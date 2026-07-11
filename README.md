@@ -124,19 +124,19 @@ Testes com usuários, aplicação do questionário SUS e análise de feedbacks.
 
 ### Taxonomia das Tecnologias Assistivas
 
-![Taxonomia das Tecnologias Assistivas](docs/images/Taxonomia%20TA%201.png)
+![Taxonomia das Tecnologias Assistivas](docs/image/Taxonomia TA 1.png)
 
 ### Categorização do Perfil do Estudante
 
-![Categorização do Perfil do Estudante](docs/images/Taxonomia%20Perfil%20estudante%202.png)
+![Categorização do Perfil do Estudante](docs/image/Taxonomia Perfil estudante 2.png)
 
 ### Diagrama de Estudo de Caso (UML)
 
-![Diagrama UML](docs/images/UML%20de%20Estudo%20de%20Caso.png)
+![Diagrama UML](docs/image/UML de Estudo de Caso .png)
 
 ### Modelo Entidade-Relacionamento (MER)
 
-![Diagrama UML](docs/images/UML%20de%20Estudo%20de%20Caso.png)
+![Diagrama UML](docs/image/dbDiagramIA.png)
 
 ### Wireframes das Telas
 
