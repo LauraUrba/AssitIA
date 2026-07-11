@@ -51,7 +51,7 @@ O **AssistIA** é um sistema web desenvolvido para auxiliar profissionais da edu
 
 A pesquisa foi estruturada em seis etapas metodológicas, conforme ilustrado na figura abaixo:
 
-![Etapas da Pesquisa](docs/images/etapas.png)
+![Etapas da Pesquisa](docs/image/etapas.png)
 
 ### Etapa 1 – Delineamento do Referencial Teórico
 Estruturação da base teórica sobre TEA, tecnologias assistivas e educação inclusiva, com fundamentação em DSM-5, CID-11 e legislação brasileira.
