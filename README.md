@@ -148,7 +148,6 @@ Os wireframes de baixa fidelidade representam as principais telas da plataforma:
 | **Perfil do Aluno** | Cadastro completo com barra de progresso e abas de navegação |
 | **Recomendações IA** | Seleção de áreas de foco e recursos disponíveis |
 | **Catálogo de TAs** | Busca e filtros por categoria com cards descritivos |
-| **PEI** | Geração de Plano Educacional Individualizado |
 
 > **Link para Wireframe Estruturado:** [miro - Wireframes AssistIA](https://miro.com/app/board/uXjVG0o8EKQ=/)
 
