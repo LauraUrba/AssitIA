@@ -204,7 +204,7 @@ Os wireframes de baixa fidelidade representam as principais telas da plataforma:
 
 ```
 AssistIA_site/
-├── assets/                          # imagens                        
+├── docs/                          # imagens no Readme.md                       
 │   ├── image
 │
 ├── assistIA/                          # Configurações do projeto
