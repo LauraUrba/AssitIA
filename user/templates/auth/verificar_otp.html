@@ -1,0 +1,240 @@
+{% extends 'auth/base.html' %}
+{% load static %}
+
+{% block title %}Verificação - AssistIA{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="logo-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>AssistIA</h1>
+            <p>Verificação em duas etapas</p>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="background: #EEF2FF; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <i class="fas fa-envelope" style="font-size: 32px; color: var(--primary-color);"></i>
+            </div>
+        </div>
+
+        <h2 class="auth-title" style="text-align: center;">Código de Verificação</h2>
+        <p class="auth-subtitle" style="text-align: center;">
+            Enviamos um código de 6 dígitos para seu email.<br>
+            <strong style="color: var(--primary-color);">{{ request.session.user_email|default:"seu email" }}</strong>
+        </p>
+
+        <!-- Mensagens -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert-custom alert-{{ message.tags }}">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form id="otpForm" method="post" action="{% url 'verificar_otp' %}">
+            {% csrf_token %}
+
+            <div class="otp-input-group" id="otpGroup">
+                <input type="text" class="otp-input" id="otp1" maxlength="1" pattern="[0-9]" inputmode="numeric" autofocus required>
+                <input type="text" class="otp-input" id="otp2" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                <input type="text" class="otp-input" id="otp3" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                <input type="text" class="otp-input" id="otp4" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                <input type="text" class="otp-input" id="otp5" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                <input type="text" class="otp-input" id="otp6" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+            </div>
+
+            <input type="hidden" name="otp" id="otpHidden">
+
+            <button type="submit" class="btn btn-primary-custom" id="verifyBtn">
+                <span class="btn-text"><i class="fas fa-check-circle"></i> Verificar</span>
+                <span class="spinner"></span>
+            </button>
+        </form>
+
+        <div class="otp-timer">
+            <p style="margin-bottom: 8px;">
+                <i class="fas fa-clock" style="color: var(--primary-color);"></i>
+                <span class="timer" id="timer">05:00</span>
+            </p>
+            <a href="#" class="resend-link" id="resendLink" style="display: none;">
+                <i class="fas fa-redo"></i> Reenviar código
+            </a>
+        </div>
+
+        <div class="auth-links" style="margin-top: 16px;">
+            <a href="{% url 'login' %}">
+                <i class="fas fa-arrow-left"></i> Voltar para o login
+            </a>
+        </div>
+
+        <div class="auth-footer">
+            <p>© 2026 AssistIA - Todos os direitos reservados</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-focus e navegação entre inputs OTP
+const otpInputs = document.querySelectorAll('.otp-input');
+
+otpInputs.forEach((input, index) => {
+    input.addEventListener('input', function(e) {
+        // Permitir apenas números
+        this.value = this.value.replace(/\D/g, '');
+
+        // Auto-avançar
+        if (this.value.length === 1 && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+        }
+
+        // Atualizar hidden
+        updateOtpHidden();
+    });
+
+    input.addEventListener('keydown', function(e) {
+        // Voltar com backspace
+        if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+            otpInputs[index - 1].focus();
+        }
+
+        // Colar código
+        if (e.key === 'v' && (e.ctrlKey || e.metaKey)) {
+            setTimeout(() => {
+                const pastedText = this.value;
+                if (pastedText.length > 1) {
+                    const digits = pastedText.replace(/\D/g, '').split('');
+                    digits.forEach((digit, i) => {
+                        if (i < otpInputs.length && digit) {
+                            otpInputs[i].value = digit;
+                        }
+                    });
+                    const lastIndex = Math.min(digits.length - 1, otpInputs.length - 1);
+                    if (lastIndex >= 0) {
+                        otpInputs[lastIndex].focus();
+                    }
+                    updateOtpHidden();
+                }
+            }, 10);
+        }
+    });
+
+    input.addEventListener('focus', function() {
+        this.select();
+    });
+});
+
+function updateOtpHidden() {
+    let otp = '';
+    otpInputs.forEach(input => {
+        otp += input.value;
+    });
+    document.getElementById('otpHidden').value = otp;
+}
+
+// Timer de 5 minutos
+let timeLeft = 300;
+const timerElement = document.getElementById('timer');
+
+function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+    if (timeLeft <= 60) {
+        timerElement.style.color = '#EF4444';
+    } else if (timeLeft <= 120) {
+        timerElement.style.color = '#F59E0B';
+    }
+
+    if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        timerElement.textContent = '00:00';
+        timerElement.style.color = '#EF4444';
+        document.getElementById('resendLink').style.display = 'inline';
+
+        otpInputs.forEach(input => {
+            input.disabled = true;
+        });
+    }
+    timeLeft--;
+}
+
+const timerInterval = setInterval(updateTimer, 1000);
+updateTimer();
+
+// Reenviar código
+document.getElementById('resendLink').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Reenviar código?',
+        text: 'Um novo código será enviado para seu email.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4F46E5',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Sim, reenviar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "{% url 'login' %}";
+        }
+    });
+});
+
+// Prevenir múltiplos envios
+document.getElementById('otpForm').addEventListener('submit', function(e) {
+    let otpCompleto = true;
+    otpInputs.forEach(input => {
+        if (input.value.length === 0) {
+            otpCompleto = false;
+            input.classList.add('is-invalid');
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+
+    if (!otpCompleto) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'warning',
+            title: 'Código incompleto',
+            text: 'Por favor, digite todos os 6 dígitos do código.',
+            timer: 3000,
+            showConfirmButton: false
+        });
+        return;
+    }
+
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+});
+
+// Auto-focus no primeiro campo
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('otp1').focus();
+});
+
+// Navegação com teclas direcionais
+document.addEventListener('keydown', function(e) {
+    const activeElement = document.activeElement;
+    if (activeElement && activeElement.classList.contains('otp-input')) {
+        const currentIndex = Array.from(otpInputs).indexOf(activeElement);
+
+        if (e.key === 'ArrowRight' && currentIndex < otpInputs.length - 1) {
+            e.preventDefault();
+            otpInputs[currentIndex + 1].focus();
+        } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
+            e.preventDefault();
+            otpInputs[currentIndex - 1].focus();
+        }
+    }
+});
+</script>
+{% endblock %}

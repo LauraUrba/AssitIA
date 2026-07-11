@@ -1,0 +1,292 @@
+<!-- telas/templates/estudantes/detalhe.html -->
+{% extends 'telas/base.html' %}
+
+{% block title %}{{ estudante.nome }} - AssistIA{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6">
+                <i class="fas fa-user-circle text-primary"></i> {{ estudante.nome }}
+            </h1>
+            <p class="text-muted">Detalhes do aluno</p>
+        </div>
+        <div class="btn-group">
+            <a href="{% url 'editar_estudante' estudante.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'gerar_recomendacao' estudante.id %}" class="btn btn-success">
+                <i class="fas fa-star ia-sparkle"></i> Recomendar
+            </a>
+            <a href="{% url 'gerar_pei' estudante.id %}" class="btn btn-info">
+                <i class="fas fa-file-alt"></i> Gerar PEI
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informações -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle text-primary"></i> Informações</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <strong>Nome:</strong>
+                            <p>{{ estudante.nome }}</p>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Data Nascimento:</strong>
+                            <p>{{ estudante.data_nascimento|date:"d/m/Y"|default:"Não informada" }}</p>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Nível Suporte:</strong>
+                            <p>
+                                <span class="badge bg-{% if estudante.nivel_suporte == 1 %}success{% elif estudante.nivel_suporte == 2 %}warning{% else %}danger{% endif %} fs-6">
+                                    {{ estudante.get_nivel_suporte_display }}
+                                </span>
+                            </p>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Turma:</strong>
+                            <p>{{ estudante.turma|default:"Não informada" }}</p>
+                        </li>
+                        <li>
+                            <strong>Status:</strong>
+                            <p>
+                                {% if estudante.ativo %}
+                                    <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inativo</span>
+                                {% endif %}
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Perfil TEA -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-brain text-primary"></i> Perfil TEA</h5>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#perfilModal">
+                        <i class="fas fa-edit"></i> {% if perfil %}Editar{% else %}Cadastrar{% endif %}
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if perfil %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong><i class="fas fa-comment text-primary"></i> Comunicação:</strong>
+                                <p>{{ perfil.comunicacao|default:"Não informado" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="fas fa-eye text-primary"></i> Perfil Sensorial:</strong>
+                                <p>{{ perfil.perfil_sensorial|default:"Não informado" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="fas fa-running text-primary"></i> Habilidade Motora:</strong>
+                                <p>{{ perfil.habilidade_motora|default:"Não informado" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="fas fa-brain text-primary"></i> Perfil Cognitivo:</strong>
+                                <p>{{ perfil.perfil_cognitivo|default:"Não informado" }}</p>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <strong><i class="fas fa-exclamation-triangle text-primary"></i> Desafios:</strong>
+                                <p>{{ perfil.desafios|default:"Não informado"|linebreaks }}</p>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <strong><i class="fas fa-sticky-note text-primary"></i> Observações:</strong>
+                                <p>{{ perfil.observacoes|default:"Não informado"|linebreaks }}</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-brain fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Perfil TEA não cadastrado.</p>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#perfilModal">
+                                <i class="fas fa-plus"></i> Cadastrar Perfil
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recomendações -->
+    <!--
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb text-primary"></i> Recomendações</h5>
+                    <a href="{% url 'gerar_recomendacao' estudante.id %}" class="btn btn-sm btn-success">
+                        <i class="fas fa-plus"></i> Nova Recomendação
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recomendacoes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rec in recomendacoes %}
+                                        <tr>
+                                            <td>{{ rec.criado_em|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <span class="badge bg-{% if rec.status == 'gerada' %}warning{% elif rec.status == 'visualizada' %}info{% else %}secondary{% endif %}">
+                                                    {{ rec.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'detalhe_recomendacao' rec.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-lightbulb fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Nenhuma recomendação ainda.</p>
+                            <a href="{% url 'gerar_recomendacao' estudante.id %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Gerar Primeira Recomendação
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    -->
+
+
+    <!-- PEIs -->
+    <!--
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-file-alt text-primary"></i> PEIs</h5>
+                    <a href="{% url 'gerar_pei' estudante.id %}" class="btn btn-sm btn-info">
+                        <i class="fas fa-plus"></i> Novo PEI
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if peis %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Versão</th>
+                                        <th>Data Criação</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pei in peis %}
+                                        <tr>
+                                            <td><span class="badge bg-primary">v{{ pei.versao }}</span></td>
+                                            <td>{{ pei.criado_em|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <a href="{% url 'detalhe_pei' pei.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'editar_pei' pei.id %}" class="btn btn-sm btn-outline-warning">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-file-alt fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Nenhum PEI ainda.</p>
+                            <a href="{% url 'gerar_pei' estudante.id %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-plus"></i> Gerar Primeiro PEI
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+-->
+
+<!-- Modal Perfil TEA -->
+<div class="modal fade" id="perfilModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-brain text-primary"></i>
+                    {% if perfil %}Editar{% else %}Cadastrar{% endif %} Perfil TEA
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'salvar_perfil_tea' estudante.id %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="comunicacao" class="form-label">Comunicação</label>
+                            <input type="text" class="form-control" id="comunicacao" name="comunicacao"
+                                   value="{{ perfil.comunicacao|default:'' }}" placeholder="Ex: Verbal, Não verbal">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="perfil_sensorial" class="form-label">Perfil Sensorial</label>
+                            <input type="text" class="form-control" id="perfil_sensorial" name="perfil_sensorial"
+                                   value="{{ perfil.perfil_sensorial|default:'' }}" placeholder="Ex: Hipersensível, Hipossensível">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="habilidade_motora" class="form-label">Habilidade Motora</label>
+                            <input type="text" class="form-control" id="habilidade_motora" name="habilidade_motora"
+                                   value="{{ perfil.habilidade_motora|default:'' }}" placeholder="Ex: Coordenação fina, Grossa">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="perfil_cognitivo" class="form-label">Perfil Cognitivo</label>
+                            <input type="text" class="form-control" id="perfil_cognitivo" name="perfil_cognitivo"
+                                   value="{{ perfil.perfil_cognitivo|default:'' }}" placeholder="Ex: Raciocínio lógico, Memória">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="desafios" class="form-label">Desafios</label>
+                            <textarea class="form-control" id="desafios" name="desafios" rows="2"
+                                      placeholder="Descreva os desafios do aluno...">{{ perfil.desafios|default:'' }}</textarea>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="observacoes" class="form-label">Observações</label>
+                            <textarea class="form-control" id="observacoes" name="observacoes" rows="2"
+                                      placeholder="Observações adicionais...">{{ perfil.observacoes|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Perfil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

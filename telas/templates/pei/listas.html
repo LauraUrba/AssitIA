@@ -1,0 +1,59 @@
+<!-- telas/templates/pei/lista.html -->
+{% extends 'telas/base.html' %}
+
+{% block title %}PEIs - AssistIA{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6"><i class="fas fa-file-alt text-primary"></i> PEIs</h1>
+            <p class="text-muted">Planos Educacionais Individualizados</p>
+        </div>
+        <a href="{% url 'lista_estudantes' %}" class="btn btn-info">
+            <i class="fas fa-plus"></i> Novo PEI
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Aluno</th>
+                            <th>Versão</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pei in peis %}
+                        <tr>
+                            <td><i class="fas fa-user-circle text-primary"></i> {{ pei.estudante.nome }}</td>
+                            <td><span class="badge bg-primary">v{{ pei.versao }}</span></td>
+                            <td>{{ pei.criado_em|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'detalhe_pei' pei.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'editar_pei' pei.id %}" class="btn btn-sm btn-outline-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4">
+                                <i class="fas fa-file-alt fa-3x text-muted mb-3 d-block"></i>
+                                <h5>Nenhum PEI encontrado</h5>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

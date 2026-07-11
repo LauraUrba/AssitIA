@@ -1,0 +1,351 @@
+<!-- telas/templates/tecnologias/catalogo.html -->
+{% extends 'telas/base.html' %}
+{% load static %}
+
+{% block title %}Catálogo de Tecnologias - AssistIA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tech-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        height: 100%;
+    }
+    .tech-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .tech-card .card-header {
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-weight: 600;
+        font-size: 16px;
+    }
+    .tech-card .card-body {
+        padding: 20px;
+    }
+    .tech-card .card-text {
+        color: #4B5563;
+        font-size: 14px;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .tech-category {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .tech-category.comunicacao { background: #DBEAFE; color: #1E40AF; }
+    .tech-category.regulacao_sensorial { background: #FEF3C7; color: #92400E; }
+    .tech-category.motor { background: #D1FAE5; color: #065F46; }
+    .tech-category.cognitivo { background: #EDE9FE; color: #5B21B6; }
+    .tech-category.interacao_social { background: #FCE4EC; color: #9C27B0; }
+    .tech-category.estruturacao { background: #E0F2FE; color: #0369A1; }
+
+    .modal-tech .modal-header {
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: white;
+        border: none;
+    }
+    .modal-tech .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+    .modal-tech .modal-body {
+        padding: 30px;
+    }
+    .modal-tech .modal-body .detail-section {
+        background: #F9FAFB;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border-left: 4px solid #4F46E5;
+    }
+    .modal-tech .modal-body .detail-section:last-child {
+        margin-bottom: 0;
+    }
+    .search-box {
+        position: relative;
+    }
+    .search-box input {
+        padding-left: 40px;
+        border-radius: 25px;
+        border: 2px solid #E5E7EB;
+        height: 45px;
+    }
+    .search-box input:focus {
+        border-color: #4F46E5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    .search-box .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9CA3AF;
+    }
+    .filter-btn.active {
+        background: #4F46E5 !important;
+        color: white !important;
+    }
+    .badge-catalogo {
+        background: #4F46E5;
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-6">
+                        <i class="fas fa-microchip text-primary"></i> Catálogo de Tecnologias Assistivas
+                    </h1>
+                    <p class="text-muted">
+                        <span class="badge bg-primary rounded-pill me-2">{{ total }}</span>
+                        tecnologias disponíveis para auxiliar no desenvolvimento
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Busca e Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchTech" class="form-control" placeholder="Buscar tecnologia..." onkeyup="filtrarTecnologias()">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline-primary btn-sm filter-btn active" data-categoria="todos" onclick="filtrarCategoria('todos')">
+                    <i class="fas fa-th"></i> Todos
+                </button>
+                <button class="btn btn-outline-primary btn-sm filter-btn" data-categoria="comunicacao" onclick="filtrarCategoria('comunicacao')">
+                    <i class="fas fa-comment"></i> Comunicação
+                </button>
+                <button class="btn btn-outline-primary btn-sm filter-btn" data-categoria="regulacao_sensorial" onclick="filtrarCategoria('regulacao_sensorial')">
+                    <i class="fas fa-eye"></i> Sensorial
+                </button>
+                <button class="btn btn-outline-primary btn-sm filter-btn" data-categoria="motor" onclick="filtrarCategoria('motor')">
+                    <i class="fas fa-running"></i> Motor
+                </button>
+                <button class="btn btn-outline-primary btn-sm filter-btn" data-categoria="cognitivo" onclick="filtrarCategoria('cognitivo')">
+                    <i class="fas fa-brain"></i> Cognitivo
+                </button>
+                <button class="btn btn-outline-primary btn-sm filter-btn" data-categoria="interacao_social" onclick="filtrarCategoria('interacao_social')">
+                    <i class="fas fa-users"></i> Social
+                </button>
+                <button class="btn btn-outline-primary btn-sm filter-btn" data-categoria="estruturacao" onclick="filtrarCategoria('estruturacao')">
+                    <i class="fas fa-calendar-check"></i> Estrutura
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Tecnologias -->
+    <div class="row" id="tecnologiasContainer">
+        {% for tecnologia in tecnologias %}
+            <div class="col-md-4 mb-4 tecnologia-card" data-categoria="{{ tecnologia.categoria }}" data-nome="{{ tecnologia.nome|lower }}">
+                <div class="card shadow-sm tech-card h-100" onclick="abrirModal('{{ tecnologia.id }}')">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>{{ tecnologia.nome }}</span>
+                            <span class="tech-category {{ tecnologia.categoria }}">
+                                {{ tecnologia.get_categoria_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            {{ tecnologia.descricao|truncatechars:120|default:"Tecnologia assistiva para auxílio no desenvolvimento." }}
+                        </p>
+                        <div class="mt-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                {% if tecnologia.avaliacao_media > 0 %}
+                                    <span class="text-warning">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= tecnologia.avaliacao_media %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="text-muted small">({{ tecnologia.total_avaliacoes }})</span>
+                                {% else %}
+                                    <span class="text-muted small">Sem avaliações</span>
+                                {% endif %}
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); abrirModal('{{ tecnologia.id }}')">
+                                <i class="fas fa-info-circle"></i> Detalhes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-microchip fa-4x text-muted mb-3"></i>
+                <h3>Nenhuma tecnologia cadastrada</h3>
+                <p class="text-muted">Adicione tecnologias assistivas ao catálogo para começar a recomendar.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<div class="modal fade modal-tech" id="techModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">
+                    <i class="fas fa-microchip"></i> Detalhes da Tecnologia
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Conteúdo será preenchido via JavaScript -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Dados das tecnologias
+const tecnologiasData = [
+    {% for tecnologia in tecnologias %}
+    {
+        id: '{{ tecnologia.id }}',
+        nome: '{{ tecnologia.nome|escapejs }}',
+        categoria: '{{ tecnologia.categoria }}',
+        categoria_display: '{{ tecnologia.get_categoria_display }}',
+        descricao: '{{ tecnologia.descricao|escapejs|default:"Sem descrição" }}',
+        exemplos_uso: '{{ tecnologia.exemplos_uso|escapejs|default:"Não informado" }}',
+        avaliacao_media: {{ tecnologia.avaliacao_media|default:0 }},
+        total_avaliacoes: {{ tecnologia.total_avaliacoes|default:0 }},
+        materiais: '{{ tecnologia.materiais|escapejs|default:"Não informado" }}',
+        como_fazer: '{{ tecnologia.como_fazer|escapejs|default:"Não informado" }}',
+        como_usar: '{{ tecnologia.como_usar|escapejs|default:"Não informado" }}',
+        para_que_serve: '{{ tecnologia.para_que_serve|escapejs|default:"Não informado" }}'
+    },
+    {% endfor %}
+];
+
+function abrirModal(id) {
+    const tech = tecnologiasData.find(t => t.id === id);
+    if (!tech) return;
+
+    const modalBody = document.getElementById('modalBody');
+
+    // Construir estrelas
+    let estrelas = '';
+    const media = Math.round(tech.avaliacao_media);
+    for (let i = 1; i <= 5; i++) {
+        if (i <= media) {
+            estrelas += '<i class="fas fa-star text-warning"></i>';
+        } else {
+            estrelas += '<i class="far fa-star text-warning"></i>';
+        }
+    }
+
+    modalBody.innerHTML = `
+        <div class="mb-3">
+            <h4>${tech.nome}</h4>
+            <span class="tech-category ${tech.categoria}">${tech.categoria_display}</span>
+            <span class="ms-2">${estrelas} ${tech.total_avaliacoes > 0 ? `(${tech.total_avaliacoes} avaliações)` : 'Sem avaliações'}</span>
+        </div>
+
+        <div class="detail-section">
+            <h5><i class="fas fa-info-circle text-primary"></i> Descrição</h5>
+            <p class="mb-0">${tech.descricao}</p>
+        </div>
+
+        <div class="detail-section">
+            <h5><i class="fas fa-tools text-primary"></i> Materiais</h5>
+            <p class="mb-0">${tech.materiais}</p>
+        </div>
+
+        <div class="detail-section">
+            <h5><i class="fas fa-hammer text-primary"></i> Como Fazer</h5>
+            <p class="mb-0">${tech.como_fazer}</p>
+        </div>
+
+        <div class="detail-section">
+            <h5><i class="fas fa-play text-primary"></i> Como Usar</h5>
+            <p class="mb-0">${tech.como_usar}</p>
+        </div>
+
+        <div class="detail-section">
+            <h5><i class="fas fa-bullseye text-primary"></i> Para Que Serve</h5>
+            <p class="mb-0">${tech.para_que_serve}</p>
+        </div>
+
+        <div class="detail-section" style="border-left-color: #10B981;">
+            <h5><i class="fas fa-lightbulb text-success"></i> Exemplos de Uso</h5>
+            <p class="mb-0">${tech.exemplos_uso}</p>
+        </div>
+    `;
+
+    document.getElementById('modalTitle').innerHTML = `<i class="fas fa-microchip"></i> ${tech.nome}`;
+    new bootstrap.Modal(document.getElementById('techModal')).show();
+}
+
+function filtrarCategoria(categoria) {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`.filter-btn[data-categoria="${categoria}"]`)?.classList.add('active');
+
+    const cards = document.querySelectorAll('.tecnologia-card');
+    cards.forEach(card => {
+        if (categoria === 'todos' || card.dataset.categoria === categoria) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function filtrarTecnologias() {
+    const searchTerm = document.getElementById('searchTech').value.toLowerCase();
+    const cards = document.querySelectorAll('.tecnologia-card');
+
+    cards.forEach(card => {
+        const nome = card.dataset.nome || '';
+        if (nome.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

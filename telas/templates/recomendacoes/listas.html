@@ -1,0 +1,387 @@
+<!-- telas/templates/recomendacoes/lista.html -->
+{% extends 'telas/base.html' %}
+{% load static %}
+
+{% block title %}Recomendações - AssistIA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .status-badge.gerada { background: #FEF3C7; color: #92400E; }
+    .status-badge.visualizada { background: #DBEAFE; color: #1E40AF; }
+    .status-badge.arquivada { background: #F3F4F6; color: #4B5563; }
+
+    .recomendacao-row {
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+    .recomendacao-row:hover {
+        background: #F9FAFB;
+    }
+    .empty-state {
+        padding: 60px 20px;
+    }
+    .empty-state i {
+        font-size: 64px;
+        color: #D1D5DB;
+    }
+    .btn-acoes {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+    .btn-acoes .btn {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+    .btn-excluir {
+        color: #EF4444;
+    }
+    .btn-excluir:hover {
+        background: #FEF2F2;
+        color: #DC2626;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6">
+                <i class="fas fa-star text-warning"></i>
+                Recomendações
+            </h1>
+            <p class="text-muted">
+                <span class="badge bg-primary rounded-pill me-2">{{ total }}</span>
+                recomendações geradas pela IA
+            </p>
+        </div>
+        <a href="{% url 'lista_estudantes' %}" class="btn btn-ia ia-pulse">
+            <i class="fas fa-star ia-sparkle"></i>
+            Nova Recomendação com IA
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" id="searchRecomendacao" class="form-control"
+                           placeholder="🔍 Buscar por aluno..." onkeyup="filtrarRecomendacoes()">
+                </div>
+                <div class="col-md-3">
+                    <select id="filtroStatus" class="form-control" onchange="filtrarRecomendacoes()">
+                        <option value="todos">Todos os status</option>
+                        <option value="gerada">Gerada</option>
+                        <option value="visualizada">Visualizada</option>
+                        <option value="arquivada">Arquivada</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-secondary w-100" onclick="limparFiltros()">
+                        <i class="fas fa-undo"></i> Limpar
+                    </button>
+                </div>
+                <div class="col-md-3 text-end">
+                    <span class="text-muted small">
+                        <i class="fas fa-star text-warning"></i> Recomendado por IA
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Recomendações -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if recomendacoes %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="tabelaRecomendacoes">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">#</th>
+                                <th style="width: 25%;">
+                                    <i class="fas fa-user-circle text-primary"></i> Aluno
+                                </th>
+                                <th style="width: 20%;">
+                                    <i class="fas fa-calendar-alt text-primary"></i> Data
+                                </th>
+                                <th style="width: 15%;">
+                                    <i class="fas fa-tag text-primary"></i> Status
+                                </th>
+                                <th style="width: 10%;">
+                                    <i class="fas fa-microchip text-primary"></i> TAs
+                                </th>
+                                <th style="width: 25%;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for recomendacao in recomendacoes %}
+                                <tr class="recomendacao-row" data-status="{{ recomendacao.status }}" data-nome="{{ recomendacao.estudante.nome|lower }}" data-id="{{ recomendacao.id }}">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                                 style="width: 35px; height: 35px; font-size: 14px; font-weight: 600; margin-right: 10px;">
+                                                {{ recomendacao.estudante.nome|slice:":1"|upper }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ recomendacao.estudante.nome }}</strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ recomendacao.estudante.turma|default:"Sem turma" }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>{{ recomendacao.criado_em|date:"d/m/Y" }}</div>
+                                        <small class="text-muted">{{ recomendacao.criado_em|date:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge {{ recomendacao.status }}">
+                                            <i class="fas fa-{% if recomendacao.status == 'gerada' %}clock{% elif recomendacao.status == 'visualizada' %}check-circle{% else %}archive{% endif %}"></i>
+                                            {{ recomendacao.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary rounded-pill">
+                                            {{ recomendacao.recomendacoes_ta.count }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-acoes">
+                                            <a href="{% url 'detalhe_recomendacao' recomendacao.id %}"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Ver detalhes">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if recomendacao.status != 'arquivada' %}
+                                                <button class="btn btn-sm btn-outline-warning"
+                                                        onclick="arquivarRecomendacao('{{ recomendacao.id }}')"
+                                                        title="Arquivar">
+                                                    <i class="fas fa-archive"></i>
+                                                </button>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-outline-danger btn-excluir"
+                                                    onclick="excluirRecomendacao('{{ recomendacao.id }}', '{{ recomendacao.estudante.nome|escapejs }}')"
+                                                    title="Excluir">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary"
+                                                    onclick="window.print()"
+                                                    title="Imprimir">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Resumo -->
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <div>
+                        <span class="text-muted small">
+                            <i class="fas fa-robot"></i>
+                            <span id="contadorRecomendacoes">{{ recomendacoes|length }}</span> recomendações geradas
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-muted small">
+                            <span class="badge bg-warning rounded-pill">
+                                <span id="contadorTotal">{{ recomendacoes|length }}</span>
+                            </span>
+                            recomendação(ões) no total
+                        </span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state text-center">
+                    <i class="fas fa-star text-muted"></i>
+                    <h4 class="mt-3">Nenhuma recomendação encontrada</h4>
+                    <p class="text-muted">
+                        Ainda não há recomendações geradas.
+                        <br>
+                        Clique no botão abaixo para gerar sua primeira recomendação com IA.
+                    </p>
+                    <a href="{% url 'lista_estudantes' %}" class="btn btn-ia mt-2 ia-pulse">
+                        <i class="fas fa-star ia-sparkle"></i>
+                        Gerar Primeira Recomendação com IA
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade modal-excluir" id="modalExcluir" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir esta recomendação?</p>
+                <p class="text-muted small" id="modalNomeAluno"></p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle"></i>
+                    Esta ação <strong>não pode ser desfeita</strong>.
+                    Todas as tecnologias recomendadas também serão removidas.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarExcluir">
+                    <i class="fas fa-trash"></i> Sim, excluir permanentemente
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let recomendacaoIdParaExcluir = null;
+
+function filtrarRecomendacoes() {
+    const search = document.getElementById('searchRecomendacao').value.toLowerCase();
+    const status = document.getElementById('filtroStatus').value;
+    const rows = document.querySelectorAll('#tabelaRecomendacoes tbody tr');
+    let count = 0;
+
+    rows.forEach(row => {
+        const nome = row.dataset.nome || '';
+        const rowStatus = row.dataset.status || '';
+        let mostrar = true;
+
+        if (search && !nome.includes(search)) {
+            mostrar = false;
+        }
+        if (status !== 'todos' && rowStatus !== status) {
+            mostrar = false;
+        }
+
+        row.style.display = mostrar ? '' : 'none';
+        if (mostrar) count++;
+    });
+
+    const contadorTotal = document.getElementById('contadorTotal');
+    const contadorRecomendacoes = document.getElementById('contadorRecomendacoes');
+    if (contadorTotal) contadorTotal.textContent = count;
+    if (contadorRecomendacoes) contadorRecomendacoes.textContent = count;
+}
+
+function limparFiltros() {
+    document.getElementById('searchRecomendacao').value = '';
+    document.getElementById('filtroStatus').value = 'todos';
+    filtrarRecomendacoes();
+}
+
+function arquivarRecomendacao(id) {
+    Swal.fire({
+        title: 'Arquivar recomendação?',
+        text: 'Esta ação pode ser desfeita depois.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Sim, arquivar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/telas/recomendacoes/${id}/arquivar/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Arquivada!',
+                        text: 'Recomendação arquivada com sucesso.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    setTimeout(() => location.reload(), 2000);
+                }
+            });
+        }
+    });
+}
+
+function excluirRecomendacao(id, nomeAluno) {
+    recomendacaoIdParaExcluir = id;
+    document.getElementById('modalNomeAluno').innerHTML =
+        `<strong>Aluno:</strong> ${nomeAluno}`;
+    new bootstrap.Modal(document.getElementById('modalExcluir')).show();
+}
+
+document.getElementById('btnConfirmarExcluir').addEventListener('click', function() {
+    if (!recomendacaoIdParaExcluir) return;
+
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Excluindo...';
+
+    fetch(`/telas/recomendacoes/${recomendacaoIdParaExcluir}/excluir/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('modalExcluir')).hide();
+            Swal.fire({
+                icon: 'success',
+                title: 'Excluída!',
+                text: 'Recomendação excluída permanentemente.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: data.error || 'Não foi possível excluir a recomendação.'
+            });
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trash"></i> Sim, excluir permanentemente';
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Erro ao excluir recomendação.'
+        });
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-trash"></i> Sim, excluir permanentemente';
+    });
+});
+
+document.getElementById('searchRecomendacao').addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') {
+        filtrarRecomendacoes();
+    }
+});
+</script>
+{% endblock %}

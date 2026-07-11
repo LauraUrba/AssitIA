@@ -1,0 +1,651 @@
+INFO 2026-06-22 19:54:17,435 autoreload Watching for file changes with StatReloader
+INFO 2026-06-22 19:54:29,531 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-22 19:54:29,651 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 19:54:34,687 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-22 19:54:34,766 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 19:54:36,972 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14673
+WARNING 2026-06-22 19:54:37,029 log "GET /static/css/style.css HTTP/1.1" 404 1853
+ERROR 2026-06-22 19:54:39,219 log Internal Server Error: /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/
+Traceback (most recent call last):
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/AssistIA/telas/views.py", line 272, in gerar_recomendacao
+    return render(request, 'recomendacoes/gerar.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/template/loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: recomendacoes/gerar.html
+ERROR 2026-06-22 19:54:39,221 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 500 98477
+INFO 2026-06-22 19:56:26,046 autoreload Watching for file changes with StatReloader
+INFO 2026-06-22 19:56:28,650 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14254
+WARNING 2026-06-22 19:56:28,734 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 19:57:07,874 log "POST /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14603
+WARNING 2026-06-22 19:57:07,944 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 19:57:48,714 log "POST /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 302 0
+INFO 2026-06-22 19:57:48,788 log "GET /telas/recomendacoes/d4a16df3-ae49-4f40-8979-3c48b1e6f9e2/ HTTP/1.1" 200 23877
+WARNING 2026-06-22 19:57:48,886 log "GET /static/css/style.css HTTP/1.1" 404 1853
+ERROR 2026-06-22 19:57:58,952 log Internal Server Error: /telas/recomendacoes/
+Traceback (most recent call last):
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/AssistIA/telas/views.py", line 158, in lista_recomendacoes
+    return render(request, 'recomendacoes/lista.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/template/loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: recomendacoes/lista.html
+ERROR 2026-06-22 19:57:58,954 log "GET /telas/recomendacoes/ HTTP/1.1" 500 97492
+ERROR 2026-06-22 19:58:55,974 log Internal Server Error: /telas/recomendacoes/
+Traceback (most recent call last):
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/AssistIA/telas/views.py", line 158, in lista_recomendacoes
+    return render(request, 'recomendacoes/listas.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/template/loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: recomendacoes/lista.html
+ERROR 2026-06-22 19:58:55,976 log "GET /telas/recomendacoes/ HTTP/1.1" 500 97631
+INFO 2026-06-22 19:58:56,252 autoreload /home/laura/AssistIA_site/AssistIA/telas/views.py changed, reloading.
+INFO 2026-06-22 19:58:56,937 autoreload Watching for file changes with StatReloader
+INFO 2026-06-22 19:58:59,178 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14254
+INFO 2026-06-22 19:59:02,864 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14254
+WARNING 2026-06-22 19:59:02,922 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 19:59:55,474 log "POST /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 302 0
+INFO 2026-06-22 19:59:55,553 log "GET /telas/recomendacoes/ba41a460-19a1-4cd7-ad23-cc240a85c6b9/ HTTP/1.1" 200 23926
+WARNING 2026-06-22 19:59:55,678 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:00:37,583 log "GET /telas/recomendacoes/ HTTP/1.1" 200 3526
+WARNING 2026-06-22 20:00:37,650 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:00:47,867 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 6490
+WARNING 2026-06-22 20:00:47,927 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:00:59,071 log "GET /telas/recomendacoes/ HTTP/1.1" 200 3526
+WARNING 2026-06-22 20:00:59,131 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:01:04,074 log "GET /telas/pei/ HTTP/1.1" 200 4772
+WARNING 2026-06-22 20:01:04,137 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:01:10,093 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-22 20:01:10,151 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:01:21,503 log "GET /telas/perfil/ HTTP/1.1" 200 8465
+WARNING 2026-06-22 20:01:21,578 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:01:35,029 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 6490
+WARNING 2026-06-22 20:01:35,091 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:01:38,507 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-22 20:01:38,566 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:01:41,683 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-22 20:01:41,740 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:01:44,993 log "GET /telas/recomendacoes/ HTTP/1.1" 200 3526
+WARNING 2026-06-22 20:01:45,058 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:01:48,889 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 6490
+WARNING 2026-06-22 20:01:48,946 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:05:32,728 autoreload /home/laura/AssistIA_site/AssistIA/telas/views.py changed, reloading.
+INFO 2026-06-22 20:05:33,204 autoreload Watching for file changes with StatReloader
+INFO 2026-06-22 20:08:29,192 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 22191
+WARNING 2026-06-22 20:08:29,253 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:13:42,927 autoreload Watching for file changes with StatReloader
+INFO 2026-06-22 20:13:48,814 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 38417
+WARNING 2026-06-22 20:13:48,879 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:14:16,433 log "GET /admin/ HTTP/1.1" 302 0
+INFO 2026-06-22 20:14:16,511 log "GET /admin/login/?next=/admin/ HTTP/1.1" 200 3662
+INFO 2026-06-22 20:14:16,633 log "GET /static/admin/css/base.css HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:16,635 log "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:16,637 log "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:16,641 log "GET /static/admin/css/login.css HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:16,641 log "GET /static/admin/js/theme.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:16,643 log "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:16,653 log "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:26,161 log "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2026-06-22 20:14:26,214 log "GET /admin/ HTTP/1.1" 200 6623
+INFO 2026-06-22 20:14:26,324 log "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:26,345 log "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:26,346 log "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,770 log "GET /admin/auth/group/ HTTP/1.1" 200 8640
+INFO 2026-06-22 20:14:29,828 log "GET /static/admin/css/changelists.css HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,839 log "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,840 log "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,840 log "GET /static/admin/js/actions.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,841 log "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,842 log "GET /static/admin/js/core.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,845 log "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,848 log "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,850 log "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,852 log "GET /static/admin/img/search.svg HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,877 log "GET /admin/jsi18n/ HTTP/1.1" 200 8498
+INFO 2026-06-22 20:14:29,914 log "GET /static/admin/js/filters.js HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:29,973 log "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:32,001 log "GET /admin/user/usuario/ HTTP/1.1" 200 13188
+INFO 2026-06-22 20:14:32,055 log "GET /static/admin/img/icon-yes.svg HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:32,064 log "GET /static/admin/img/icon-no.svg HTTP/1.1" 200 645
+INFO 2026-06-22 20:14:32,086 log "GET /admin/jsi18n/ HTTP/1.1" 200 8498
+INFO 2026-06-22 20:14:32,125 log "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:32,136 log "GET /static/admin/img/sorting-icons.svg HTTP/1.1" 304 0
+INFO 2026-06-22 20:14:35,025 log "GET /admin/auth/group/ HTTP/1.1" 200 8640
+INFO 2026-06-22 20:14:35,784 log "GET /admin/ HTTP/1.1" 200 6623
+INFO 2026-06-22 20:14:36,480 log "GET /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2026-06-22 20:14:36,533 log "GET /admin/ HTTP/1.1" 200 6623
+INFO 2026-06-22 20:22:55,435 autoreload Watching for file changes with StatReloader
+INFO 2026-06-22 20:23:06,598 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 34199
+WARNING 2026-06-22 20:23:06,665 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:24:47,913 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 34349
+WARNING 2026-06-22 20:24:47,970 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:25:24,957 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 34349
+WARNING 2026-06-22 20:25:25,005 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:25:27,513 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 34164
+WARNING 2026-06-22 20:25:27,563 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:25:39,431 log "GET /telas/estudantes/ HTTP/1.1" 200 5124
+WARNING 2026-06-22 20:25:39,490 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:25:46,467 log "GET /auth/logout/ HTTP/1.1" 302 0
+INFO 2026-06-22 20:25:46,485 log "GET /auth/login/ HTTP/1.1" 200 5433
+WARNING 2026-06-22 20:25:46,584 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:25:56,660 log "GET /auth/esqueci-senha/ HTTP/1.1" 200 3664
+WARNING 2026-06-22 20:25:56,725 log "GET /static/css/style.css HTTP/1.1" 404 1853
+ERROR 2026-06-22 20:26:04,745 log Internal Server Error: /auth/esqueci-senha/
+Traceback (most recent call last):
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/AssistIA/user/views.py", line 122, in esqueci_senha_view
+    send_mail(
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 268, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/mail/__init__.py", line 108, in send_mail
+    return mail.send()
+           ^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/mail/message.py", line 358, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/mail/backends/smtp.py", line 130, in send_messages
+    new_conn_created = self.open()
+                       ^^^^^^^^^^^
+  File "/home/laura/AssistIA_site/.venv/lib/python3.12/site-packages/django/core/mail/backends/smtp.py", line 88, in open
+    self.connection = self.connection_class(
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/smtplib.py", line 255, in __init__
+    (code, msg) = self.connect(host, port)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/smtplib.py", line 341, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/smtplib.py", line 312, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socket.py", line 852, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.12/socket.py", line 837, in create_connection
+    sock.connect(sa)
+OSError: [Errno 101] Network is unreachable
+ERROR 2026-06-22 20:26:04,747 log "POST /auth/esqueci-senha/ HTTP/1.1" 500 125229
+INFO 2026-06-22 20:27:42,993 autoreload /home/laura/AssistIA_site/AssistIA/AssistIA/settings.py changed, reloading.
+INFO 2026-06-22 20:27:43,656 autoreload Watching for file changes with StatReloader
+INFO 2026-06-22 20:28:47,693 autoreload /home/laura/AssistIA_site/AssistIA/AssistIA/settings.py changed, reloading.
+INFO 2026-06-22 20:28:48,380 autoreload Watching for file changes with StatReloader
+INFO 2026-06-22 20:28:58,900 autoreload /home/laura/AssistIA_site/AssistIA/user/views.py changed, reloading.
+INFO 2026-06-22 20:28:59,514 autoreload Watching for file changes with StatReloader
+ERROR 2026-06-22 20:29:01,641 views Erro ao enviar email: [Errno 101] Network is unreachable
+INFO 2026-06-22 20:29:01,664 log "POST /auth/esqueci-senha/ HTTP/1.1" 200 3940
+WARNING 2026-06-22 20:29:01,732 log "GET /static/css/style.css HTTP/1.1" 404 1853
+ERROR 2026-06-22 20:29:04,428 views Erro ao enviar email: [Errno 101] Network is unreachable
+INFO 2026-06-22 20:29:04,430 log "POST /auth/esqueci-senha/ HTTP/1.1" 200 3940
+WARNING 2026-06-22 20:29:04,519 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:31:29,712 autoreload /home/laura/AssistIA_site/AssistIA/user/views.py changed, reloading.
+INFO 2026-06-22 20:31:30,246 autoreload Watching for file changes with StatReloader
+ERROR 2026-06-22 20:31:46,841 views Erro ao enviar email: [Errno 101] Network is unreachable
+INFO 2026-06-22 20:31:46,863 log "POST /auth/esqueci-senha/ HTTP/1.1" 200 3940
+WARNING 2026-06-22 20:31:46,942 log "GET /static/css/style.css HTTP/1.1" 404 1853
+ERROR 2026-06-22 20:31:49,625 views Erro ao enviar email: [Errno 101] Network is unreachable
+INFO 2026-06-22 20:31:49,629 log "POST /auth/esqueci-senha/ HTTP/1.1" 200 3940
+WARNING 2026-06-22 20:31:49,669 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:33:01,938 autoreload /home/laura/AssistIA_site/AssistIA/AssistIA/settings.py changed, reloading.
+INFO 2026-06-22 20:33:02,490 autoreload Watching for file changes with StatReloader
+INFO 2026-06-22 20:33:05,900 log "POST /auth/esqueci-senha/ HTTP/1.1" 200 3937
+WARNING 2026-06-22 20:33:05,979 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:33:13,879 log "POST /auth/esqueci-senha/ HTTP/1.1" 200 3937
+WARNING 2026-06-22 20:33:13,947 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:33:26,217 log "GET /auth/redefinir-senha/ZDcxMjUxNDItZTExNC00ZTgyLThkNTgtOT=M3ZWViODQxZjI0/dald3d-d02967ce8bcd0af833bbd690f9bc3c98/ HTTP/1.1" 200 6306
+WARNING 2026-06-22 20:33:26,351 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:33:50,290 log "POST /auth/redefinir-senha/ZDcxMjUxNDItZTExNC00ZTgyLThkNTgtOT=M3ZWViODQxZjI0/dald3d-d02967ce8bcd0af833bbd690f9bc3c98/ HTTP/1.1" 302 0
+INFO 2026-06-22 20:33:50,300 log "GET /auth/login/ HTTP/1.1" 200 5455
+WARNING 2026-06-22 20:33:50,407 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:34:06,951 log "POST /auth/login/ HTTP/1.1" 302 0
+INFO 2026-06-22 20:34:07,008 log "GET /telas/ HTTP/1.1" 200 6654
+WARNING 2026-06-22 20:34:07,101 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:34:28,539 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-22 20:34:28,605 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:34:32,831 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14673
+WARNING 2026-06-22 20:34:32,881 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:34:38,466 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14254
+WARNING 2026-06-22 20:34:38,524 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:35:49,451 log "POST /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14603
+WARNING 2026-06-22 20:35:49,518 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:35:59,651 log "POST /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 302 0
+INFO 2026-06-22 20:35:59,719 log "GET /telas/recomendacoes/4b405ae4-b63e-454e-979c-2004d831b298/ HTTP/1.1" 200 29068
+WARNING 2026-06-22 20:35:59,827 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:38:29,172 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-22 20:38:29,236 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:45:56,523 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-22 20:45:56,594 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:46:00,788 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 15678
+WARNING 2026-06-22 20:46:00,866 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:46:16,550 log "GET /telas/pei/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 5663
+WARNING 2026-06-22 20:46:16,624 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:46:22,024 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14254
+WARNING 2026-06-22 20:46:22,085 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-22 20:46:42,495 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 45950
+WARNING 2026-06-22 20:46:42,559 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:05:16,466 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 12:05:31,488 log "GET /auth/login/ HTTP/1.1" 302 0
+INFO 2026-06-24 12:05:31,562 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 12:05:31,746 log "GET /static/css/style.css HTTP/1.1" 404 1853
+WARNING 2026-06-24 12:05:31,901 log Not Found: /favicon.ico
+WARNING 2026-06-24 12:05:31,902 log "GET /favicon.ico HTTP/1.1" 404 2507
+INFO 2026-06-24 12:05:34,983 log "GET /telas/perfil/ HTTP/1.1" 200 8466
+WARNING 2026-06-24 12:05:35,046 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:05:38,290 log "GET /auth/logout/ HTTP/1.1" 302 0
+INFO 2026-06-24 12:05:38,311 log "GET /auth/login/ HTTP/1.1" 200 5433
+WARNING 2026-06-24 12:05:38,408 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:32:02,797 log "POST /auth/login/ HTTP/1.1" 302 0
+INFO 2026-06-24 12:32:02,848 log "GET /telas/ HTTP/1.1" 200 6654
+WARNING 2026-06-24 12:32:02,947 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:32:06,431 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 12:32:06,504 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:32:10,516 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 15678
+WARNING 2026-06-24 12:32:10,589 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:32:12,169 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14254
+WARNING 2026-06-24 12:32:12,234 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:33:15,801 log "POST /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14603
+WARNING 2026-06-24 12:33:15,876 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:33:27,701 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 12:33:27,773 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:33:30,777 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 12:33:30,858 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:33:32,642 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 16558
+WARNING 2026-06-24 12:33:32,707 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:33:33,963 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14254
+WARNING 2026-06-24 12:33:34,026 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:33:50,291 log "POST /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 302 0
+INFO 2026-06-24 12:33:50,381 log "GET /telas/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/ HTTP/1.1" 200 29068
+WARNING 2026-06-24 12:33:50,520 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:34:04,086 log "POST /telas/recomendacoes/feedback/ HTTP/1.1" 200 17
+INFO 2026-06-24 12:34:06,198 log "GET /telas/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/ HTTP/1.1" 200 28714
+WARNING 2026-06-24 12:34:06,268 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:35:50,371 log "GET /telas/recomendacoes/ HTTP/1.1" 200 3526
+WARNING 2026-06-24 12:35:50,445 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:35:52,017 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 45950
+WARNING 2026-06-24 12:35:52,089 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:41:15,605 autoreload /home/laura/AssistIA_site/AssistIA/telas/views.py changed, reloading.
+INFO 2026-06-24 12:41:16,392 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 12:41:45,714 log "GET /telas/recomendacoes/ HTTP/1.1" 200 3526
+WARNING 2026-06-24 12:41:45,794 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:41:51,900 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 12:41:51,966 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:41:54,081 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 17440
+WARNING 2026-06-24 12:41:54,139 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:41:56,292 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14255
+WARNING 2026-06-24 12:41:56,364 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:42:20,463 log "POST /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 302 0
+INFO 2026-06-24 12:42:20,524 log "GET /telas/recomendacoes/473128da-5fff-4624-b04e-7a5bb7c8d389/ HTTP/1.1" 200 37865
+WARNING 2026-06-24 12:42:20,600 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:42:44,422 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 50716
+WARNING 2026-06-24 12:42:44,487 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:46:43,901 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 12:46:47,363 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 36622
+WARNING 2026-06-24 12:46:47,426 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:47:00,676 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 12:47:00,729 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:47:02,737 log "GET /telas/recomendacoes/ HTTP/1.1" 200 3526
+WARNING 2026-06-24 12:47:02,811 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:47:17,779 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 12:47:17,839 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:47:22,885 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14255
+WARNING 2026-06-24 12:47:22,951 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:47:28,377 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 12:47:28,434 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:47:29,988 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 18322
+WARNING 2026-06-24 12:47:30,051 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:51:44,161 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 18831
+WARNING 2026-06-24 12:51:44,225 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:51:49,107 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14255
+WARNING 2026-06-24 12:51:49,176 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:52:09,843 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 18831
+WARNING 2026-06-24 12:52:09,914 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:52:30,606 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 18831
+WARNING 2026-06-24 12:52:30,657 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:52:32,581 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 18318
+WARNING 2026-06-24 12:52:32,646 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:58:05,995 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 18324
+WARNING 2026-06-24 12:58:06,049 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:58:10,926 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14255
+WARNING 2026-06-24 12:58:10,991 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:58:30,460 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14255
+WARNING 2026-06-24 12:58:30,524 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:58:31,961 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14265
+WARNING 2026-06-24 12:58:32,014 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:58:40,864 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 12:58:40,915 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:58:43,995 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 12:58:44,056 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:59:32,092 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 12:59:32,155 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 12:59:33,297 log "GET /telas/estudantes/ HTTP/1.1" 200 6366
+WARNING 2026-06-24 12:59:33,354 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:00:41,435 log "GET /telas/estudantes/ HTTP/1.1" 200 6359
+WARNING 2026-06-24 13:00:41,507 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:00:43,000 log "GET /telas/estudantes/ HTTP/1.1" 200 6359
+WARNING 2026-06-24 13:00:43,061 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:00:58,941 log "GET /telas/estudantes/ HTTP/1.1" 200 6354
+WARNING 2026-06-24 13:00:58,998 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:01:00,038 log "GET /telas/estudantes/ HTTP/1.1" 200 6354
+WARNING 2026-06-24 13:01:00,100 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:01:20,761 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 13:01:20,818 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:01:26,538 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:01:26,586 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:01:29,217 log "GET /telas/pei/ HTTP/1.1" 200 4772
+WARNING 2026-06-24 13:01:29,276 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:01:31,658 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 13:01:31,722 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:01:33,843 log "GET /telas/pei/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 5663
+WARNING 2026-06-24 13:01:33,930 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:03:01,845 log "POST /telas/pei/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 302 0
+INFO 2026-06-24 13:03:01,914 log "GET /telas/pei/33795ed7-9753-4452-bbe7-04f095e9d11a/ HTTP/1.1" 200 5928
+WARNING 2026-06-24 13:03:02,021 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:03:20,326 log "GET /telas/perfil/ HTTP/1.1" 200 8466
+WARNING 2026-06-24 13:03:20,398 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:03:34,250 log "GET /telas/recomendacoes/ HTTP/1.1" 200 3526
+WARNING 2026-06-24 13:03:34,304 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:03:37,013 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 36622
+WARNING 2026-06-24 13:03:37,072 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:06:17,531 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 13:06:21,030 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 67800
+WARNING 2026-06-24 13:06:21,090 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:17:47,032 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 13:17:52,295 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 64964
+WARNING 2026-06-24 13:17:52,358 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:02,218 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:18:02,282 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:18,381 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 13:18:18,444 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:24,475 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:18:24,539 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:26,529 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 13:18:26,594 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:30,299 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14265
+WARNING 2026-06-24 13:18:30,358 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:32,777 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 13:18:32,844 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:34,660 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/editar/ HTTP/1.1" 200 7058
+WARNING 2026-06-24 13:18:34,718 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:38,783 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 13:18:38,861 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:40,491 log "GET /telas/pei/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 5663
+WARNING 2026-06-24 13:18:40,555 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:43,666 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 19452
+WARNING 2026-06-24 13:18:43,732 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:45,694 log "GET /telas/pei/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 5663
+WARNING 2026-06-24 13:18:45,757 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:47,535 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:18:47,600 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:18:48,788 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 64964
+WARNING 2026-06-24 13:18:48,853 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:19:02,217 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:19:02,285 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:21:01,409 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:21:01,470 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:21:17,010 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 13:21:17,082 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:22:12,720 log "GET /telas/recomendacoes/ HTTP/1.1" 200 24319
+WARNING 2026-06-24 13:22:12,790 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:22:22,317 log "GET /telas/recomendacoes/473128da-5fff-4624-b04e-7a5bb7c8d389/ HTTP/1.1" 200 22746
+WARNING 2026-06-24 13:22:22,380 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:22:31,216 log "GET /telas/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/ HTTP/1.1" 200 11845
+WARNING 2026-06-24 13:22:31,283 log "GET /static/css/style.css HTTP/1.1" 404 1853
+WARNING 2026-06-24 13:22:37,035 log Not Found: /app/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/arquivar/
+WARNING 2026-06-24 13:22:37,035 log "POST /app/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/arquivar/ HTTP/1.1" 404 2667
+INFO 2026-06-24 13:24:03,678 log "GET /telas/recomendacoes/473128da-5fff-4624-b04e-7a5bb7c8d389/ HTTP/1.1" 200 22746
+WARNING 2026-06-24 13:24:03,744 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:24:48,696 log "GET /telas/recomendacoes/ HTTP/1.1" 200 29761
+WARNING 2026-06-24 13:24:48,767 log "GET /static/css/style.css HTTP/1.1" 404 1853
+WARNING 2026-06-24 13:24:54,344 log Not Found: /app/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/excluir/
+WARNING 2026-06-24 13:24:54,345 log "POST /app/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/excluir/ HTTP/1.1" 404 2664
+WARNING 2026-06-24 13:24:58,971 log Not Found: /app/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/excluir/
+WARNING 2026-06-24 13:24:58,971 log "POST /app/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/excluir/ HTTP/1.1" 404 2664
+INFO 2026-06-24 13:28:58,617 autoreload /home/laura/AssistIA_site/AssistIA/telas/models.py changed, reloading.
+INFO 2026-06-24 13:28:59,233 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 13:29:15,252 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 13:29:19,023 log "GET /telas/recomendacoes/ HTTP/1.1" 200 29761
+WARNING 2026-06-24 13:29:19,077 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:29:21,616 log "GET /telas/recomendacoes/ HTTP/1.1" 200 29761
+WARNING 2026-06-24 13:29:21,666 log "GET /static/css/style.css HTTP/1.1" 404 1853
+WARNING 2026-06-24 13:29:25,468 log Not Found: /app/recomendacoes/473128da-5fff-4624-b04e-7a5bb7c8d389/excluir/
+WARNING 2026-06-24 13:29:25,468 log "POST /app/recomendacoes/473128da-5fff-4624-b04e-7a5bb7c8d389/excluir/ HTTP/1.1" 404 2664
+WARNING 2026-06-24 13:29:32,588 log Not Found: /app/recomendacoes/473128da-5fff-4624-b04e-7a5bb7c8d389/excluir/
+WARNING 2026-06-24 13:29:32,589 log "POST /app/recomendacoes/473128da-5fff-4624-b04e-7a5bb7c8d389/excluir/ HTTP/1.1" 404 2664
+INFO 2026-06-24 13:30:55,725 autoreload /home/laura/AssistIA_site/AssistIA/telas/urls.py changed, reloading.
+INFO 2026-06-24 13:30:56,186 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 13:31:04,497 autoreload /home/laura/AssistIA_site/AssistIA/telas/views.py changed, reloading.
+INFO 2026-06-24 13:31:04,908 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 13:32:54,844 log "GET /telas/recomendacoes/ HTTP/1.1" 200 29716
+WARNING 2026-06-24 13:32:54,904 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:32:56,692 log "GET /telas/recomendacoes/ HTTP/1.1" 200 29716
+WARNING 2026-06-24 13:32:56,771 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:00,667 log "POST /telas/recomendacoes/473128da-5fff-4624-b04e-7a5bb7c8d389/excluir/ HTTP/1.1" 200 102
+INFO 2026-06-24 13:33:02,772 log "GET /telas/recomendacoes/ HTTP/1.1" 200 25653
+WARNING 2026-06-24 13:33:02,836 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:06,802 log "POST /telas/recomendacoes/fdd0e72d-9f85-41fb-a550-273f375776b5/excluir/ HTTP/1.1" 200 102
+INFO 2026-06-24 13:33:08,887 log "GET /telas/recomendacoes/ HTTP/1.1" 200 21590
+WARNING 2026-06-24 13:33:08,954 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:11,348 log "POST /telas/recomendacoes/4b405ae4-b63e-454e-979c-2004d831b298/excluir/ HTTP/1.1" 200 102
+INFO 2026-06-24 13:33:13,439 log "GET /telas/recomendacoes/ HTTP/1.1" 200 17527
+WARNING 2026-06-24 13:33:13,501 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:15,562 log "POST /telas/recomendacoes/c60e3edc-a5ad-4e44-8440-aac254cf96b4/excluir/ HTTP/1.1" 200 102
+INFO 2026-06-24 13:33:17,650 log "GET /telas/recomendacoes/ HTTP/1.1" 200 12086
+WARNING 2026-06-24 13:33:17,709 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:22,753 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:33:22,801 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:27,253 log "GET /telas/pei/ HTTP/1.1" 200 5281
+WARNING 2026-06-24 13:33:27,315 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:28,713 log "GET /telas/pei/33795ed7-9753-4452-bbe7-04f095e9d11a/ HTTP/1.1" 200 5597
+WARNING 2026-06-24 13:33:28,762 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:31,582 log "GET /telas/pei/33795ed7-9753-4452-bbe7-04f095e9d11a/editar/ HTTP/1.1" 200 5834
+WARNING 2026-06-24 13:33:31,658 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:34,205 log "GET /telas/pei/33795ed7-9753-4452-bbe7-04f095e9d11a/ HTTP/1.1" 200 5597
+WARNING 2026-06-24 13:33:34,268 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:36,588 log "GET /telas/pei/ HTTP/1.1" 200 5281
+WARNING 2026-06-24 13:33:36,651 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:42,989 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:33:43,039 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:49,342 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:33:49,396 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:51,832 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+WARNING 2026-06-24 13:33:51,886 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:33:53,871 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 14265
+WARNING 2026-06-24 13:33:53,930 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:34:09,677 log "GET /auth/login/ HTTP/1.1" 302 0
+INFO 2026-06-24 13:34:09,728 log "GET /telas/ HTTP/1.1" 200 6316
+WARNING 2026-06-24 13:34:09,838 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:34:14,266 log "GET /auth/logout/ HTTP/1.1" 302 0
+INFO 2026-06-24 13:34:14,288 log "GET /auth/login/ HTTP/1.1" 200 5433
+WARNING 2026-06-24 13:34:14,404 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:34:30,223 log "GET /auth/cadastro/ HTTP/1.1" 200 8305
+WARNING 2026-06-24 13:34:30,293 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:35:29,654 log "GET /auth/cadastro/ HTTP/1.1" 200 8304
+WARNING 2026-06-24 13:35:29,721 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:36:07,710 log "POST /auth/cadastro/ HTTP/1.1" 302 0
+INFO 2026-06-24 13:36:07,721 log "GET /auth/login/ HTTP/1.1" 200 5451
+WARNING 2026-06-24 13:36:07,825 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:36:21,020 log "POST /auth/login/ HTTP/1.1" 302 0
+INFO 2026-06-24 13:36:21,068 log "GET /telas/ HTTP/1.1" 200 6594
+WARNING 2026-06-24 13:36:21,172 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:36:25,510 log "GET /telas/estudantes/ HTTP/1.1" 200 5115
+WARNING 2026-06-24 13:36:25,568 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:36:56,135 log "GET /telas/perfil/ HTTP/1.1" 200 8404
+WARNING 2026-06-24 13:36:56,204 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:37:03,772 log "POST /telas/perfil/ HTTP/1.1" 302 0
+INFO 2026-06-24 13:37:03,832 log "GET /telas/perfil/ HTTP/1.1" 200 8748
+WARNING 2026-06-24 13:37:03,930 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:37:11,003 log "GET /telas/ HTTP/1.1" 200 6286
+WARNING 2026-06-24 13:37:11,068 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:37:26,599 log "GET /auth/cadastro/ HTTP/1.1" 302 0
+INFO 2026-06-24 13:37:26,691 log "GET /telas/ HTTP/1.1" 200 6286
+WARNING 2026-06-24 13:37:26,750 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:37:30,690 log "GET /auth/logout/ HTTP/1.1" 302 0
+INFO 2026-06-24 13:37:30,705 log "GET /auth/login/ HTTP/1.1" 200 5433
+WARNING 2026-06-24 13:37:30,815 log "GET /static/css/style.css HTTP/1.1" 404 1853
+INFO 2026-06-24 13:44:05,647 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 13:44:13,435 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 13:44:17,888 log "GET /auth/login/ HTTP/1.1" 200 5221
+INFO 2026-06-24 13:44:17,960 log "GET /static/css/style.css HTTP/1.1" 200 5208
+INFO 2026-06-24 13:44:25,074 log "GET /auth/cadastro/ HTTP/1.1" 200 8304
+INFO 2026-06-24 13:44:37,138 log "GET /auth/login/ HTTP/1.1" 200 5221
+INFO 2026-06-24 13:44:37,205 log "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2026-06-24 13:49:46,217 log "POST /auth/login/ HTTP/1.1" 302 0
+INFO 2026-06-24 13:49:46,278 log "GET /telas/ HTTP/1.1" 200 6654
+INFO 2026-06-24 13:49:46,380 log "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2026-06-24 13:49:52,565 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+INFO 2026-06-24 13:49:57,773 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+INFO 2026-06-24 13:50:00,321 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 64964
+INFO 2026-06-24 13:50:07,865 log "GET /telas/recomendacoes/ HTTP/1.1" 200 12086
+INFO 2026-06-24 13:50:14,262 log "GET /telas/pei/ HTTP/1.1" 200 5281
+INFO 2026-06-24 14:10:03,719 log "GET /auth/logout/ HTTP/1.1" 302 0
+INFO 2026-06-24 14:10:03,739 log "GET /auth/login/ HTTP/1.1" 200 5433
+INFO 2026-06-24 14:10:03,873 log "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2026-06-24 14:10:06,411 log "GET /auth/esqueci-senha/ HTTP/1.1" 200 3664
+INFO 2026-06-24 14:10:11,497 log "POST /auth/esqueci-senha/ HTTP/1.1" 200 3937
+INFO 2026-06-24 14:11:16,860 log "GET /auth/redefinir-senha/ZDcxMjUxNDItZTExNC00ZTgyLThkNTgtOT=M3ZWViODQxZjI0/daokoz-9906c8dcd41ece9eba4dbf781617e989/ HTTP/1.1" 200 6306
+INFO 2026-06-24 14:11:29,307 log "POST /auth/redefinir-senha/ZDcxMjUxNDItZTExNC00ZTgyLThkNTgtOT=M3ZWViODQxZjI0/daokoz-9906c8dcd41ece9eba4dbf781617e989/ HTTP/1.1" 302 0
+INFO 2026-06-24 14:11:29,319 log "GET /auth/login/ HTTP/1.1" 200 5455
+INFO 2026-06-24 14:11:42,449 log "POST /auth/login/ HTTP/1.1" 302 0
+INFO 2026-06-24 14:11:42,498 log "GET /telas/ HTTP/1.1" 200 6654
+INFO 2026-06-24 14:13:22,102 log "GET /telas/perfil/ HTTP/1.1" 200 8466
+INFO 2026-06-24 14:13:22,165 log "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2026-06-24 14:13:37,367 log "GET /auth/logout/ HTTP/1.1" 302 0
+INFO 2026-06-24 14:13:37,381 log "GET /auth/login/ HTTP/1.1" 200 5433
+INFO 2026-06-24 14:13:55,636 autoreload Watching for file changes with StatReloader
+INFO 2026-06-24 14:14:01,463 log "GET /admin/ HTTP/1.1" 302 0
+INFO 2026-06-24 14:14:01,527 log "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4113
+INFO 2026-06-24 14:14:01,649 log "GET /static/admin/css/base.css HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:01,652 log "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:01,653 log "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:01,656 log "GET /static/admin/js/theme.js HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:01,658 log "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:01,658 log "GET /static/admin/css/login.css HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:01,670 log "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:11,423 log "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2026-06-24 14:14:11,489 log "GET /admin/ HTTP/1.1" 200 6623
+INFO 2026-06-24 14:14:11,614 log "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:11,633 log "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:11,634 log "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,036 log "GET /admin/auth/group/ HTTP/1.1" 200 8640
+INFO 2026-06-24 14:14:17,118 log "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,127 log "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,128 log "GET /static/admin/js/core.js HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,128 log "GET /static/admin/css/changelists.css HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,132 log "GET /static/admin/js/actions.js HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,133 log "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,138 log "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 285314
+INFO 2026-06-24 14:14:17,143 log "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 325171
+INFO 2026-06-24 14:14:17,144 log "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,147 log "GET /static/admin/img/search.svg HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,156 log "GET /admin/jsi18n/ HTTP/1.1" 200 8498
+INFO 2026-06-24 14:14:17,199 log "GET /static/admin/js/filters.js HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:17,247 log "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:18,825 log "GET /admin/user/usuario/ HTTP/1.1" 200 13792
+INFO 2026-06-24 14:14:18,883 log "GET /static/admin/img/icon-yes.svg HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:18,884 log "GET /static/admin/img/icon-no.svg HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:18,914 log "GET /admin/jsi18n/ HTTP/1.1" 200 8498
+INFO 2026-06-24 14:14:18,961 log "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:18,989 log "GET /static/admin/img/sorting-icons.svg HTTP/1.1" 304 0
+INFO 2026-06-24 14:14:28,403 log "GET /admin/user/usuario/?perfil__exact=coordenador HTTP/1.1" 200 13250
+INFO 2026-06-24 14:14:28,490 log "GET /admin/jsi18n/ HTTP/1.1" 200 8498
+INFO 2026-06-24 14:14:29,997 log "GET /admin/user/usuario/?perfil__exact=especialista HTTP/1.1" 200 11019
+INFO 2026-06-24 14:14:30,073 log "GET /admin/jsi18n/ HTTP/1.1" 200 8498
+INFO 2026-06-24 14:14:31,380 log "GET /admin/user/usuario/? HTTP/1.1" 200 13792
+INFO 2026-06-24 14:14:31,473 log "GET /admin/jsi18n/ HTTP/1.1" 200 8498
+INFO 2026-06-25 19:29:16,022 autoreload Watching for file changes with StatReloader
+WARNING 2026-06-25 19:29:25,412 log Not Found: /
+WARNING 2026-06-25 19:29:25,413 log "GET / HTTP/1.1" 404 2456
+WARNING 2026-06-25 19:29:25,535 log Not Found: /favicon.ico
+WARNING 2026-06-25 19:29:25,535 log "GET /favicon.ico HTTP/1.1" 404 2507
+INFO 2026-06-25 19:29:32,243 log "GET /auth/cadastro/ HTTP/1.1" 302 0
+INFO 2026-06-25 19:29:32,320 log "GET /telas/ HTTP/1.1" 200 6294
+INFO 2026-06-25 19:29:32,421 log "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2026-06-25 19:29:35,170 log "GET /auth/logout/ HTTP/1.1" 302 0
+INFO 2026-06-25 19:29:35,190 log "GET /auth/login/ HTTP/1.1" 200 5433
+INFO 2026-06-25 19:29:40,653 log "GET /auth/cadastro/ HTTP/1.1" 200 8304
+INFO 2026-06-25 19:30:20,213 log "GET /auth/login/ HTTP/1.1" 200 5221
+INFO 2026-06-25 19:30:29,544 log "POST /auth/login/ HTTP/1.1" 200 5466
+INFO 2026-06-25 19:30:37,076 log "POST /auth/login/ HTTP/1.1" 302 0
+INFO 2026-06-25 19:30:37,137 log "GET /telas/ HTTP/1.1" 200 6654
+INFO 2026-06-25 19:30:45,480 log "GET /telas/recomendacoes/ HTTP/1.1" 200 12086
+INFO 2026-06-25 19:30:49,346 log "GET /telas/ HTTP/1.1" 200 6316
+INFO 2026-06-25 19:31:08,613 log "GET /telas/pei/ HTTP/1.1" 200 5281
+INFO 2026-06-25 19:31:15,753 log "GET /telas/pei/33795ed7-9753-4452-bbe7-04f095e9d11a/ HTTP/1.1" 200 5597
+INFO 2026-06-25 19:31:32,511 log "GET /telas/pei/ HTTP/1.1" 200 5281
+INFO 2026-06-25 19:31:38,774 log "GET /telas/ HTTP/1.1" 200 6316
+INFO 2026-06-25 19:31:40,587 log "GET /telas/estudantes/ HTTP/1.1" 200 6360
+INFO 2026-06-25 19:31:42,877 log "GET /telas/estudantes/novo/ HTTP/1.1" 200 7012
+INFO 2026-06-25 19:32:48,413 log "POST /telas/estudantes/novo/ HTTP/1.1" 302 0
+INFO 2026-06-25 19:32:48,480 log "GET /telas/estudantes/2438494f-76f7-414d-b311-384d4bffd0ba/ HTTP/1.1" 200 13455
+INFO 2026-06-25 19:34:14,569 log "POST /telas/estudantes/2438494f-76f7-414d-b311-384d4bffd0ba/salvar-perfil/ HTTP/1.1" 302 0
+INFO 2026-06-25 19:34:14,638 log "GET /telas/estudantes/2438494f-76f7-414d-b311-384d4bffd0ba/ HTTP/1.1" 200 14766
+INFO 2026-06-25 19:34:29,802 log "GET /telas/recomendacoes/gerar/2438494f-76f7-414d-b311-384d4bffd0ba/ HTTP/1.1" 200 14241
+INFO 2026-06-25 19:36:13,172 log "POST /telas/recomendacoes/gerar/2438494f-76f7-414d-b311-384d4bffd0ba/ HTTP/1.1" 302 0
+INFO 2026-06-25 19:36:13,245 log "GET /telas/recomendacoes/5747be3d-d15f-4554-997a-d15f341f08cb/ HTTP/1.1" 200 38111
+WARNING 2026-06-25 19:37:10,061 log Not Found: /telas/recomendacoes/5747be3d-d15f-4554-997a-d15f341f08cb/Explorar o recurso conforme instru\xe7\xf5es do site
+WARNING 2026-06-25 19:37:10,062 log "GET /telas/recomendacoes/5747be3d-d15f-4554-997a-d15f341f08cb/Explorar%20o%20recurso%20conforme%20instru%C3%A7%C3%B5es%20do%20site HTTP/1.1" 404 8416
+INFO 2026-06-25 19:38:03,986 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 67352
+INFO 2026-06-25 19:39:15,863 log "GET /telas/estudantes/ HTTP/1.1" 200 8233
+INFO 2026-06-25 19:39:19,307 log "GET /telas/recomendacoes/gerar/2438494f-76f7-414d-b311-384d4bffd0ba/ HTTP/1.1" 200 14241
+INFO 2026-06-25 19:39:22,586 log "GET /telas/recomendacoes/ HTTP/1.1" 200 17576
+INFO 2026-06-25 19:39:38,736 log "GET /telas/recomendacoes/5747be3d-d15f-4554-997a-d15f341f08cb/ HTTP/1.1" 200 37748
+INFO 2026-06-25 19:39:49,068 log "GET /telas/perfil/ HTTP/1.1" 200 8466
+INFO 2026-06-25 19:43:43,929 log "GET /telas/recomendacoes/ HTTP/1.1" 200 17576
+INFO 2026-06-25 19:43:46,510 log "GET /telas/recomendacoes/5747be3d-d15f-4554-997a-d15f341f08cb/ HTTP/1.1" 200 37748
+INFO 2026-06-25 19:44:31,180 log "GET /telas/estudantes/ HTTP/1.1" 200 8233
+INFO 2026-06-25 19:44:35,522 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 15803
+INFO 2026-07-01 14:26:49,669 autoreload Watching for file changes with StatReloader
+WARNING 2026-07-01 14:26:59,967 log Not Found: /
+WARNING 2026-07-01 14:26:59,969 log "GET / HTTP/1.1" 404 2456
+WARNING 2026-07-01 14:27:00,105 log Not Found: /favicon.ico
+WARNING 2026-07-01 14:27:00,106 log "GET /favicon.ico HTTP/1.1" 404 2507

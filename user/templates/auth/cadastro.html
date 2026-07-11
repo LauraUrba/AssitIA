@@ -1,0 +1,186 @@
+{% extends 'auth/base.html' %}
+{% load static %}
+
+{% block title %}Cadastro - AssistIA{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="logo-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1>AssistIA</h1>
+            <p>Crie sua conta</p>
+        </div>
+
+        <h2 class="auth-title">Criar conta</h2>
+        <p class="auth-subtitle">Preencha os dados abaixo para começar</p>
+
+        <!-- Mensagens -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert-custom alert-{{ message.tags }}">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Formulário de Cadastro -->
+        <form method="post" action="{% url 'cadastro' %}" id="cadastroForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="nome">Nome Completo <span class="required">*</span></label>
+                <div class="input-group-custom">
+                    <input type="text"
+                           id="nome"
+                           name="nome"
+                           class="form-control"
+                           placeholder="Seu nome completo"
+                           value="{{ request.POST.nome }}"
+                           required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <div class="input-group-custom">
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           class="form-control"
+                           placeholder="seu@email.com"
+                           value="{{ request.POST.email }}"
+                           required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="perfil">Perfil <span class="required">*</span></label>
+                <div class="input-group-custom">
+                    <select id="perfil" name="perfil" class="form-control" required>
+                        <option value="">Selecione seu perfil</option>
+                        <option value="professor" {% if request.POST.perfil == professor %}selected{% endif %}>Professor</option>
+                        <option value="coordenador" {% if request.POST.perfil == coordenador %}selected{% endif %}>Coordenador</option>
+                        <option value="administrador" {% if request.POST.perfil == administrador %}selected{% endif %}>Especialista</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha <span class="required">*</span></label>
+                <div class="input-group-custom">
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           class="form-control"
+                           placeholder="Mínimo 8 caracteres"
+                           required
+                           minlength="8">
+                    <span class="input-icon" onclick="togglePassword('password', 'toggleIcon1')">
+                        <i class="fas fa-eye" id="toggleIcon1"></i>
+                    </span>
+                </div>
+                <small class="text-muted" style="font-size: 12px;">
+                    <i class="fas fa-info-circle"></i> A senha deve ter no mínimo 8 caracteres
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirmar Senha <span class="required">*</span></label>
+                <div class="input-group-custom">
+                    <input type="password"
+                           id="confirm_password"
+                           name="confirm_password"
+                           class="form-control"
+                           placeholder="Confirme sua senha"
+                           required>
+                    <span class="input-icon" onclick="togglePassword('confirm_password', 'toggleIcon2')">
+                        <i class="fas fa-eye" id="toggleIcon2"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="form-check mb-4">
+                <input type="checkbox" class="form-check-input" id="terms" required>
+                <label class="form-check-label" for="terms" style="font-size: 13px; color: var(--text-gray);">
+                    Li e concordo com os <a href="#" style="color: var(--primary-color);">Termos de Uso</a> e
+                    <a href="#" style="color: var(--primary-color);">Política de Privacidade</a>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary-custom" id="cadastroBtn">
+                <span class="btn-text"><i class="fas fa-user-plus"></i> Criar conta</span>
+                <span class="spinner"></span>
+            </button>
+        </form>
+
+        <div class="auth-links">
+            <span style="color: var(--text-gray); font-size: 14px;">Já tem uma conta?</span>
+            <a href="{% url 'login' %}">Fazer login</a>
+        </div>
+
+        <div class="auth-footer">
+            <p>© 2026 AssistIA - Todos os direitos reservados</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+// Validação de senha em tempo real
+document.getElementById('password').addEventListener('input', function() {
+    const confirm = document.getElementById('confirm_password');
+    if (confirm.value && this.value !== confirm.value) {
+        confirm.classList.add('is-invalid');
+        confirm.setCustomValidity('As senhas não coincidem');
+    } else if (confirm.value) {
+        confirm.classList.remove('is-invalid');
+        confirm.setCustomValidity('');
+    }
+});
+
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const senha = document.getElementById('password').value;
+    if (senha !== this.value) {
+        this.classList.add('is-invalid');
+        this.setCustomValidity('As senhas não coincidem');
+    } else {
+        this.classList.remove('is-invalid');
+        this.setCustomValidity('');
+    }
+});
+
+document.getElementById('cadastroForm').addEventListener('submit', function(e) {
+    const senha = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
+
+    if (senha !== confirm) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'As senhas não coincidem!'
+        });
+        return;
+    }
+
+    const btn = document.getElementById('cadastroBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+});
+</script>
+{% endblock %}

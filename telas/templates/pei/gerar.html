@@ -1,0 +1,51 @@
+<!-- telas/templates/pei/gerar.html -->
+{% extends 'telas/base.html' %}
+
+{% block title %}Gerar PEI - AssistIA{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-file-alt text-primary"></i> Gerar PEI para {{ estudante.nome }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Preencha os campos abaixo para criar o Plano Educacional Individualizado.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="objetivos" class="form-label">Objetivos <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="objetivos" name="objetivos" rows="4" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="estrategias" class="form-label">Estratégias</label>
+                            <textarea class="form-control" id="estrategias" name="estrategias" rows="4"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="recursos" class="form-label">Recursos</label>
+                            <textarea class="form-control" id="recursos" name="recursos" rows="3"></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detalhe_estudante' estudante.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salvar PEI
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,294 @@
+{% extends 'telas/base.html' %}
+{% load static %}
+
+{% block title %}Gerar Recomendação - AssistIA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+    .loading-overlay.active {
+        display: flex;
+    }
+    .loading-content {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        text-align: center;
+        max-width: 400px;
+    }
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4F46E5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .perfil-card {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 10px;
+    }
+    .perfil-card .label {
+        font-weight: 600;
+        color: #475569;
+        font-size: 13px;
+    }
+    .perfil-card .value {
+        color: #1e293b;
+        font-size: 14px;
+        margin: 4px 0 0 0;
+    }
+    .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+    .checkbox-grid .form-check {
+        background: #f8fafc;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin: 0;
+    }
+    .checkbox-grid .form-check:hover {
+        background: #eef2ff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6">
+                        <i class="fas fa-robot text-primary"></i> Gerar Recomendação com IA
+                    </h1>
+                    <p class="text-muted">
+                        A IA vai analisar o perfil do aluno e recomendar as melhores tecnologias assistivas
+                    </p>
+                </div>
+                <a href="{% url 'detalhe_estudante' estudante.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Perfil do Aluno -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle text-primary"></i> Perfil do Aluno
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px; font-size: 32px;">
+                            {{ estudante.nome|slice:":1"|upper }}
+                        </div>
+                        <h4 class="mt-2">{{ estudante.nome }}</h4>
+                        <span class="badge bg-{% if estudante.nivel_suporte == 1 %}success{% elif estudante.nivel_suporte == 2 %}warning{% else %}danger{% endif %}">
+                            {{ estudante.get_nivel_suporte_display }}
+                        </span>
+                        <span class="badge bg-secondary">{{ estudante.turma|default:"Sem turma" }}</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="perfil-card">
+                        <p class="label"><i class="fas fa-calendar-alt"></i> Idade</p>
+                        <p class="value">
+                            {% if estudante.data_nascimento %}
+                                {{ estudante.data_nascimento|timesince }}
+                            {% else %}
+                                Não informada
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if perfil_tea %}
+                        <div class="perfil-card">
+                            <p class="label"><i class="fas fa-comment"></i> Comunicação</p>
+                            <p class="value">{{ perfil_tea.comunicacao|default:"Não informado" }}</p>
+                        </div>
+                        <div class="perfil-card">
+                            <p class="label"><i class="fas fa-eye"></i> Perfil Sensorial</p>
+                            <p class="value">{{ perfil_tea.perfil_sensorial|default:"Não informado" }}</p>
+                        </div>
+                        <div class="perfil-card">
+                            <p class="label"><i class="fas fa-running"></i> Habilidade Motora</p>
+                            <p class="value">{{ perfil_tea.habilidade_motora|default:"Não informado" }}</p>
+                        </div>
+                        <div class="perfil-card">
+                            <p class="label"><i class="fas fa-brain"></i> Perfil Cognitivo</p>
+                            <p class="value">{{ perfil_tea.perfil_cognitivo|default:"Não informado" }}</p>
+                        </div>
+                        {% if perfil_tea.desafios %}
+                            <div class="perfil-card">
+                                <p class="label"><i class="fas fa-exclamation-triangle text-warning"></i> Desafios</p>
+                                <p class="value">{{ perfil_tea.desafios|truncatechars:80 }}</p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i>
+                            Perfil TEA não cadastrado. <a href="{% url 'detalhe_estudante' estudante.id %}" class="alert-link">Cadastrar agora</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de Recomendação -->
+        <div class="col-md-8">
+            <form id="recomendacaoForm" method="post">
+                {% csrf_token %}
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sliders-h text-primary"></i> Parâmetros da Recomendação
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="area_principal" class="form-label">Área Principal de Apoio</label>
+                                <select class="form-control" id="area_principal" name="area_principal">
+                                    <option value="comunicacao">Comunicação</option>
+                                    <option value="regulacao_sensorial">Regulação Sensorial</option>
+                                    <option value="motor">Motor</option>
+                                    <option value="cognitivo">Cognitivo</option>
+                                    <option value="interacao_social">Interação Social</option>
+                                    <option value="estruturacao">Estruturação</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="prioridade" class="form-label">Nível de Prioridade</label>
+                                <select class="form-control" id="prioridade" name="prioridade">
+                                    <option value="alta">Alta</option>
+                                    <option value="media" selected>Média</option>
+                                    <option value="baixa">Baixa</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="interesses" class="form-label">Interesses Específicos do Aluno</label>
+                                <input type="text" class="form-control" id="interesses" name="interesses"
+                                       placeholder="Ex: Música, desenhos, animais..."
+                                       value="{{ perfil_tea.interesses|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="sensibilidades" class="form-label">Sensibilidades Sensoriais</label>
+                                <input type="text" class="form-control" id="sensibilidades" name="sensibilidades"
+                                       placeholder="Ex: Sons altos, luzes fortes, texturas..."
+                                       value="{{ perfil_tea.sensibilidades|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="recursos" class="form-label">Recursos Disponíveis na Escola</label>
+                                <input type="text" class="form-control" id="recursos" name="recursos"
+                                       placeholder="Ex: Tablet, impressora, computador, materiais recicláveis...">
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <label class="form-label">Áreas de Atenção (selecione as relevantes)</label>
+                                <div class="checkbox-grid">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="areas" value="comunicacao" checked>
+                                        <label class="form-check-label">Comunicação</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="areas" value="sensorial">
+                                        <label class="form-check-label">Sensorial</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="areas" value="motor">
+                                        <label class="form-check-label">Motor</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="areas" value="cognitivo">
+                                        <label class="form-check-label">Cognitivo</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="areas" value="social">
+                                        <label class="form-check-label">Social</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="areas" value="estrutura">
+                                        <label class="form-check-label">Estrutura</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="gerarBtn">
+                    <i class="fas fa-star ia-sparkle"></i> Gerar Recomendações com IA
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h4>🤖 Gerando Recomendações...</h4>
+        <p class="text-muted">A IA está analisando o perfil do aluno e selecionando as melhores tecnologias assistivas.</p>
+        <div class="progress mt-3">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+        </div>
+        <p class="text-muted small mt-2">Isso pode levar alguns segundos...</p>
+    </div>
+</div>
+
+-->
+
+<script>
+document.getElementById('recomendacaoForm').addEventListener('submit', function(e) {
+    // Mostrar loading
+    document.getElementById('loadingOverlay').classList.add('active');
+
+    // Desabilitar botão
+    const btn = document.getElementById('gerarBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Gerando...';
+});
+</script>
+{% endblock %}

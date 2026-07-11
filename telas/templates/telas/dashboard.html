@@ -1,0 +1,75 @@
+<!-- telas/templates/telas/dashboard.html -->
+{% extends 'telas/base.html' %}
+
+{% block title %}Dashboard - AssistIA{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-6">
+                <i class="fas fa-chart-line text-primary"></i> Dashboard
+            </h1>
+            <p class="text-muted">Bem-vindo(a), <strong>{{ user.nome }}</strong>!</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-white-50">Total de Alunos</h6>
+                            <h2 class="display-5 fw-bold">{{ total_estudantes }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-3x text-white-50"></i>
+                    </div>
+                    <a href="{% url 'lista_estudantes' %}" class="btn btn-light btn-sm mt-2">Ver todos</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-white-50">Alunos Ativos</h6>
+                            <h2 class="display-5 fw-bold">{{ estudantes_ativos }}</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-white-50">Recomendações</h6>
+                            <h2 class="display-5 fw-bold">{{ total_recomendacoes }}</h2>
+                        </div>
+                        <i class="fas fa-lightbulb fa-3x text-white-50"></i>
+                    </div>
+                    <a href="{% url 'lista_recomendacoes' %}" class="btn btn-light btn-sm mt-2">Ver todas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-white-50">PEIs</h6>
+                            <h2 class="display-5 fw-bold">{{ total_pei }}</h2>
+                        </div>
+                        <i class="fas fa-file-alt fa-3x text-white-50"></i>
+                    </div>
+                    <a href="{% url 'lista_pei' %}" class="btn btn-light btn-sm mt-2">Ver todos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

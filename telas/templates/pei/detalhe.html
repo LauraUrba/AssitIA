@@ -1,0 +1,58 @@
+<!-- telas/templates/pei/detalhe.html -->
+{% extends 'telas/base.html' %}
+
+{% block title %}Detalhe do PEI - AssistIA{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6"><i class="fas fa-file-alt text-primary"></i> PEI - {{ pei.estudante.nome }}</h1>
+            <p class="text-muted">Versão {{ pei.versao }} - {{ pei.criado_em|date:"d/m/Y H:i" }}</p>
+        </div>
+        <div class="btn-group">
+            <a href="{% url 'editar_pei' pei.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'lista_pei' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="mb-4">
+                <h5><i class="fas fa-user text-primary"></i> Informações do Aluno</h5>
+                <div class="row">
+                    <div class="col-md-4"><strong>Nome:</strong> {{ pei.estudante.nome }}</div>
+                    <div class="col-md-4"><strong>Nível Suporte:</strong> {{ pei.estudante.get_nivel_suporte_display }}</div>
+                    <div class="col-md-4"><strong>Turma:</strong> {{ pei.estudante.turma|default:"-" }}</div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="mb-4">
+                <h5><i class="fas fa-bullseye text-primary"></i> Objetivos</h5>
+                <div class="p-3 bg-light rounded">{{ pei.objetivos|default:"Não informado"|linebreaks }}</div>
+            </div>
+
+            <div class="mb-4">
+                <h5><i class="fas fa-lightbulb text-primary"></i> Estratégias</h5>
+                <div class="p-3 bg-light rounded">{{ pei.estrategias|default:"Não informado"|linebreaks }}</div>
+            </div>
+
+            <div class="mb-4">
+                <h5><i class="fas fa-tools text-primary"></i> Recursos</h5>
+                <div class="p-3 bg-light rounded">{{ pei.recursos|default:"Não informado"|linebreaks }}</div>
+            </div>
+
+            <div class="text-muted small">
+                <p>Última atualização: {{ pei.atualizado_em|date:"d/m/Y H:i" }}</p>
+                <p>Professor: {{ pei.professor.nome }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

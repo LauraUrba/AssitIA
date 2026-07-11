@@ -1,0 +1,77 @@
+<!-- telas/templates/estudantes/form.html -->
+{% extends 'telas/base.html' %}
+
+{% block title %}{% if edit %}Editar{% else %}Novo{% endif %} Aluno - AssistIA{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-{% if edit %}edit{% else %}user-plus{% endif %} text-primary"></i>
+                        {% if edit %}Editar{% else %}Novo{% endif %} Aluno
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="nome" class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nome" name="nome"
+                                   value="{{ estudante.nome|default:'' }}" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+                                <input type="date" class="form-control" id="data_nascimento" name="data_nascimento"
+                                       value="{{ estudante.data_nascimento|date:'Y-m-d'|default:'' }}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="nivel_suporte" class="form-label">Nível de Suporte <span class="text-danger">*</span></label>
+                                <select class="form-control" id="nivel_suporte" name="nivel_suporte" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="1" {% if estudante.nivel_suporte == 1 %}selected{% endif %}>Nível 1 - Suporte Leve</option>
+                                    <option value="2" {% if estudante.nivel_suporte == 2 %}selected{% endif %}>Nível 2 - Suporte Moderado</option>
+                                    <option value="3" {% if estudante.nivel_suporte == 3 %}selected{% endif %}>Nível 3 - Suporte Intensivo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="turma" class="form-label">Turma</label>
+                                <input type="text" class="form-control" id="turma" name="turma"
+                                       value="{{ estudante.turma|default:'' }}" placeholder="Ex: 5º Ano A">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4 pt-2">
+                                    <input type="checkbox" class="form-check-input" id="ativo" name="ativo"
+                                           {% if estudante.ativo or not edit %}checked{% endif %}>
+                                    <label class="form-check-label" for="ativo">Aluno Ativo</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'lista_estudantes' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {% if edit %}Atualizar{% else %}Salvar{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

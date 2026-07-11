@@ -1,0 +1,429 @@
+<!-- telas/templates/recomendacoes/detalhe.html -->
+{% extends 'telas/base.html' %}
+{% load static %}
+
+{% block title %}Recomendações para {{ recomendacao.estudante.nome }} - AssistIA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .recomendacao-card {
+        border-radius: 12px;
+        border-left: 5px solid #4F46E5;
+        transition: transform 0.2s;
+        margin-bottom: 16px;
+        background: white;
+    }
+    .recomendacao-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .recomendacao-card.rank-1 { border-left-color: #F59E0B; }
+    .recomendacao-card.rank-2 { border-left-color: #9CA3AF; }
+    .recomendacao-card.rank-3 { border-left-color: #EF4444; }
+    .recomendacao-card .rank-badge {
+        font-size: 14px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    .recomendacao-card .rank-badge.rank-1 { background: #F59E0B; color: white; }
+    .recomendacao-card .rank-badge.rank-2 { background: #9CA3AF; color: white; }
+    .recomendacao-card .rank-badge.rank-3 { background: #EF4444; color: white; }
+    .recomendacao-card .rank-badge.rank-other { background: #E5E7EB; color: #4B5563; }
+
+    .tech-category {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .tech-category.comunicacao { background: #DBEAFE; color: #1E40AF; }
+    .tech-category.regulacao_sensorial { background: #FEF3C7; color: #92400E; }
+    .tech-category.motor { background: #D1FAE5; color: #065F46; }
+    .tech-category.cognitivo { background: #EDE9FE; color: #5B21B6; }
+    .tech-category.interacao_social { background: #FCE4EC; color: #9C27B0; }
+    .tech-category.estruturacao { background: #E0F2FE; color: #0369A1; }
+    .tech-category.online { background: #E0F2FE; color: #0369A1; }
+
+    .detail-item {
+        background: #F9FAFB;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-top: 6px;
+    }
+    .detail-item strong {
+        color: #4F46E5;
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .detail-item p {
+        margin: 4px 0 0 0;
+        font-size: 14px;
+        color: #1F2937;
+    }
+    .fonte-badge {
+        font-size: 11px;
+        padding: 2px 10px;
+        border-radius: 12px;
+        background: #E5E7EB;
+        color: #4B5563;
+    }
+    .fonte-badge.ia { background: #DBEAFE; color: #1E40AF; }
+    .fonte-badge.internet { background: #D1FAE5; color: #065F46; }
+    .fonte-badge.catalogo { background: #FEF3C7; color: #92400E; }
+
+    .justificativa-box {
+        background: #F3F4F6;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-top: 8px;
+        font-size: 14px;
+        color: #4B5563;
+        border-left: 3px solid #4F46E5;
+    }
+    .justificativa-box i {
+        color: #4F46E5;
+        margin-right: 8px;
+    }
+    .feedback-btn {
+        padding: 4px 12px;
+        font-size: 12px;
+        border-radius: 20px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .feedback-btn.aceita { background: #10B981; color: white; }
+    .feedback-btn.aceita:hover { background: #059669; }
+    .feedback-btn.a_testar { background: #F59E0B; color: white; }
+    .feedback-btn.a_testar:hover { background: #D97706; }
+    .feedback-btn.rejeitada { background: #EF4444; color: white; }
+    .feedback-btn.rejeitada:hover { background: #DC2626; }
+    .feedback-btn.detalhes { background: #4F46E5; color: white; }
+    .feedback-btn.detalhes:hover { background: #4338CA; }
+
+    .link-internet {
+        color: #4F46E5;
+        word-break: break-all;
+    }
+    .link-internet:hover {
+        color: #4338CA;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6">
+                <i class="fas fa-lightbulb text-primary"></i>
+                Recomendações para {{ recomendacao.estudante.nome }}
+            </h1>
+            <p class="text-muted">
+                <i class="fas fa-robot text-primary"></i> Recomendado por IA em {{ recomendacao.criado_em|date:"d/m/Y H:i" }}
+                <span class="badge bg-{% if recomendacao.status == 'gerada' %}warning{% elif recomendacao.status == 'visualizada' %}info{% else %}secondary{% endif %} ms-2">
+                    {{ recomendacao.get_status_display }}
+                </span>
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'lista_recomendacoes' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+            <button class="btn btn-outline-primary" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-microchip text-primary"></i>
+                        Tecnologias Recomendadas pela IA
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if tecnologias_recomendadas %}
+                        {% for rec_ta in tecnologias_recomendadas %}
+                            <div class="card recomendacao-card rank-{{ rec_ta.posicao_ranking }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                <span class="rank-badge rank-{% if rec_ta.posicao_ranking <= 3 %}rank-{{ rec_ta.posicao_ranking }}{% else %}other{% endif %}">
+                                                    {% if rec_ta.posicao_ranking == 1 %}🥇 #1
+                                                    {% elif rec_ta.posicao_ranking == 2 %}🥈 #2
+                                                    {% elif rec_ta.posicao_ranking == 3 %}🥉 #3
+                                                    {% else %}#{{ rec_ta.posicao_ranking }}{% endif %}
+                                                </span>
+                                                <h5 class="mb-0">{{ rec_ta.ta.nome }}</h5>
+                                            </div>
+                                            <div class="mt-1">
+                                                <span class="tech-category {{ rec_ta.ta.categoria }}">
+                                                    {{ rec_ta.ta.get_categoria_display }}
+                                                </span>
+                                                <span class="fonte-badge ia">🤖 IA</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Descrição completa -->
+                                    <div class="detail-item">
+                                        <strong><i class="fas fa-info-circle"></i> Descrição</strong>
+                                        <p>{{ rec_ta.ta.descricao|default:"Tecnologia assistiva recomendada." }}</p>
+                                    </div>
+
+                                    <!-- Materiais -->
+                                    {% if rec_ta.ta.materiais %}
+                                        <div class="detail-item">
+                                            <strong><i class="fas fa-box"></i> Materiais</strong>
+                                            <p>{{ rec_ta.ta.materiais }}</p>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Como Fazer -->
+                                    {% if rec_ta.ta.como_fazer %}
+                                        <div class="detail-item">
+                                            <strong><i class="fas fa-hammer"></i> Como Fazer</strong>
+                                            <p>{{ rec_ta.ta.como_fazer }}</p>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Como Usar -->
+                                    {% if rec_ta.ta.como_usar %}
+                                        <div class="detail-item">
+                                            <strong><i class="fas fa-play"></i> Como Usar</strong>
+                                            <p>{{ rec_ta.ta.como_usar }}</p>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Para Que Serve -->
+                                    {% if rec_ta.ta.para_que_serve %}
+                                        <div class="detail-item" style="border-left: 3px solid #10B981;">
+                                            <strong><i class="fas fa-bullseye"></i> Para Que Serve</strong>
+                                            <p>{{ rec_ta.ta.para_que_serve }}</p>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Link (se for recurso online) -->
+                                    {% if rec_ta.ta.categoria == 'online' and rec_ta.ta.exemplos_uso %}
+                                        <div class="detail-item" style="border-left: 3px solid #4F46E5;">
+                                            <strong><i class="fas fa-globe"></i> Link</strong>
+                                            <p><a href="{{ rec_ta.ta.exemplos_uso }}" target="_blank" class="link-internet">{{ rec_ta.ta.exemplos_uso }}</a></p>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Justificativa -->
+                                    {% if rec_ta.justificativa %}
+                                        <div class="justificativa-box">
+                                            <i class="fas fa-quote-left"></i>
+                                            {{ rec_ta.justificativa }}
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Botões de ação -->
+                                    <div class="mt-3 d-flex gap-2 flex-wrap">
+                                        <button class="feedback-btn aceita" onclick="darFeedback('{{ rec_ta.id }}', 'aceita')">
+                                            <i class="fas fa-check"></i> Aceitar
+                                        </button>
+                                        <button class="feedback-btn a_testar" onclick="darFeedback('{{ rec_ta.id }}', 'a_testar')">
+                                            <i class="fas fa-clock"></i> Testar
+                                        </button>
+                                        <button class="feedback-btn rejeitada" onclick="darFeedback('{{ rec_ta.id }}', 'rejeitada')">
+                                            <i class="fas fa-times"></i> Rejeitar
+                                        </button>
+                                        <button class="feedback-btn detalhes" onclick="abrirModal('{{ rec_ta.ta.id }}')">
+                                            <i class="fas fa-info-circle"></i> Detalhes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-microchip fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Nenhuma tecnologia recomendada.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar com informações do aluno -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle text-primary"></i> Aluno
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                             style="width: 60px; height: 60px; font-size: 24px;">
+                            {{ recomendacao.estudante.nome|slice:":1"|upper }}
+                        </div>
+                        <h5 class="mt-2">{{ recomendacao.estudante.nome }}</h5>
+                        <span class="badge bg-{% if recomendacao.estudante.nivel_suporte == 1 %}success{% elif recomendacao.estudante.nivel_suporte == 2 %}warning{% else %}danger{% endif %}">
+                            {{ recomendacao.estudante.get_nivel_suporte_display }}
+                        </span>
+                    </div>
+                    <hr>
+                    <div class="small">
+                        <p><strong>Turma:</strong> {{ recomendacao.estudante.turma|default:"-" }}</p>
+                        <p><strong>Data Nascimento:</strong> {{ recomendacao.estudante.data_nascimento|date:"d/m/Y"|default:"-" }}</p>
+                        <p><strong>Data da Recomendação:</strong> {{ recomendacao.criado_em|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes da Tecnologia -->
+<div class="modal fade" id="techModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #4F46E5, #7C3AED); color: white; border: none;">
+                <h5 class="modal-title" id="modalTitle">
+                    <i class="fas fa-microchip"></i> Detalhes da Tecnologia
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: brightness(0) invert(1);"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Dados das tecnologias para o modal
+const tecnologiasData = [
+    {% for rec_ta in tecnologias_recomendadas %}
+    {
+        id: '{{ rec_ta.ta.id }}',
+        nome: '{{ rec_ta.ta.nome|escapejs }}',
+        categoria: '{{ rec_ta.ta.categoria }}',
+        categoria_display: '{{ rec_ta.ta.get_categoria_display }}',
+        descricao: '{{ rec_ta.ta.descricao|escapejs|default:"Sem descrição" }}',
+        materiais: '{{ rec_ta.ta.materiais|escapejs|default:"Não informado" }}',
+        como_fazer: '{{ rec_ta.ta.como_fazer|escapejs|default:"Não informado" }}',
+        como_usar: '{{ rec_ta.ta.como_usar|escapejs|default:"Não informado" }}',
+        para_que_serve: '{{ rec_ta.ta.para_que_serve|escapejs|default:"Não informado" }}',
+        exemplos_uso: '{{ rec_ta.ta.exemplos_uso|escapejs|default:"Não informado" }}'
+    },
+    {% endfor %}
+];
+
+function darFeedback(recomendacaoTaId, avaliacao) {
+    const messages = {
+        'aceita': 'Aceitar esta recomendação?',
+        'a_testar': 'Marcar para testar esta tecnologia?',
+        'rejeitada': 'Rejeitar esta recomendação?'
+    };
+
+    Swal.fire({
+        title: messages[avaliacao],
+        text: 'Seu feedback ajuda a melhorar as recomendações.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4F46E5',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Confirmar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/app/recomendacoes/feedback/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                    recomendacao_ta_id: recomendacaoTaId,
+                    avaliacao: avaliacao,
+                    comentario: ''
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Feedback registrado!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    setTimeout(() => location.reload(), 2000);
+                }
+            });
+        }
+    });
+}
+
+function abrirModal(id) {
+    const tech = tecnologiasData.find(t => t.id === id);
+    if (!tech) return;
+
+    const modalBody = document.getElementById('modalBody');
+
+    modalBody.innerHTML = `
+        <div class="mb-3">
+            <h4>${tech.nome}</h4>
+            <span class="tech-category ${tech.categoria}">${tech.categoria_display}</span>
+        </div>
+
+        <div class="detail-section" style="background: #F9FAFB; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #4F46E5;">
+            <h5 style="color: #4F46E5; font-weight: 600;"><i class="fas fa-info-circle"></i> Descrição</h5>
+            <p class="mb-0">${tech.descricao || 'Não informado'}</p>
+        </div>
+
+        <div class="detail-section" style="background: #F9FAFB; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #4F46E5;">
+            <h5 style="color: #4F46E5; font-weight: 600;"><i class="fas fa-box"></i> Materiais</h5>
+            <p class="mb-0">${tech.materiais || 'Não informado'}</p>
+        </div>
+
+        <div class="detail-section" style="background: #F9FAFB; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #4F46E5;">
+            <h5 style="color: #4F46E5; font-weight: 600;"><i class="fas fa-hammer"></i> Como Fazer</h5>
+            <p class="mb-0">${tech.como_fazer || 'Não informado'}</p>
+        </div>
+
+        <div class="detail-section" style="background: #F9FAFB; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #4F46E5;">
+            <h5 style="color: #4F46E5; font-weight: 600;"><i class="fas fa-play"></i> Como Usar</h5>
+            <p class="mb-0">${tech.como_usar || 'Não informado'}</p>
+        </div>
+
+        <div class="detail-section" style="background: #F9FAFB; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #10B981;">
+            <h5 style="color: #4F46E5; font-weight: 600;"><i class="fas fa-bullseye"></i> Para Que Serve</h5>
+            <p class="mb-0">${tech.para_que_serve || 'Não informado'}</p>
+        </div>
+
+        <div class="detail-section" style="background: #F9FAFB; border-radius: 8px; padding: 16px; border-left: 4px solid #8B5CF6;">
+            <h5 style="color: #4F46E5; font-weight: 600;"><i class="fas fa-lightbulb"></i> Exemplos de Uso</h5>
+            <p class="mb-0">${tech.exemplos_uso || 'Não informado'}</p>
+        </div>
+    `;
+
+    document.getElementById('modalTitle').innerHTML = `<i class="fas fa-microchip"></i> ${tech.nome}`;
+    new bootstrap.Modal(document.getElementById('techModal')).show();
+}
+</script>
+{% endblock %}
