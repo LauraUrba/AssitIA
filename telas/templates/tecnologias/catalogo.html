@@ -64,6 +64,8 @@
     }
     .modal-tech .modal-body {
         padding: 30px;
+        max-height: 600px;
+        overflow-y: auto;
     }
     .modal-tech .modal-body .detail-section {
         background: #F9FAFB;
@@ -99,12 +101,107 @@
         background: #4F46E5 !important;
         color: white !important;
     }
-    .badge-catalogo {
+
+    /* ===== ESTRELAS DE AVALIAÇÃO ===== */
+    .star-rating {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        gap: 4px;
+    }
+    .star-rating input {
+        display: none;
+    }
+    .star-rating label {
+        cursor: pointer;
+        font-size: 28px;
+        color: #D1D5DB;
+        transition: color 0.2s;
+    }
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+        color: #F59E0B;
+    }
+    .star-rating input:checked + label {
+        color: #F59E0B;
+    }
+    .star-display {
+        color: #F59E0B;
+        font-size: 18px;
+        letter-spacing: 2px;
+    }
+    .star-display .star-empty {
+        color: #D1D5DB;
+    }
+    .star-display .star-half {
+        color: #F59E0B;
+        position: relative;
+    }
+    .star-display .star-half::after {
+        content: '★';
+        color: #D1D5DB;
+        position: absolute;
+        left: 0;
+        clip-path: inset(0 50% 0 0);
+    }
+    .avaliacao-item {
+        background: #F9FAFB;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        border-left: 3px solid #4F46E5;
+    }
+    .avaliacao-item .professor {
+        font-weight: 600;
+        color: #1F2937;
+        font-size: 14px;
+    }
+    .avaliacao-item .data {
+        font-size: 12px;
+        color: #9CA3AF;
+    }
+    .avaliacao-item .comentario {
+        font-size: 14px;
+        color: #4B5563;
+        margin-top: 4px;
+    }
+    .avaliacao-item .estrelas-avaliacao {
+        font-size: 14px;
+        color: #F59E0B;
+    }
+    .avaliacao-media {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1F2937;
+    }
+    .avaliacao-media .total {
+        font-size: 14px;
+        font-weight: 400;
+        color: #6B7280;
+    }
+    .btn-avaliar {
         background: #4F46E5;
         color: white;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-size: 13px;
+        border: none;
+        padding: 8px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-avaliar:hover {
+        background: #4338CA;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        color: white;
+    }
+    .btn-avaliar:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    .avaliacao-sucesso {
+        color: #10B981;
+        font-weight: 500;
     }
 </style>
 {% endblock %}
@@ -162,7 +259,7 @@
         </div>
     </div>
 
-    <!-- Cards de Tecnologias -->
+        <!-- Cards de Tecnologias -->
     <div class="row" id="tecnologiasContainer">
         {% for tecnologia in tecnologias %}
             <div class="col-md-4 mb-4 tecnologia-card" data-categoria="{{ tecnologia.categoria }}" data-nome="{{ tecnologia.nome|lower }}">
@@ -181,19 +278,26 @@
                         </p>
                         <div class="mt-3 d-flex justify-content-between align-items-center">
                             <div>
-                                {% if tecnologia.avaliacao_media > 0 %}
-                                    <span class="text-warning">
-                                        {% for i in "12345"|make_list %}
-                                            {% if forloop.counter <= tecnologia.avaliacao_media %}
-                                                <i class="fas fa-star"></i>
-                                            {% else %}
-                                                <i class="far fa-star"></i>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </span>
-                                    <span class="text-muted small">({{ tecnologia.total_avaliacoes }})</span>
+                                <span class="star-display" id="stars-{{ tecnologia.id }}">
+                                    {# Calcular estrelas usando um filtro personalizado ou lógica mais robusta #}
+                                    {% with media=tecnologia.avaliacao_media|default:0 %}
+                                        {% with media_int=media|floatformat:"0"|add:0 %}
+                                            {% for i in "12345"|make_list %}
+                                                {% if forloop.counter <= media_int %}
+                                                    <i class="fas fa-star"></i>
+                                                {% elif forloop.counter <= media|add:"0.5"|floatformat:"0"|add:0 %}
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endwith %}
+                                    {% endwith %}
+                                </span>
+                                {% if tecnologia.total_avaliacoes > 0 %}
+                                    <span class="text-muted small" id="total-{{ tecnologia.id }}">({{ tecnologia.total_avaliacoes }})</span>
                                 {% else %}
-                                    <span class="text-muted small">Sem avaliações</span>
+                                    <span class="text-muted small" id="total-{{ tecnologia.id }}">Sem avaliações</span>
                                 {% endif %}
                             </div>
                             <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); abrirModal('{{ tecnologia.id }}')">
@@ -211,7 +315,6 @@
             </div>
         {% endfor %}
     </div>
-</div>
 
 <!-- Modal de Detalhes -->
 <div class="modal fade modal-tech" id="techModal" tabindex="-1">
@@ -239,6 +342,15 @@
 </div>
 
 <script>
+// ===== VERIFICAR SE BOOTSTRAP ESTÁ CARREGADO =====
+if (typeof bootstrap === 'undefined') {
+    console.error('❌ Bootstrap JS não está carregado!');
+    // Fallback: carregar Bootstrap via CDN
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
+    document.head.appendChild(script);
+}
+
 // Dados das tecnologias
 const tecnologiasData = [
     {% for tecnologia in tecnologias %}
@@ -249,75 +361,328 @@ const tecnologiasData = [
         categoria_display: '{{ tecnologia.get_categoria_display }}',
         descricao: '{{ tecnologia.descricao|escapejs|default:"Sem descrição" }}',
         exemplos_uso: '{{ tecnologia.exemplos_uso|escapejs|default:"Não informado" }}',
-        avaliacao_media: {{ tecnologia.avaliacao_media|default:0 }},
-        total_avaliacoes: {{ tecnologia.total_avaliacoes|default:0 }},
+        avaliacao_media: parseFloat('{{ tecnologia.avaliacao_media|default:"0" }}'),
+        total_avaliacoes: parseInt('{{ tecnologia.total_avaliacoes|default:"0" }}'),
         materiais: '{{ tecnologia.materiais|escapejs|default:"Não informado" }}',
         como_fazer: '{{ tecnologia.como_fazer|escapejs|default:"Não informado" }}',
         como_usar: '{{ tecnologia.como_usar|escapejs|default:"Não informado" }}',
-        para_que_serve: '{{ tecnologia.para_que_serve|escapejs|default:"Não informado" }}'
+        para_que_serve: '{{ tecnologia.para_que_serve|escapejs|default:"Não informado" }}',
+        avaliacao_usuario: parseInt('{{ tecnologia.avaliacao_usuario|default:"0" }}'),
+        avaliacoes: [
+            {% for aval in tecnologia.avaliacoes_list %}
+            {
+                professor: '{{ aval.professor.nome }}',
+                nota: {{ aval.nota }},
+                comentario: '{{ aval.comentario|escapejs|default:"" }}',
+                data: '{{ aval.criado_em|date:"d/m/Y H:i" }}'
+            },
+            {% endfor %}
+        ]
     },
     {% endfor %}
 ];
 
+console.log('✅ Tecnologias carregadas:', tecnologiasData.length);
+
+// ===== FUNÇÃO PARA ABRIR MODAL (VERSÃO SIMPLIFICADA E ROBUSTA) =====
 function abrirModal(id) {
-    const tech = tecnologiasData.find(t => t.id === id);
-    if (!tech) return;
+    console.log('🔍 Abrindo modal para tecnologia:', id);
 
-    const modalBody = document.getElementById('modalBody');
-
-    // Construir estrelas
-    let estrelas = '';
-    const media = Math.round(tech.avaliacao_media);
-    for (let i = 1; i <= 5; i++) {
-        if (i <= media) {
-            estrelas += '<i class="fas fa-star text-warning"></i>';
-        } else {
-            estrelas += '<i class="far fa-star text-warning"></i>';
+    try {
+        // Buscar a tecnologia
+        const tech = tecnologiasData.find(t => t.id === id);
+        if (!tech) {
+            console.error('❌ Tecnologia não encontrada:', id);
+            alert('Erro: Tecnologia não encontrada!');
+            return;
         }
+
+        console.log('✅ Tecnologia encontrada:', tech.nome);
+
+        // Fechar modal existente
+        const modalElement = document.getElementById('techModal');
+        let modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+
+        // Construir o conteúdo do modal
+        const modalBody = document.getElementById('modalBody');
+        const modalTitle = document.getElementById('modalTitle');
+
+        // Construir estrelas de exibição
+        let estrelasDisplay = '';
+        const media = Math.round(tech.avaliacao_media);
+        for (let i = 1; i <= 5; i++) {
+            if (i <= media) {
+                estrelasDisplay += '<i class="fas fa-star text-warning"></i>';
+            } else if (i - 0.5 <= media) {
+                estrelasDisplay += '<i class="fas fa-star-half-alt text-warning"></i>';
+            } else {
+                estrelasDisplay += '<i class="far fa-star text-warning"></i>';
+            }
+        }
+
+        // Construir estrelas de avaliação (clique)
+        let estrelasAvaliar = '';
+        for (let i = 5; i >= 1; i--) {
+            estrelasAvaliar += `
+                <input type="radio" id="star_${tech.id}_${i}" name="rating_${tech.id}" value="${i}" ${tech.avaliacao_usuario === i ? 'checked' : ''}>
+                <label for="star_${tech.id}_${i}" title="${i} estrelas">★</label>
+            `;
+        }
+
+        // Construir avaliações dos professores
+        let avaliacoesHtml = '';
+        if (tech.avaliacoes && tech.avaliacoes.length > 0) {
+            tech.avaliacoes.forEach(aval => {
+                let estrelasAval = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= aval.nota) {
+                        estrelasAval += '<i class="fas fa-star text-warning"></i>';
+                    } else {
+                        estrelasAval += '<i class="far fa-star text-warning"></i>';
+                    }
+                }
+                avaliacoesHtml += `
+                    <div class="avaliacao-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="professor">${aval.professor}</span>
+                            <span class="data">${aval.data}</span>
+                        </div>
+                        <div class="estrelas-avaliacao">${estrelasAval}</div>
+                        ${aval.comentario ? `<div class="comentario">"${aval.comentario}"</div>` : ''}
+                    </div>
+                `;
+            });
+        } else {
+            avaliacoesHtml = '<p class="text-muted text-center">Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>';
+        }
+
+        // Montar HTML do modal
+        modalBody.innerHTML = `
+            <!-- Cabeçalho -->
+            <div class="mb-4">
+                <h3>${tech.nome}</h3>
+                <span class="tech-category ${tech.categoria}">${tech.categoria_display}</span>
+            </div>
+
+            <!-- Avaliação Média -->
+            <div class="detail-section" style="border-left-color: #F59E0B;">
+                <h5><i class="fas fa-star text-warning"></i> Avaliação Média</h5>
+                <div class="d-flex align-items-center gap-4">
+                    <div>
+                        <span class="avaliacao-media">
+                            ${tech.avaliacao_media.toFixed(1)}
+                            <span class="total">/ 5</span>
+                        </span>
+                        <div class="star-display">${estrelasDisplay}</div>
+                    </div>
+                    <div>
+                        <span class="text-muted">${tech.total_avaliacoes} avaliação(ões)</span>
+                        ${tech.total_avaliacoes > 0 ? `<br><span class="text-success"><i class="fas fa-check-circle"></i> Recomendado por ${tech.total_avaliacoes} professores</span>` : ''}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="detail-section">
+                <h5><i class="fas fa-info-circle text-primary"></i> Descrição</h5>
+                <p class="mb-0">${tech.descricao || 'Não informado'}</p>
+            </div>
+
+            <!-- Materiais -->
+            <div class="detail-section">
+                <h5><i class="fas fa-tools text-primary"></i> Materiais</h5>
+                <p class="mb-0">${tech.materiais || 'Não informado'}</p>
+            </div>
+
+            <!-- Como Fazer -->
+            <div class="detail-section">
+                <h5><i class="fas fa-hammer text-primary"></i> Como Fazer</h5>
+                <p class="mb-0">${tech.como_fazer || 'Não informado'}</p>
+            </div>
+
+            <!-- Como Usar -->
+            <div class="detail-section">
+                <h5><i class="fas fa-play text-primary"></i> Como Usar</h5>
+                <p class="mb-0">${tech.como_usar || 'Não informado'}</p>
+            </div>
+
+            <!-- Para Que Serve -->
+            <div class="detail-section">
+                <h5><i class="fas fa-bullseye text-primary"></i> Para Que Serve</h5>
+                <p class="mb-0">${tech.para_que_serve || 'Não informado'}</p>
+            </div>
+
+            <!-- Exemplos de Uso -->
+            <div class="detail-section" style="border-left-color: #10B981;">
+                <h5><i class="fas fa-lightbulb text-success"></i> Exemplos de Uso</h5>
+                <p class="mb-0">${tech.exemplos_uso || 'Não informado'}</p>
+            </div>
+
+            <!-- Avaliação do Professor -->
+            <div class="detail-section" style="border-left-color: #8B5CF6; background: #F5F3FF;">
+                <h5><i class="fas fa-star text-warning"></i> Avalie esta Tecnologia</h5>
+                <div class="star-rating" id="starRating_${tech.id}">
+                    ${estrelasAvaliar}
+                </div>
+                <div class="mt-2">
+                    <textarea class="form-control" id="comentario_${tech.id}" rows="2" placeholder="Compartilhe sua experiência com esta tecnologia (opcional)" style="font-size: 14px;"></textarea>
+                </div>
+                <button class="btn-avaliar mt-2" onclick="enviarAvaliacao('${tech.id}')">
+                    <i class="fas fa-paper-plane"></i> Enviar Avaliação
+                </button>
+                <div id="feedback_${tech.id}" class="mt-2"></div>
+            </div>
+
+            <!-- Avaliações dos Professores -->
+            <div class="detail-section" style="border-left-color: #10B981; background: #F0FDF4;">
+                <h5><i class="fas fa-users text-success"></i> Avaliações de Professores</h5>
+                <div id="avaliacoesList_${tech.id}">
+                    ${avaliacoesHtml}
+                </div>
+            </div>
+        `;
+
+        modalTitle.innerHTML = `<i class="fas fa-microchip"></i> ${tech.nome}`;
+
+        // Abrir modal
+        const newModal = new bootstrap.Modal(modalElement);
+        newModal.show();
+
+        console.log('✅ Modal aberto com sucesso!');
+
+    } catch (error) {
+        console.error('❌ Erro ao abrir modal:', error);
+        alert('Erro ao abrir detalhes da tecnologia. Verifique o console para mais informações.');
     }
-
-    modalBody.innerHTML = `
-        <div class="mb-3">
-            <h4>${tech.nome}</h4>
-            <span class="tech-category ${tech.categoria}">${tech.categoria_display}</span>
-            <span class="ms-2">${estrelas} ${tech.total_avaliacoes > 0 ? `(${tech.total_avaliacoes} avaliações)` : 'Sem avaliações'}</span>
-        </div>
-
-        <div class="detail-section">
-            <h5><i class="fas fa-info-circle text-primary"></i> Descrição</h5>
-            <p class="mb-0">${tech.descricao}</p>
-        </div>
-
-        <div class="detail-section">
-            <h5><i class="fas fa-tools text-primary"></i> Materiais</h5>
-            <p class="mb-0">${tech.materiais}</p>
-        </div>
-
-        <div class="detail-section">
-            <h5><i class="fas fa-hammer text-primary"></i> Como Fazer</h5>
-            <p class="mb-0">${tech.como_fazer}</p>
-        </div>
-
-        <div class="detail-section">
-            <h5><i class="fas fa-play text-primary"></i> Como Usar</h5>
-            <p class="mb-0">${tech.como_usar}</p>
-        </div>
-
-        <div class="detail-section">
-            <h5><i class="fas fa-bullseye text-primary"></i> Para Que Serve</h5>
-            <p class="mb-0">${tech.para_que_serve}</p>
-        </div>
-
-        <div class="detail-section" style="border-left-color: #10B981;">
-            <h5><i class="fas fa-lightbulb text-success"></i> Exemplos de Uso</h5>
-            <p class="mb-0">${tech.exemplos_uso}</p>
-        </div>
-    `;
-
-    document.getElementById('modalTitle').innerHTML = `<i class="fas fa-microchip"></i> ${tech.nome}`;
-    new bootstrap.Modal(document.getElementById('techModal')).show();
 }
 
+// ===== FUNÇÃO PARA ENVIAR AVALIAÇÃO =====
+function enviarAvaliacao(tecnologiaId) {
+    const starRating = document.querySelector(`#starRating_${tecnologiaId}`);
+    const estrelaSelecionada = starRating ? starRating.querySelector('input:checked') : null;
+    const comentario = document.getElementById(`comentario_${tecnologiaId}`).value;
+    const feedback = document.getElementById(`feedback_${tecnologiaId}`);
+    const btn = document.querySelector(`#feedback_${tecnologiaId}`).previousElementSibling;
+
+    if (!estrelaSelecionada) {
+        feedback.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-circle"></i> Selecione uma nota antes de avaliar.</span>';
+        return;
+    }
+
+    const nota = parseInt(estrelaSelecionada.value);
+
+    // Desabilitar botão
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+
+    fetch('/telas/tecnologias/avaliar/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}',
+        },
+        body: JSON.stringify({
+            tecnologia_id: tecnologiaId,
+            nota: nota,
+            comentario: comentario
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            feedback.innerHTML = `<span class="avaliacao-sucesso"><i class="fas fa-check-circle"></i> ${data.message}</span>`;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-check"></i> Avaliado';
+
+            // ATUALIZAR OBJETO LOCAL
+            const tech = tecnologiasData.find(t => t.id === tecnologiaId);
+            if (tech) {
+                tech.avaliacao_usuario = nota;
+                tech.avaliacao_media = data.nova_media;
+                tech.total_avaliacoes = data.total_avaliacoes;
+
+                // Adicionar nova avaliação
+                const novaAvaliacao = {
+                    professor: '{{ request.user.nome }}',
+                    nota: nota,
+                    comentario: comentario,
+                    data: new Date().toLocaleString('pt-BR')
+                };
+                tech.avaliacoes.unshift(novaAvaliacao);
+            }
+
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('techModal'));
+            if (modal) {
+                modal.hide();
+            }
+
+            // ATUALIZAR O CARD
+            atualizarCard(tecnologiaId, data.nova_media, data.total_avaliacoes);
+
+            // RECARREGAR MODAL
+            setTimeout(() => {
+                abrirModal(tecnologiaId);
+            }, 500);
+        } else {
+            feedback.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-circle"></i> ${data.message}</span>`;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Avaliação';
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        feedback.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-circle"></i> Erro ao enviar avaliação. Tente novamente.</span>';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Avaliação';
+    });
+}
+
+// ===== FUNÇÃO PARA ATUALIZAR O CARD =====
+function atualizarCard(tecnologiaId, novaMedia, totalAvaliacoes) {
+    const cards = document.querySelectorAll('.tecnologia-card');
+    let cardEncontrado = null;
+
+    cards.forEach(card => {
+        const onclickAttr = card.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(tecnologiaId)) {
+            cardEncontrado = card;
+        }
+    });
+
+    if (!cardEncontrado) return;
+
+    const starDisplay = cardEncontrado.querySelector('.star-display');
+    const totalSpan = cardEncontrado.querySelector('.text-muted.small');
+
+    if (starDisplay) {
+        let estrelasHtml = '';
+        const media = Math.round(novaMedia);
+        for (let i = 1; i <= 5; i++) {
+            if (i <= media) {
+                estrelasHtml += '<i class="fas fa-star"></i>';
+            } else if (i - 0.5 <= media) {
+                estrelasHtml += '<i class="fas fa-star-half-alt"></i>';
+            } else {
+                estrelasHtml += '<i class="far fa-star"></i>';
+            }
+        }
+        starDisplay.innerHTML = estrelasHtml;
+    }
+
+    if (totalSpan) {
+        if (totalAvaliacoes > 0) {
+            totalSpan.textContent = `(${totalAvaliacoes})`;
+        } else {
+            totalSpan.textContent = 'Sem avaliações';
+        }
+    }
+}
+
+// ===== FUNÇÕES DE FILTRO =====
 function filtrarCategoria(categoria) {
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -337,7 +702,6 @@ function filtrarCategoria(categoria) {
 function filtrarTecnologias() {
     const searchTerm = document.getElementById('searchTech').value.toLowerCase();
     const cards = document.querySelectorAll('.tecnologia-card');
-
     cards.forEach(card => {
         const nome = card.dataset.nome || '';
         if (nome.includes(searchTerm)) {
@@ -347,5 +711,18 @@ function filtrarTecnologias() {
         }
     });
 }
+
+// ===== INICIALIZAÇÃO - VERIFICAR SE TUDO ESTÁ OK =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Página carregada!');
+    console.log('📊 Total de tecnologias:', tecnologiasData.length);
+
+    // Verificar se o Bootstrap está disponível
+    if (typeof bootstrap !== 'undefined') {
+        console.log('✅ Bootstrap JS carregado!');
+    } else {
+        console.error('❌ Bootstrap JS NÃO carregado!');
+    }
+});
 </script>
 {% endblock %}

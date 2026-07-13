@@ -1,7 +1,135 @@
+<!-- user/templates/auth/cadastro.html -->
 {% extends 'auth/base.html' %}
 {% load static %}
 
 {% block title %}Cadastro - AssistIA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .modal-lg {
+        max-width: 800px;
+    }
+    .modal-body {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    .termos-content {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #1F2937;
+    }
+    .termos-content h1 {
+        font-size: 20px;
+        color: #4F46E5;
+        margin: 20px 0 10px;
+    }
+    .termos-content h2 {
+        font-size: 17px;
+        color: #4F46E5;
+        margin: 15px 0 8px;
+    }
+    .termos-content h3 {
+        font-size: 15px;
+        color: #1F2937;
+        margin: 12px 0 6px;
+    }
+    .termos-content ul {
+        padding-left: 20px;
+    }
+    .termos-content li {
+        margin-bottom: 4px;
+    }
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 16px 0;
+    }
+    .checkbox-group .form-check {
+        padding: 12px 16px;
+        background: #F9FAFB;
+        border-radius: 8px;
+        border: 2px solid #E5E7EB;
+        transition: all 0.2s;
+    }
+    .checkbox-group .form-check:hover {
+        border-color: #4F46E5;
+        background: #EEF2FF;
+    }
+    .checkbox-group .form-check input:checked + label {
+        color: #4F46E5;
+        font-weight: 500;
+    }
+    .checkbox-group .form-check label {
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .checkbox-group .form-check .text-muted {
+        font-size: 12px;
+        display: block;
+        margin-top: 4px;
+    }
+    .btn-termos {
+        background: transparent;
+        border: none;
+        color: #4F46E5;
+        text-decoration: underline;
+        cursor: pointer;
+        padding: 0;
+        font-size: inherit;
+    }
+    .btn-termos:hover {
+        color: #4338CA;
+    }
+    .modal-header {
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: white;
+        border: none;
+    }
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+    .modal-footer {
+        border-top: 1px solid #E5E7EB;
+    }
+    .btn-aceitar {
+        background: #10B981;
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-aceitar:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .btn-recusar {
+        background: #EF4444;
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-recusar:hover {
+        background: #DC2626;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .termos-aceitos {
+        color: #10B981;
+        font-weight: 500;
+    }
+    .termos-nao-aceitos {
+        color: #EF4444;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="auth-container">
@@ -62,9 +190,9 @@
                 <div class="input-group-custom">
                     <select id="perfil" name="perfil" class="form-control" required>
                         <option value="">Selecione seu perfil</option>
-                        <option value="professor" {% if request.POST.perfil == professor %}selected{% endif %}>Professor</option>
-                        <option value="coordenador" {% if request.POST.perfil == coordenador %}selected{% endif %}>Coordenador</option>
-                        <option value="administrador" {% if request.POST.perfil == administrador %}selected{% endif %}>Especialista</option>
+                        <option value="professor" {% if request.POST.perfil == "professor" %}selected{% endif %}>Professor</option>
+                        <option value="coordenador" {% if request.POST.perfil == "coordenador" %}selected{% endif %}>Coordenador</option>
+                        <option value="especialista" {% if request.POST.perfil == "especialista" %}selected{% endif %}>Especialista</option>
                     </select>
                 </div>
             </div>
@@ -83,8 +211,19 @@
                         <i class="fas fa-eye" id="toggleIcon1"></i>
                     </span>
                 </div>
+                <div class="password-strength">
+                    <div class="bar" id="passwordStrengthBar"></div>
+                </div>
+                <ul class="password-requirements" id="passwordRequirements">
+                    <li id="req-length" class="invalid"><span class="req-icon"></span> Mínimo 8 caracteres</li>
+                    <li id="req-uppercase" class="invalid"><span class="req-icon"></span> Pelo menos 1 letra maiúscula (A-Z)</li>
+                    <li id="req-lowercase" class="invalid"><span class="req-icon"></span> Pelo menos 1 letra minúscula (a-z)</li>
+                    <li id="req-number" class="invalid"><span class="req-icon"></span> Pelo menos 1 número (0-9)</li>
+                    <li id="req-special" class="invalid"><span class="req-icon"></span> Pelo menos 1 caractere especial</li>
+                    <li id="req-name" class="invalid"><span class="req-icon"></span> Não pode conter seu nome ou email</li>
+                </ul>
                 <small class="text-muted" style="font-size: 12px;">
-                    <i class="fas fa-info-circle"></i> A senha deve ter no mínimo 8 caracteres
+                    <i class="fas fa-info-circle"></i> A senha deve atender a todos os requisitos acima
                 </small>
             </div>
 
@@ -103,15 +242,44 @@
                 </div>
             </div>
 
-            <div class="form-check mb-4">
-                <input type="checkbox" class="form-check-input" id="terms" required>
-                <label class="form-check-label" for="terms" style="font-size: 13px; color: var(--text-gray);">
-                    Li e concordo com os <a href="#" style="color: var(--primary-color);">Termos de Uso</a> e
-                    <a href="#" style="color: var(--primary-color);">Política de Privacidade</a>
-                </label>
+            <!-- ===== TERMOS DE USO E PRIVACIDADE ===== -->
+            <div class="checkbox-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="termos_uso" name="termos_uso" required>
+                    <label class="form-check-label" for="termos_uso">
+                        <i class="fas fa-file-contract"></i> Li e aceito os
+                        <button type="button" class="btn-termos" data-bs-toggle="modal" data-bs-target="#termosModal">
+                            Termos de Uso
+                        </button>
+                        <span class="text-muted">(obrigatório)</span>
+                        <span class="text-muted" id="termos_status" style="display:none;">✅ Aceito</span>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="politica_privacidade" name="politica_privacidade" required>
+                    <label class="form-check-label" for="politica_privacidade">
+                        <i class="fas fa-shield-alt"></i> Li e aceito a
+                        <button type="button" class="btn-termos" data-bs-toggle="modal" data-bs-target="#privacidadeModal">
+                            Política de Privacidade
+                        </button>
+                        <span class="text-muted">(obrigatório)</span>
+                        <span class="text-muted" id="privacidade_status" style="display:none;">✅ Aceito</span>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="consentimento_menor" name="consentimento_menor">
+                    <label class="form-check-label" for="consentimento_menor">
+                        <i class="fas fa-child"></i> Declaro que sou responsável legal e autorizo o cadastro de menores
+                        <button type="button" class="btn-termos" data-bs-toggle="modal" data-bs-target="#consentimentoModal">
+                            (Consentimento para Menores)
+                        </button>
+                        <span class="text-muted">(opcional)</span>
+                        <span class="text-muted" id="consentimento_status" style="display:none;">✅ Aceito</span>
+                    </label>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary-custom" id="cadastroBtn">
+            <button type="submit" class="btn btn-primary-custom" id="cadastroBtn" disabled>
                 <span class="btn-text"><i class="fas fa-user-plus"></i> Criar conta</span>
                 <span class="spinner"></span>
             </button>
@@ -128,7 +296,90 @@
     </div>
 </div>
 
+<!-- ===== MODAL TERMOS DE USO ===== -->
+<div class="modal fade" id="termosModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-file-contract"></i> Termos de Uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body termos-content">
+                <div id="termosConteudo">
+                    <!-- Carregado via JavaScript -->
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-aceitar" onclick="aceitarTermos('termos_uso')">
+                    <i class="fas fa-check"></i> Aceito os Termos
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL POLÍTICA DE PRIVACIDADE ===== -->
+<div class="modal fade" id="privacidadeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-shield-alt"></i> Política de Privacidade</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body termos-content">
+                <div id="privacidadeConteudo">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-aceitar" onclick="aceitarTermos('politica_privacidade')">
+                    <i class="fas fa-check"></i> Aceito a Política
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL CONSENTIMENTO MENOR ===== -->
+<div class="modal fade" id="consentimentoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-child"></i> Consentimento para Menores</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body termos-content">
+                <div id="consentimentoConteudo">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-aceitar" onclick="aceitarTermos('consentimento_menor')">
+                    <i class="fas fa-check"></i> Declaro que sou responsável
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+// ============ TOGGLE PASSWORD ============
 function togglePassword(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
@@ -141,16 +392,57 @@ function togglePassword(inputId, iconId) {
     }
 }
 
-// Validação de senha em tempo real
+// ============ VALIDAÇÃO DE SENHA ============
 document.getElementById('password').addEventListener('input', function() {
-    const confirm = document.getElementById('confirm_password');
-    if (confirm.value && this.value !== confirm.value) {
-        confirm.classList.add('is-invalid');
-        confirm.setCustomValidity('As senhas não coincidem');
-    } else if (confirm.value) {
-        confirm.classList.remove('is-invalid');
-        confirm.setCustomValidity('');
+    const password = this.value;
+    const nome = document.getElementById('nome').value;
+    const email = document.getElementById('email').value;
+    const emailPrefix = email.split('@')[0] || '';
+
+    const requirements = [
+        { id: 'req-length', test: password.length >= 8 },
+        { id: 'req-uppercase', test: /[A-Z]/.test(password) },
+        { id: 'req-lowercase', test: /[a-z]/.test(password) },
+        { id: 'req-number', test: /[0-9]/.test(password) },
+        { id: 'req-special', test: /[!@#$%^&*(),.?":{}|<>]/.test(password) },
+        { id: 'req-name', test: !(nome && password.toLowerCase().includes(nome.toLowerCase())) && !(emailPrefix && password.toLowerCase().includes(emailPrefix.toLowerCase())) }
+    ];
+
+    let validCount = 0;
+    requirements.forEach(req => {
+        const element = document.getElementById(req.id);
+        if (element) {
+            if (req.test) {
+                element.className = 'valid';
+                validCount++;
+            } else {
+                element.className = 'invalid';
+            }
+        }
+    });
+
+    const bar = document.getElementById('passwordStrengthBar');
+    if (bar) {
+        const percent = (validCount / requirements.length) * 100;
+        bar.style.width = percent + '%';
+        if (percent <= 25) {
+            bar.className = 'bar fraca';
+        } else if (percent <= 50) {
+            bar.className = 'bar media';
+        } else if (percent <= 75) {
+            bar.className = 'bar forte';
+        } else {
+            bar.className = 'bar muito-forte';
+        }
     }
+});
+
+document.getElementById('nome').addEventListener('input', function() {
+    document.getElementById('password').dispatchEvent(new Event('input'));
+});
+
+document.getElementById('email').addEventListener('input', function() {
+    document.getElementById('password').dispatchEvent(new Event('input'));
 });
 
 document.getElementById('confirm_password').addEventListener('input', function() {
@@ -164,6 +456,70 @@ document.getElementById('confirm_password').addEventListener('input', function()
     }
 });
 
+// ============ TERMOS DE USO ============
+function carregarTermos(tipo, containerId) {
+    fetch(`/auth/termos/${tipo}/`)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById(containerId);
+            if (data.conteudo) {
+                container.innerHTML = data.conteudo.replace(/\n/g, '<br>');
+            } else {
+                container.innerHTML = '<p class="text-muted">Conteúdo não disponível.</p>';
+            }
+        })
+        .catch(() => {
+            document.getElementById(containerId).innerHTML = '<p class="text-muted">Erro ao carregar os termos.</p>';
+        });
+}
+
+function aceitarTermos(tipo) {
+    const modalMap = {
+        'termos_uso': { checkbox: 'termos_uso', status: 'termos_status', modal: 'termosModal' },
+        'politica_privacidade': { checkbox: 'politica_privacidade', status: 'privacidade_status', modal: 'privacidadeModal' },
+        'consentimento_menor': { checkbox: 'consentimento_menor', status: 'consentimento_status', modal: 'consentimentoModal' }
+    };
+
+    const data = modalMap[tipo];
+    if (data) {
+        document.getElementById(data.checkbox).checked = true;
+        document.getElementById(data.status).style.display = 'inline';
+        document.getElementById(data.status).textContent = '✅ Aceito';
+        // Fechar modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById(data.modal));
+        if (modal) modal.hide();
+        verificarTermos();
+    }
+}
+
+function verificarTermos() {
+    const termos = document.getElementById('termos_uso').checked;
+    const privacidade = document.getElementById('politica_privacidade').checked;
+    const btn = document.getElementById('cadastroBtn');
+
+    if (termos && privacidade) {
+        btn.disabled = false;
+    } else {
+        btn.disabled = true;
+    }
+}
+
+// Event listeners para checkboxes
+document.getElementById('termos_uso').addEventListener('change', verificarTermos);
+document.getElementById('politica_privacidade').addEventListener('change', verificarTermos);
+
+// Carregar conteúdos quando os modais são abertos
+document.getElementById('termosModal').addEventListener('show.bs.modal', function() {
+    carregarTermos('termos_uso', 'termosConteudo');
+});
+document.getElementById('privacidadeModal').addEventListener('show.bs.modal', function() {
+    carregarTermos('politica_privacidade', 'privacidadeConteudo');
+});
+document.getElementById('consentimentoModal').addEventListener('show.bs.modal', function() {
+    carregarTermos('consentimento_menor', 'consentimentoConteudo');
+});
+
+// ============ VALIDAÇÃO DO FORMULÁRIO ============
 document.getElementById('cadastroForm').addEventListener('submit', function(e) {
     const senha = document.getElementById('password').value;
     const confirm = document.getElementById('confirm_password').value;

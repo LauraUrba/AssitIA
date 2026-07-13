@@ -30,7 +30,7 @@
 
 O **AssistIA** é um sistema web desenvolvido para auxiliar profissionais da educação (professores, coordenadores e especialistas) a recomendar tecnologias assistivas para alunos com Transtorno do Espectro Autista (TEA). O sistema utiliza inteligência artificial para analisar o perfil do aluno e sugerir recursos personalizados.
 
-### 🎯 Público-Alvo
+### Público-Alvo
 
 | Stakeholder | Descrição |
 |-------------|-----------|
@@ -39,11 +39,11 @@ O **AssistIA** é um sistema web desenvolvido para auxiliar profissionais da edu
 | **Especialistas** | Validam recomendações e ajustam o sistema |
 | **Alunos TEA** | Beneficiários indiretos do sistema |
 
-### 📌 Status Atual
+### Status Atual
 
 - ✅ Telas para professores completamente funcionais
-- ⏳ Telas para coordenadores (em desenvolvimento)
-- ⏳ Telas para especialistas (planejadas)
+- Telas para coordenadores (sendo planejadas)
+- Telas para especialistas (sendo planejadas)
 
 ---
 
@@ -124,15 +124,15 @@ Testes com usuários, aplicação do questionário SUS e análise de feedbacks.
 
 ### Taxonomia das Tecnologias Assistivas
 
-![Taxonomia das Tecnologias Assistivas](docs/image/Taxonomia TA 1.png)
+![Taxonomia das Tecnologias Assistivas](docs/image/TaxonomiaTA.png)
 
 ### Categorização do Perfil do Estudante
 
-![Categorização do Perfil do Estudante](docs/image/Taxonomia Perfil estudante 2.png)
+![Categorização do Perfil do Estudante](docs/image/TaxonomiaPerfilestudante.png)
 
 ### Diagrama de Estudo de Caso (UML)
 
-![Diagrama UML](docs/image/UML de Estudo de Caso .png)
+![Diagrama UML](docs/image/UMLEstudoCaso.png)
 
 ### Modelo Entidade-Relacionamento (MER)
 
@@ -204,7 +204,7 @@ Os wireframes de baixa fidelidade representam as principais telas da plataforma:
 
 ```
 AssistIA_site/
-├── assets/                          # imagens                        
+├── docs/                          # imagens no Readme.md                       
 │   ├── image
 │
 ├── assistIA/                          # Configurações do projeto
@@ -491,7 +491,7 @@ def send_otp(request, user):
     request.session['otp_secret_key'] = secret_key
     request.session['otp_valid_date'] = (datetime.now() + timedelta(minutes=5)).isoformat()
     
-    print(f"🔐 Código OTP: {otp_code}")
+    print(f"Código OTP: {otp_code}")
     return True
 ```
 
@@ -824,12 +824,12 @@ fetch(`/telas/recomendacoes/${id}/excluir/`, {
 
 ## Melhorias Implementadas
 
-### 🚀 Arquitetura
+### Arquitetura
 - ✅ Estrutura de pastas reorganizada
 - ✅ Apps separados por responsabilidade (user, telas)
 - ✅ URLs organizadas e semânticas
 
-### 🔐 Segurança
+### Segurança
 - ✅ Argon2 para criptografia de senhas
 - ✅ 2FA com OTP
 - ✅ JWT para autenticação
@@ -838,14 +838,14 @@ fetch(`/telas/recomendacoes/${id}/excluir/`, {
 - ✅ CSRF protection
 - ✅ Bloqueio por tentativas de login
 
-### 🎨 Interface
+### Interface
 - ✅ Design responsivo com Bootstrap 5
 - ✅ CSS global centralizado
 - ✅ Ícones Font Awesome
 - ✅ Alertas e modais com SweetAlert2
 - ✅ Estrela ✨ para indicar IA
 
-### ⚙️ Funcionalidades
+### Funcionalidades
 - ✅ CRUD completo de alunos
 - ✅ Perfil TEA com modal
 - ✅ Catálogo de tecnologias com filtros
@@ -855,7 +855,7 @@ fetch(`/telas/recomendacoes/${id}/excluir/`, {
 - ✅ Geração de PDF
 - ✅ Lista de recomendações com filtros e busca
 
-### 🗄️ Banco de Dados
+### Banco de Dados
 - ✅ PostgreSQL com UUID
 - ✅ Relacionamentos entre tabelas
 - ✅ Índices para performance
@@ -864,30 +864,32 @@ fetch(`/telas/recomendacoes/${id}/excluir/`, {
 
 ## Próximos Passos
 
-### 🔐 Segurança Avançada
+### Segurança Avançada
 
-| Item | Descrição | Status |
-|------|-----------|--------|
-| **Hardening de Senhas** | Histórico de senhas, notificação de senhas fracas | ⏳ Planejado |
-| **Honeypot** | Campos ocultos, tempo de preenchimento, bloqueio de IPs | ⏳ Planejado |
-| **Logs de Monitoramento** | Logs estruturados em JSON, alertas de múltiplas falhas | ⏳ Planejado |
+| Item | Descrição | Status      |
+|------|-----------|-------------|
+| **Hardening de Senhas** | Histórico de senhas, notificação de senhas fracas | ✅ Feito     |
+| **Honeypot** | Campos ocultos, tempo de preenchimento, bloqueio de IPs | ✅ Feito     |
+| **Logs de Monitoramento** | Logs estruturados em JSON, alertas de múltiplas falhas | ✅ Feito     |
+| **Histórico de Senhas** | Evitar reutilização de senhas | ✅ Feito  |
+| **Login com 2FA** |Já tem a estrutura, falta integrar com login| ✅ Feito  |
 | **Automação de Segurança** | Backup automatizado, rotação de chaves, scan de vulnerabilidades | ⏳ Planejado |
 
-### 📊 Telas para Coordenadores
+### Telas para Coordenadores
 
 | Item | Descrição | Status |
 |------|-----------|--------|
 | **Dashboard do Coordenador** | Visão geral de todos os professores, estatísticas | ⏳ Em desenvolvimento |
 | **Acompanhamento de Professores** | Lista de professores, atividades recentes | ⏳ Em desenvolvimento |
 
-### 🧠 Telas para Especialistas
+### Telas para Especialistas
 
 | Item | Descrição | Status |
 |------|-----------|--------|
 | **Validação de Recomendações** | Revisão de recomendações geradas pela IA | ⏳ Planejado |
 | **Configurações do Sistema** | Ajuste do modelo de IA, gerenciamento de usuários | ⏳ Planejado |
 
-### 🚀 Funcionalidades Adicionais
+### Funcionalidades Adicionais
 
 | Item | Descrição | Status |
 |------|-----------|--------|
@@ -903,14 +905,15 @@ Este projeto está sob a licença MIT.
 
 ---
 
-**📅 Última atualização:** 24 de Junho de 2026
+**Última atualização do código:** 24 de Junho de 2026
 
-**👤 Desenvolvedora:** Laura
+**Desenvolvedora:** Laura
+**Orientador:** Rafael Leonardo Vivian
 
-**🔗 Links:**
+**Links:**
 - **API de IA**: https://api-assitia.onrender.com
 - **Documentação do TCC**: https://docs.google.com/document/d/1M4p_rf9ZomxLC8pR7ZDh3RJaT84Q3WEdXk2KfDmH6RI/edit?tab=t.8yh8xakvjh4w
 
 ---
 
-**✨ Obrigada por utilizar o AssistIA!**
+**Obrigada por utilizar o AssistIA!**

@@ -52,8 +52,6 @@ class PerfilTEA(models.Model):
         return f"Perfil TEA - {self.estudante.nome}"
 
 
-# telas/models.py - Adicionar novos campos
-
 class TecnologiaAssistiva(models.Model):
     CATEGORIA_CHOICES = [
         ('comunicacao', 'Comunicação'),
@@ -80,11 +78,12 @@ class TecnologiaAssistiva(models.Model):
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
-    # NOVOS CAMPOS PARA O CATÁLOGO
     materiais = models.TextField(blank=True, null=True, help_text="Materiais necessários para criar/adaptar")
     como_fazer = models.TextField(blank=True, null=True, help_text="Passo a passo de como criar/fazer")
     como_usar = models.TextField(blank=True, null=True, help_text="Como utilizar a tecnologia")
     para_que_serve = models.TextField(blank=True, null=True, help_text="Para que serve esta tecnologia")
+
+    criada_por_ia = models.BooleanField(default=False, help_text="Indica se foi criada pela IA")
 
     class Meta:
         db_table = 'tecnologia_assistiva'
@@ -95,6 +94,27 @@ class TecnologiaAssistiva(models.Model):
     def __str__(self):
         return f"{self.nome} ({self.get_categoria_display()})"
 
+
+class AvaliacaoTecnologia(models.Model):
+    """Avaliação de uma tecnologia assistiva por um professor"""
+    tecnologia = models.ForeignKey(TecnologiaAssistiva, on_delete=models.CASCADE, related_name='avaliacoes')
+    professor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                  related_name='avaliacoes_tecnologias')
+    nota = models.IntegerField(choices=[(i, f'{i} estrelas') for i in range(1, 6)],
+                               validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comentario = models.TextField(blank=True, null=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'avaliacao_tecnologia'
+        verbose_name = 'Avaliação de Tecnologia'
+        verbose_name_plural = 'Avaliações de Tecnologias'
+        unique_together = ['tecnologia', 'professor']  # Um professor só pode avaliar uma vez por tecnologia
+        ordering = ['-criado_em']
+
+    def __str__(self):
+        return f"{self.professor.nome} - {self.tecnologia.nome} - {self.nota}★"
 
 
 class Recomendacao(models.Model):
@@ -184,3 +204,99 @@ class PEI(models.Model):
 
     def __str__(self):
         return f"PEI - {self.estudante.nome} (v{self.versao})"
+
+
+
+class LogSeguranca(models.Model):
+    """Log de eventos de segurança do sistema"""
+
+    TIPO_CHOICES = [
+        ('login', 'Login'),
+        ('logout', 'Logout'),
+        ('falha_login', 'Falha de Login'),
+        ('2fa', '2FA'),
+        ('cadastro', 'Cadastro'),
+        ('alteracao_senha', 'Alteração de Senha'),
+        ('recuperacao_senha', 'Recuperação de Senha'),
+        ('acesso_negado', 'Acesso Negado'),
+        ('ataque', 'Ataque Detectado'),
+        ('honeypot', 'Honeypot'),
+        ('admin', 'Ação Administrativa'),
+        ('exclusao', 'Exclusão'),
+        ('edicao', 'Edição'),
+        ('criacao', 'Criação'),
+    ]
+
+    NIVEL_CHOICES = [
+        ('info', 'Informação'),
+        ('warning', 'Aviso'),
+        ('error', 'Erro'),
+        ('critical', 'Crítico'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='logs_seguranca')
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES)
+    nivel = models.CharField(max_length=20, choices=NIVEL_CHOICES, default='info')
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True, null=True)
+    detalhes = models.TextField(blank=True, null=True)
+    dados_extra = models.JSONField(default=dict, blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'log_seguranca'
+        verbose_name = 'Log de Segurança'
+        verbose_name_plural = 'Logs de Segurança'
+        ordering = ['-criado_em']
+        indexes = [
+            models.Index(fields=['tipo', 'criado_em']),
+            models.Index(fields=['usuario', 'criado_em']),
+            models.Index(fields=['ip', 'criado_em']),
+            models.Index(fields=['nivel']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} - {self.usuario} - {self.criado_em.strftime('%d/%m/%Y %H:%M')}"
+
+
+
+class TermosUso(models.Model):
+    """Modelo para gerenciar versões dos Termos de Uso e Política de Privacidade"""
+    versao = models.CharField(max_length=20)
+    titulo = models.CharField(max_length=200)
+    conteudo = models.TextField()
+    tipo = models.CharField(max_length=20, choices=[
+        ('termos_uso', 'Termos de Uso'),
+        ('politica_privacidade', 'Política de Privacidade'),
+        ('consentimento_menor', 'Consentimento para Menores'),
+    ])
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'termos_uso'
+        verbose_name = 'Termo de Uso'
+        verbose_name_plural = 'Termos de Uso'
+        ordering = ['-data_criacao']
+
+    def __str__(self):
+        return f"{self.titulo} - v{self.versao}"
+
+
+class AceiteTermos(models.Model):
+    """Registro de aceite dos termos por usuário"""
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='aceites_termos')
+    termo = models.ForeignKey(TermosUso, on_delete=models.CASCADE)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True, null=True)
+    data_aceite = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'aceite_termos'
+        verbose_name = 'Aceite de Termo'
+        verbose_name_plural = 'Aceites de Termos'
+
+    def __str__(self):
+        return f"{self.usuario.email} - {self.termo.titulo} - {self.data_aceite.strftime('%d/%m/%Y')}"

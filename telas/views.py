@@ -1,29 +1,136 @@
-# telas/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.http import HttpResponse, JsonResponse
-from .models import Estudante, TecnologiaAssistiva, Recomendacao, PEI, PerfilTEA, RecomendacaoTA, Feedback
+from django.utils import timezone
+from django.contrib.admin.views.decorators import staff_member_required
+from .security_logger import log_seguranca
+from .security_automation import security_automation
+from .models import LogSeguranca
+from django.db.models import Count
+from django.http import JsonResponse
+from django.db.models import Avg
+from .models import AvaliacaoTecnologia
+from .models import (
+    Estudante,
+    TecnologiaAssistiva,
+    Recomendacao,
+    PEI,
+    PerfilTEA,
+    RecomendacaoTA,
+    Feedback
+)
 from user.models import Usuario
 import json
 import requests
+import re
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 # ============ DASHBOARD ============
 
 @login_required
 def dashboard(request):
     """Dashboard principal do professor"""
+
+    # Buscar últimos alunos acessados (ordenados por data de atualização)
+    ultimos_estudantes = Estudante.objects.filter(
+        professor=request.user
+    ).order_by('-atualizado_em')[:5]
+
+    # 🔥 CORES DO BOOTSTRAP (NUNCA LIGHT)
+    cores = [
+        'primary',  # #4F46E5
+        'success',  # #10B981
+        'warning',  # #F59E0B
+        'danger',  # #EF4444
+        'purple',  # #8B5CF6
+        'pink',  # #EC4899
+        'teal',  # #14B8A6
+        'orange',  # #F97316
+        'indigo',  # #6366F1
+        'cyan',  # #06B6D4
+        'rose',  # #F43F5E
+        'amber',  # #D97706
+        'emerald',  # #059669
+        'violet',  # #7C3AED
+        'fuchsia',  # #D946EF
+    ]
+
+    for i, estudante in enumerate(ultimos_estudantes):
+        estudante.cor = cores[i % len(cores)]
+
     context = {
         'usuario': request.user,
         'total_estudantes': Estudante.objects.filter(professor=request.user).count(),
         'total_recomendacoes': Recomendacao.objects.filter(professor=request.user).count(),
         'total_pei': PEI.objects.filter(professor=request.user).count(),
         'estudantes_ativos': Estudante.objects.filter(professor=request.user, ativo=True).count(),
+        'ultimos_estudantes': ultimos_estudantes,
     }
     return render(request, 'telas/dashboard.html', context)
+
+
+@login_required
+@staff_member_required
+def dashboard_seguranca(request):
+    """Dashboard de segurança (apenas para administradores)"""
+
+    # Estatísticas
+    hoje = timezone.now().date()
+    inicio_dia = timezone.make_aware(timezone.datetime.combine(hoje, timezone.datetime.min.time()))
+
+    stats = {
+        'total_logs': LogSeguranca.objects.filter(criado_em__gte=inicio_dia).count(),
+        'falhas_login': LogSeguranca.objects.filter(tipo='falha_login', criado_em__gte=inicio_dia).count(),
+        'ataques': LogSeguranca.objects.filter(tipo='ataque', criado_em__gte=inicio_dia).count(),
+        'honeypots': LogSeguranca.objects.filter(tipo='honeypot', criado_em__gte=inicio_dia).count(),
+    }
+
+    # Últimos logs
+    logs_recentes = LogSeguranca.objects.all()[:50]
+
+    # IPs mais ativos (suspeitos)
+    ips_suspeitos = LogSeguranca.objects.filter(
+        criado_em__gte=inicio_dia
+    ).exclude(
+        ip__isnull=True
+    ).values('ip').annotate(
+        total=Count('id')
+    ).order_by('-total')[:10]
+
+    # Gráficos por tipo
+    tipos = LogSeguranca.objects.filter(
+        criado_em__gte=inicio_dia
+    ).values('tipo').annotate(
+        total=Count('id')
+    ).order_by('tipo')
+
+    # Verificar IPs bloqueados
+    ip_bloqueado = security_automation.verificar_ip_bloqueado
+
+    context = {
+        'stats': stats,
+        'logs_recentes': logs_recentes,
+        'ips_suspeitos': ips_suspeitos,
+        'tipos': tipos,
+        'ip_bloqueado': ip_bloqueado,
+    }
+
+    return render(request, 'telas/seguranca/dashboard.html', context)
+
+@login_required
+@staff_member_required
+def desbloquear_ip_view(request, ip):
+    """Desbloquear um IP"""
+    if request.method == 'POST':
+        from .security_automation import security_automation
+        security_automation.desbloquear_ip(ip)
+        return JsonResponse({'success': True})
+    return JsonResponse({'error': 'Método não permitido'}, status=405)
+
 
 
 # ============ ESTUDANTES ============
@@ -126,28 +233,39 @@ def salvar_perfil_tea(request, estudante_id):
 
 # ============ TECNOLOGIAS ASSISTIVAS ============
 
-# telas/views.py
 
 @login_required
 def catalogo_tecnologias(request):
-    """Catálogo de tecnologias assistivas - APENAS as do banco de dados"""
-    # Buscar APENAS tecnologias do banco de dados
-    tecnologias = TecnologiaAssistiva.objects.filter(ativo=True)
+    """Catálogo de tecnologias assistivas - APENAS as fixas"""
+    from django.db.models import Avg, Count
 
-    # Adicionar campos padrão para tecnologias que não têm os novos campos
+    tecnologias = TecnologiaAssistiva.objects.filter(
+        ativo=True,
+        criada_por_ia=False
+    )
+
+    # ATUALIZAR OS CAMPOS DE AVALIAÇÃO PARA CADA TECNOLOGIA
     for tech in tecnologias:
-        if not tech.descricao:
-            tech.descricao = "Tecnologia assistiva para auxílio no desenvolvimento educacional."
-        if not tech.exemplos_uso:
-            tech.exemplos_uso = "Pode ser utilizada em sala de aula e em atividades terapêuticas."
-        if not tech.materiais:
-            tech.materiais = "Materiais recicláveis e de fácil acesso"
-        if not tech.como_fazer:
-            tech.como_fazer = "Siga as instruções do fabricante ou adapte conforme a necessidade do aluno."
-        if not tech.como_usar:
-            tech.como_usar = "Utilize sob supervisão de um profissional especializado."
-        if not tech.para_que_serve:
-            tech.para_que_serve = "Auxilia no desenvolvimento, aprendizagem e inclusão do aluno."
+        # Calcular média e total
+        media = tech.avaliacoes.aggregate(Avg('nota'))['nota__avg']
+        total = tech.avaliacoes.count()
+
+        # Atualizar os campos do modelo (se houver alteração)
+        if tech.avaliacao_media != (media or 0) or tech.total_avaliacoes != total:
+            tech.avaliacao_media = media or 0
+            tech.total_avaliacoes = total
+            tech.save(update_fields=['avaliacao_media', 'total_avaliacoes'])
+
+        # Dados para exibição
+        tech.avaliacao_media_display = tech.avaliacao_media
+        tech.total_avaliacoes_display = tech.total_avaliacoes
+
+        # Verificar se o usuário já avaliou
+        avaliacao_usuario = tech.avaliacoes.filter(professor=request.user).first()
+        tech.avaliacao_usuario = avaliacao_usuario.nota if avaliacao_usuario else 0
+
+        # Pré-carregar avaliações para o modal
+        tech.avaliacoes_list = tech.avaliacoes.select_related('professor')[:10]
 
     context = {
         'tecnologias': tecnologias,
@@ -155,132 +273,319 @@ def catalogo_tecnologias(request):
     }
     return render(request, 'tecnologias/catalogo.html', context)
 
+
+@login_required
+def avaliar_tecnologia(request):
+    """Salvar avaliação de uma tecnologia"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+
+    import json
+    try:
+        data = json.loads(request.body)
+        tecnologia_id = data.get('tecnologia_id')
+        nota = data.get('nota')
+        comentario = data.get('comentario', '')
+
+        if not tecnologia_id or not nota:
+            return JsonResponse({'success': False, 'message': 'Dados incompletos'})
+
+        if nota < 1 or nota > 5:
+            return JsonResponse({'success': False, 'message': 'Nota inválida'})
+
+        tecnologia = get_object_or_404(TecnologiaAssistiva, id=tecnologia_id, ativo=True)
+
+        # Verificar se o usuário já avaliou
+        avaliacao, created = AvaliacaoTecnologia.objects.get_or_create(
+            tecnologia=tecnologia,
+            professor=request.user,
+            defaults={
+                'nota': nota,
+                'comentario': comentario
+            }
+        )
+
+        if not created:
+            avaliacao.nota = nota
+            avaliacao.comentario = comentario
+            avaliacao.save()
+            message = 'Sua avaliação foi atualizada com sucesso!'
+        else:
+            message = 'Avaliação enviada com sucesso! Obrigado pelo seu feedback.'
+
+        # ATUALIZAR OS CAMPOS DA TECNOLOGIA
+        from django.db.models import Avg, Count
+        media = tecnologia.avaliacoes.aggregate(Avg('nota'))['nota__avg'] or 0
+        total = tecnologia.avaliacoes.count()
+
+        tecnologia.avaliacao_media = media
+        tecnologia.total_avaliacoes = total
+        tecnologia.save(update_fields=['avaliacao_media', 'total_avaliacoes'])
+
+        return JsonResponse({
+            'success': True,
+            'message': message,
+            'nova_media': round(media, 1),
+            'total_avaliacoes': total,
+            'nota_usuario': nota
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Dados inválidos'}, status=400)
+    except Exception as e:
+        logger.error(f"Erro ao salvar avaliação: {str(e)}")
+        return JsonResponse({'success': False, 'message': 'Erro ao salvar avaliação'}, status=500)
+
+
 # ============ RECOMENDAÇÕES ============
 
 @login_required
-def lista_recomendacoes(request):
-    """Lista de recomendações"""
-    recomendacoes = Recomendacao.objects.filter(professor=request.user)
-    context = {
-        'recomendacoes': recomendacoes,
-        'total': recomendacoes.count(),
-    }
-    return render(request, 'recomendacoes/listas.html', context)
-
-
-
-@login_required
 def gerar_recomendacao(request, estudante_id):
-    """Gerar recomendação de TA para um estudante usando a API"""
+    """Gerar recomendação de TA para um estudante usando a API com dados dos checkboxes"""
     estudante = get_object_or_404(Estudante, id=estudante_id, professor=request.user)
     perfil = PerfilTEA.objects.filter(estudante=estudante).first()
 
     if request.method == 'POST':
         try:
-            # Coletar dados do formulário
+            # ============ COLETAR DADOS DO FORMULÁRIO ============
             area_principal = request.POST.get('area_principal', 'comunicacao')
             prioridade = request.POST.get('prioridade', 'media')
 
-            # Construir a descrição do professor baseada nos dados do aluno
+            interesses = request.POST.get('interesses', '')
+            interesses_observacao = request.POST.get('interesses_observacao', '')
+            if interesses_observacao:
+                interesses = f"{interesses}, {interesses_observacao}" if interesses else interesses_observacao
+
+            sensibilidades = request.POST.get('sensibilidades', '')
+            sensibilidades_observacao = request.POST.get('sensibilidades_observacao', '')
+            if sensibilidades_observacao:
+                sensibilidades = f"{sensibilidades}, {sensibilidades_observacao}" if sensibilidades else sensibilidades_observacao
+
+            recursos = request.POST.get('recursos', '')
+            recursos_observacao = request.POST.get('recursos_observacao', '')
+            if recursos_observacao:
+                recursos = f"{recursos}, {recursos_observacao}" if recursos else recursos_observacao
+
+            areas_atencao = request.POST.getlist('areas')
+            areas_texto = ', '.join(areas_atencao) if areas_atencao else 'Nao informadas'
+
+            # ============ CONSTRUIR DESCRIÇÃO ============
             descricao = f"""Aluno: {estudante.nome}
-Nível de suporte: {estudante.get_nivel_suporte_display()}
-Turma: {estudante.turma or 'Não informada'}
+Nível: {estudante.get_nivel_suporte_display()}
+Turma: {estudante.turma or 'N/I'}
 """
 
             if perfil:
                 descricao += f"""
-Perfil TEA:
-- Comunicação: {perfil.comunicacao or 'Não informado'}
-- Perfil Sensorial: {perfil.perfil_sensorial or 'Não informado'}
-- Habilidade Motora: {perfil.habilidade_motora or 'Não informado'}
-- Perfil Cognitivo: {perfil.perfil_cognitivo or 'Não informado'}
-- Desafios: {perfil.desafios or 'Não informados'}
-- Observações: {perfil.observacoes or 'Não informadas'}
+Comunicação: {perfil.comunicacao or 'N/I'}
+Sensorial: {perfil.perfil_sensorial or 'N/I'}
+Motor: {perfil.habilidade_motora or 'N/I'}
+Cognitivo: {perfil.perfil_cognitivo or 'N/I'}
+Desafios: {perfil.desafios or 'N/I'}
 """
 
-            # Dados para enviar para a API
+            # ============ PAYLOAD PARA A API ============
             payload = {
                 "descricao_professor": descricao,
                 "idade_aluno": calcular_idade(estudante.data_nascimento) if estudante.data_nascimento else None,
                 "nivel_suporte": str(estudante.nivel_suporte),
-                "interesses_especificos": request.POST.get('interesses', ''),
-                "sensibilidades_sensoriais": request.POST.get('sensibilidades', ''),
+                "interesses_especificos": interesses,
+                "sensibilidades_sensoriais": sensibilidades,
                 "incluir_estruturas": True,
-                "recursos_disponiveis": request.POST.get('recursos', ''),
+                "recursos_disponiveis": recursos,
                 "buscar_online": True,
                 "comunicacao": perfil.comunicacao if perfil else None,
                 "motor": perfil.habilidade_motora if perfil else None,
                 "atencao": request.POST.get('atencao', ''),
-                "comportamentos": request.POST.get('comportamentos', '')
+                "comportamentos": request.POST.get('comportamentos', ''),
+                "area_principal": area_principal,
+                "prioridade": prioridade,
+                "areas_atencao": areas_texto,
+                "interesses": interesses,
+                "sensibilidades": sensibilidades,
+                "recursos": recursos,
+                "interesses_observacao": interesses_observacao,
+                "sensibilidades_observacao": sensibilidades_observacao,
+                "recursos_observacao": recursos_observacao
             }
 
-            # Chamar a API
+            # 🔥 SALVAR AS SELEÇÕES PARA USAR NO FALLBACK
+            selecoes = {
+                'areas_atencao': areas_atencao,
+                'interesses': interesses,
+                'sensibilidades': sensibilidades,
+                'recursos': recursos,
+                'area_principal': area_principal,
+                'prioridade': prioridade
+            }
+
+            # ============ CHAMAR API  ============
             api_url = 'https://api-assitia.onrender.com/analisar-aluno-tea/'
 
-            try:
-                response = requests.post(
-                    api_url,
-                    json=payload,
-                    headers={'Content-Type': 'application/json'},
-                    timeout=30
+            import time
+            response = None
+            max_tentativas = 3
+
+            for tentativa in range(max_tentativas):
+                try:
+                    response = requests.post(
+                        api_url,
+                        json=payload,
+                        headers={'Content-Type': 'application/json'},
+                        timeout=180  # 🔥 90 segundos por tentativa
+                    )
+                    if response.status_code == 200:
+                        break
+                    elif response.status_code != 200:
+                        break
+                except requests.exceptions.Timeout:
+                    if tentativa < max_tentativas - 1:
+                        print(f"⏱️ Tentativa {tentativa + 1} falhou. Aguardando 5 segundos...")
+                        time.sleep(5)
+                        continue
+                    else:
+                        messages.warning(request, '⏱️ A IA está demorando. Usando recomendações rápidas do catálogo.')
+                        return gerar_recomendacao_rapida(request, estudante, selecoes)
+                except Exception as e:
+                    messages.error(request, f'❌ Erro ao gerar recomendação: {str(e)}')
+                    return gerar_recomendacao_rapida(request, estudante, selecoes)
+
+            if response and response.status_code == 200:
+                resultado_api = response.json()
+                recomendacao = Recomendacao.objects.create(
+                    estudante=estudante,
+                    professor=request.user,
+                    parametros_entrada=json.dumps(payload),
+                    status='gerada'
                 )
 
-                if response.status_code == 200:
-                    resultado_api = response.json()
+                analise = resultado_api.get('analise', '')
+                recursos_recomendados = extrair_recursos_da_analise(analise, selecoes)
 
-                    # Salvar recomendação no banco
-                    recomendacao = Recomendacao.objects.create(
-                        estudante=estudante,
-                        professor=request.user,
-                        parametros_entrada=json.dumps(payload),
-                        status='gerada'
-                    )
 
-                    # Salvar tecnologias recomendadas (do catálogo)
-                    # Extrair recursos da análise
-                    analise = resultado_api.get('analise', '')
-                    recursos_recomendados = extrair_recursos_da_analise(analise)
+                # Salvar tecnologias recomendadas (ATÉ 11)
+                # telas/views.py - Substituir o bloco de salvar recomendações
 
-                    for idx, recurso in enumerate(recursos_recomendados[:5], 1):
-                        # Buscar ou criar tecnologia assistiva
+                for idx, recurso in enumerate(recursos_recomendados[:11], 1):
+                    # 🔥 SE FOR LINK DA INTERNET
+                    if recurso.get('link'):
+                        # 🔥 NÃO CRIAR NO CATÁLOGO! Apenas associar à recomendação
+                        # Buscar ou criar uma tecnologia "virtual" apenas para esta recomendação
+                        ta, created = TecnologiaAssistiva.objects.get_or_create(
+                            nome=f"🌐 {recurso.get('nome', f'Recurso Online {idx}')[:50]}",
+                            defaults={
+                                'categoria': 'online',
+                                'descricao': recurso.get('descricao', 'Recurso encontrado na internet'),
+                                'materiais': recurso.get('materiais', 'Acessar o link para ver os materiais'),
+                                'como_fazer': recurso.get('como_fazer', 'Acesse o link para mais informações'),
+                                'como_usar': recurso.get('como_usar',
+                                                         'Explore o recurso conforme as instruções do site'),
+                                'para_que_serve': recurso.get('para_que_serve',
+                                                              'Tecnologia assistiva encontrada na internet'),
+                                'exemplos_uso': recurso.get('link', ''),  # Guardar o link aqui
+                                'criada_por_ia': True,  # 🔥 MARCAR COMO IA
+                                'ativo': True
+                            }
+                        )
+                    else:
+                        # 🔥 SE FOR DO CATÁLOGO, BUSCAR OU CRIAR
                         ta, created = TecnologiaAssistiva.objects.get_or_create(
                             nome=recurso.get('nome', f'Recurso {idx}'),
                             defaults={
                                 'categoria': recurso.get('categoria', 'comunicacao'),
                                 'descricao': recurso.get('descricao', ''),
-                                'exemplos_uso': recurso.get('como_usar', ''),
+                                'materiais': recurso.get('materiais', ''),
+                                'como_fazer': recurso.get('como_fazer', ''),
+                                'como_usar': recurso.get('como_usar', ''),
+                                'para_que_serve': recurso.get('para_que_serve', ''),
+                                'criada_por_ia': True,  # 🔥 MARCAR COMO IA
+                                'ativo': True
                             }
                         )
 
-                        RecomendacaoTA.objects.create(
-                            recomendacao=recomendacao,
-                            ta=ta,
-                            justificativa=recurso.get('justificativa', ''),
-                            posicao_ranking=idx
-                        )
+                    # Criar a associação na recomendação
+                    RecomendacaoTA.objects.create(
+                        recomendacao=recomendacao,
+                        ta=ta,
+                        justificativa=recurso.get('justificativa', 'Recomendado pela IA'),
+                        posicao_ranking=idx
+                    )
 
-                    messages.success(request, f'Recomendação gerada com sucesso para {estudante.nome}!')
-                    return redirect('detalhe_recomendacao', id=recomendacao.id)
-                else:
-                    messages.error(request, f'Erro na API: {response.status_code}')
+                messages.success(request, f'✅ Recomendação gerada com sucesso para {estudante.nome}!')
+                return redirect('detalhe_recomendacao', id=recomendacao.id)
+            else:
+                messages.error(request, f'❌ Erro na API: {response.status_code if response else "Sem resposta"}')
+                return gerar_recomendacao_rapida(request, estudante, selecoes)
 
-            except requests.exceptions.Timeout:
-                messages.error(request, 'A API demorou muito para responder. Tente novamente.')
-            except requests.exceptions.ConnectionError:
-                messages.error(request, 'Não foi possível conectar à API. Verifique sua internet.')
-            except Exception as e:
-                messages.error(request, f'Erro ao chamar a API: {str(e)}')
-
+        except requests.exceptions.Timeout:
+            messages.warning(request, '⏱️ A IA está demorando. Usando recomendações rápidas do catálogo.')
+            return gerar_recomendacao_rapida(request, estudante, selecoes)
         except Exception as e:
-            messages.error(request, f'Erro ao gerar recomendação: {str(e)}')
+            messages.error(request, f'❌ Erro ao gerar recomendação: {str(e)}')
+            logger.error(f"Erro ao gerar recomendação: {str(e)}")
+            return gerar_recomendacao_rapida(request, estudante, selecoes)
 
     context = {
         'estudante': estudante,
         'perfil_tea': perfil,
-        'tecnologias': TecnologiaAssistiva.objects.filter(ativo=True),
+        'tecnologias': TecnologiaAssistiva.objects.filter(ativo=True, criada_por_ia=False),
     }
     return render(request, 'recomendacoes/gerar.html', context)
 
+
+def gerar_recomendacao_rapida(request, estudante, selecoes=None):
+    """Gerar recomendação rápida usando catálogo priorizando áreas selecionadas"""
+    try:
+        recomendacao = Recomendacao.objects.create(
+            estudante=estudante,
+            professor=request.user,
+            parametros_entrada='{"fallback": "rapido"}',
+            status='gerada'
+        )
+
+        # PRIORIZAR ÁREAS SELECIONADAS
+        if selecoes and selecoes.get('areas_atencao'):
+            areas = selecoes['areas_atencao']
+            mapa_categorias = {
+                'comunicacao': 'comunicacao',
+                'sensorial': 'regulacao_sensorial',
+                'motor': 'motor',
+                'cognitivo': 'cognitivo',
+                'social': 'interacao_social',
+                'estrutura': 'estruturacao'
+            }
+
+            categorias_para_buscar = []
+            for area in areas:
+                area = area.lower().strip()
+                if area in mapa_categorias:
+                    categorias_para_buscar.append(mapa_categorias[area])
+
+            if categorias_para_buscar:
+                tecs = TecnologiaAssistiva.objects.filter(
+                    ativo=True,
+                    criada_por_ia=False,
+                    categoria__in=categorias_para_buscar
+                )[:5]
+            else:
+                tecs = TecnologiaAssistiva.objects.filter(ativo=True, criada_por_ia=False)[:5]
+        else:
+            tecs = TecnologiaAssistiva.objects.filter(ativo=True, criada_por_ia=False)[:5]
+
+        # SALVAR COM JUSTIFICATIVA CORRETA
+        for idx, ta in enumerate(tecs[:5], 1):
+            RecomendacaoTA.objects.create(
+                recomendacao=recomendacao,
+                ta=ta,
+                justificativa=f'Recomendado pela IA para {ta.get_categoria_display()}',
+                posicao_ranking=idx
+            )
+
+        messages.info(request, f'✅ Recomendação gerada para {estudante.nome}!')
+        return redirect('detalhe_recomendacao', id=recomendacao.id)
+    except Exception as e:
+        messages.error(request, f'❌ Erro ao gerar recomendação: {str(e)}')
+        return redirect('detalhe_estudante', id=estudante.id)
 
 def calcular_idade(data_nascimento):
     """Calcular idade em anos"""
@@ -289,155 +594,147 @@ def calcular_idade(data_nascimento):
     return hoje.year - data_nascimento.year - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
 
 
-# telas/views.py - Substituir a função extrair_recursos_da_analise
-
-def extrair_recursos_da_analise(analise):
+def extrair_recursos_da_analise(analise, selecoes=None):
     """
-    Extrair tecnologias válidas da análise da IA.
-    Retorna apenas tecnologias com nome, descrição e detalhes completos.
+    Extrair recursos da análise da IA.
+    Retorna: 3 do catálogo + 6 links únicos + 2 do catálogo (complemento) = 11
     """
     recursos = []
-
-    # Lista de tecnologias conhecidas (para identificar no texto)
-    tecnologias_conhecidas = {
-        'Prancha de Comunicação': {
-            'categoria': 'comunicacao',
-            'descricao': 'Recurso visual para auxiliar na comunicação não-verbal, permitindo que o aluno aponte para figuras que representam suas necessidades.',
-            'materiais': 'Revistas velhas, tesoura, cola, papelão, velcro, plastificadora',
-            'como_fazer': 'Recorte figuras de revistas, organize por categorias, cole em papelão e plastifique.',
-            'como_usar': 'O aluno aponta para a figura do que deseja comunicar.',
-            'para_que_serve': 'Facilita a comunicação não-verbal e expressão de necessidades.'
-        },
-        'Garrafa da Calma': {
-            'categoria': 'regulacao_sensorial',
-            'descricao': 'Recurso sensorial que ajuda na regulação emocional, proporcionando calma e foco através da observação do glitter.',
-            'materiais': 'Garrafa PET, água, glitter, corante, cola quente, purpurina',
-            'como_fazer': 'Encha a garrafa com água, adicione glitter e corante, feche com cola quente.',
-            'como_usar': 'Agite a garrafa e observe o glitter caindo lentamente.',
-            'para_que_serve': 'Ajuda na regulação emocional e autoconhecimento.'
-        },
-        'Kit Sensorial': {
-            'categoria': 'regulacao_sensorial',
-            'descricao': 'Caixas com diferentes texturas para exploração tátil e estimulação sensorial.',
-            'materiais': 'Caixa de sapato, tecidos variados, botões, fitas, grãos',
-            'como_fazer': 'Forre a caixa com tecidos, cole botões e fitas, crie compartimentos.',
-            'como_usar': 'Deixe o aluno explorar as texturas livremente.',
-            'para_que_serve': 'Estimula o tato e a percepção sensorial.'
-        },
-        'Teclado Adaptado': {
-            'categoria': 'motor',
-            'descricao': 'Teclado adaptado com teclas grandes para auxiliar na coordenação motora fina.',
-            'materiais': 'Papelão, teclas desenhadas, fita adesiva, tesoura',
-            'como_fazer': 'Desenhe um teclado em papelão, recorte as teclas, fixe com fita.',
-            'como_usar': 'O aluno usa para digitar ou apontar letras.',
-            'para_que_serve': 'Auxilia na coordenação motora fina e aprendizado.'
-        },
-        'Rotina Visual': {
-            'categoria': 'estruturacao',
-            'descricao': 'Caixas organizadoras para rotina visual, ajudando o aluno a entender a sequência de atividades.',
-            'materiais': 'Caixas de fósforo, papel, canetinhas, velcro',
-            'como_fazer': 'Desenhe as atividades, recorte e cole nas caixas, organize em sequência.',
-            'como_usar': 'Mostre a sequência do dia. O aluno pode mover as caixas conforme conclui.',
-            'para_que_serve': 'Dá previsibilidade e reduz a ansiedade.'
-        },
-        'Cartões de Comunicação': {
-            'categoria': 'comunicacao',
-            'descricao': 'Cartões com símbolos e figuras para comunicação alternativa, permitindo comunicação simples e eficaz.',
-            'materiais': 'Papel cartão, canetinhas, tesoura, plastificador, argola',
-            'como_fazer': 'Desenhe os símbolos, recorte e cole no papel cartão, plastifique.',
-            'como_usar': 'O aluno mostra o cartão para se comunicar.',
-            'para_que_serve': 'Facilita a comunicação alternativa e autonomia.'
-        },
-        'Fone de Ouvido Caseiro': {
-            'categoria': 'regulacao_sensorial',
-            'descricao': 'Fone adaptado para reduzir a sobrecarga auditiva em ambientes barulhentos.',
-            'materiais': 'Fone velho, espuma acústica, tecido macio, cola quente',
-            'como_fazer': 'Remova as almofadas, encha com espuma, recubra com tecido.',
-            'como_usar': 'Use em momentos de sobrecarga auditiva.',
-            'para_que_serve': 'Reduz a sobrecarga auditiva e promove bem-estar.'
-        },
-        'História Social Ilustrada': {
-            'categoria': 'interacao_social',
-            'descricao': 'Histórias ilustradas para ensinar habilidades sociais e comportamentos adequados.',
-            'materiais': 'Papel, canetinhas, grampeador, impressões',
-            'como_fazer': 'Crie uma história simples, ilustre cada passo, grampeie.',
-            'como_usar': 'Leia a história antes da situação acontecer.',
-            'para_que_serve': 'Ensina habilidades sociais e reduz ansiedade.'
-        },
-        'Agenda Visual': {
-            'categoria': 'estruturacao',
-            'descricao': 'Agenda visual para organizar tarefas e compromissos do dia a dia.',
-            'materiais': 'Papel, canetinhas, velcro, quadro magnético',
-            'como_fazer': 'Desenhe as tarefas em cartões, recorte, cole velcro.',
-            'como_usar': 'O aluno organiza as tarefas do dia na agenda.',
-            'para_que_serve': 'Ajuda na organização e planejamento diário.'
-        }
-    }
-
-    # Procurar por tecnologias conhecidas no texto
-    for tech_nome, tech_dados in tecnologias_conhecidas.items():
-        if tech_nome.lower() in analise.lower():
-            # Verificar se já não foi adicionada
-            if not any(r['nome'] == tech_nome for r in recursos):
-                recursos.append({
-                    'nome': tech_nome,
-                    'categoria': tech_dados['categoria'],
-                    'descricao': tech_dados['descricao'],
-                    'materiais': tech_dados['materiais'],
-                    'como_fazer': tech_dados['como_fazer'],
-                    'como_usar': tech_dados['como_usar'],
-                    'para_que_serve': tech_dados['para_que_serve'],
-                    'justificativa': f'Recomendado pela IA para {tech_dados["categoria"]}',
-                    'fonte': 'IA'
-                })
-
-    # Buscar recursos online (se houver resultados da busca)
-    # Procurar por links ou menções a recursos online
+    from telas.models import TecnologiaAssistiva
     import re
-    padrao_online = r'(?:https?://|www\.)[^\s]+'
-    links = re.findall(padrao_online, analise)
 
-    # Se encontrou links, adicionar como recursos online
-    for i, link in enumerate(links[:3], 1):
-        # Tentar extrair título do link
-        titulo = f"Recurso Online #{i}"
-        for linha in analise.split('\n'):
-            if link in linha:
-                titulo = linha.replace(link, '').strip()[:50] or f"Recurso Online #{i}"
-                break
+    if not selecoes:
+        selecoes = {}
+
+    # ================================================
+    # 1. RECURSOS DO CATÁLOGO (DA ANÁLISE DA API)
+    # ================================================
+    padrao_recurso = r'#### \d+\. \*\*(.+?)\*\*\s*\n\n\*\*📦 Materiais:\*\* (.+?)\n\n\*\*🔧 Como fazer:\*\* (.+?)\n\n\*\*👩‍🏫 Como usar:\*\* (.+?)\n\n\*\*🎯 Para que serve:\*\* (.+?)(?=\n\n---|\n\n###|\Z)'
+    matches = re.findall(padrao_recurso, analise, re.DOTALL)
+
+    for match in matches:
+        nome = match[0].strip()
+        materiais, como_fazer, como_usar, para_que_serve = [m.strip() for m in match[1:]]
+
+        try:
+            ta = TecnologiaAssistiva.objects.get(nome=nome, criada_por_ia=False)
+            categoria = ta.categoria
+        except TecnologiaAssistiva.DoesNotExist:
+            categoria = 'comunicacao'
+
+        recursos.append({
+            'nome': nome,
+            'categoria': categoria,
+            'descricao': para_que_serve,
+            'materiais': materiais,
+            'como_fazer': como_fazer,
+            'como_usar': como_usar,
+            'para_que_serve': para_que_serve,
+            'justificativa': f'Recomendado pela IA para {categoria}',
+            'fonte': 'IA',
+            'link': None
+        })
+
+        if len([r for r in recursos if r.get('fonte') == 'IA']) >= 3:
+            break
+
+    # ================================================
+    # 2. RECURSOS DA INTERNET (CORRIGIDO)
+    # ================================================
+    padrao_online = re.compile(
+        r'\*\*\d+\.\s*(.+?)\*\*\s*\n\n(.*?)\n\n🔗\s*Fonte:\s*(\S+)',
+        re.DOTALL
+    )
+    matches_online = padrao_online.findall(analise)
+
+    links_vistos = set()
+    for titulo_bruto, snippet, link in matches_online:
+        link = link.strip()
+
+        # Pular links inválidos ou duplicados
+        if not link or link in links_vistos:
+            continue
+        if 'assitia' in link or 'localhost' in link or '127.0.0.1' in link:
+            continue
+
+        links_vistos.add(link)
+        titulo = titulo_bruto.strip()[:80]
+
+        # Identificar fonte
+        if "youtube" in link or "youtu.be" in link:
+            fonte = "YouTube"
+        elif "tiktok" in link:
+            fonte = "TikTok"
+        elif "pinterest" in link:
+            fonte = "Pinterest"
+        elif ".pdf" in link:
+            fonte = "PDF"
+        elif "slideshare" in link:
+            fonte = "Slideshare"
+        elif "edu" in link or "educ" in link:
+            fonte = "Educacional"
+        else:
+            fonte = "Site"
 
         recursos.append({
             'nome': f"🌐 {titulo}",
             'categoria': 'online',
-            'descricao': f'Recurso encontrado na internet: {link}',
-            'materiais': 'Verificar no site',
-            'como_fazer': 'Acessar o link para mais informações',
-            'como_usar': 'Explorar o recurso conforme instruções do site',
+            'descricao': snippet.strip()[:300] or 'Recurso encontrado na internet pela IA',
+            'materiais': 'Acessar o link para ver os materiais',
+            'como_fazer': 'Acesse o link para mais informações',
+            'como_usar': 'Explore o recurso conforme as instruções do site',
             'para_que_serve': 'Tecnologia assistiva encontrada na internet',
-            'justificativa': 'Recurso encontrado na busca online',
+            'justificativa': f'Recurso recomendado pela IA - Fonte: {fonte}',
             'fonte': 'Internet',
             'link': link
         })
 
-    # Se não encontrou nenhuma tecnologia conhecida, usar as do catálogo
-    if not recursos or len([r for r in recursos if r.get('fonte') == 'IA']) == 0:
-        from telas.models import TecnologiaAssistiva
-        catalogo = TecnologiaAssistiva.objects.filter(ativo=True)[:5]
-        for ta in catalogo:
-            if not any(r['nome'] == ta.nome for r in recursos):
-                recursos.append({
-                    'nome': ta.nome,
-                    'categoria': ta.categoria,
-                    'descricao': ta.descricao,
-                    'materiais': ta.materiais,
-                    'como_fazer': ta.como_fazer,
-                    'como_usar': ta.como_usar,
-                    'para_que_serve': ta.para_que_serve,
-                    'justificativa': f'Recomendado pela IA para {ta.get_categoria_display()}',
-                    'fonte': 'Catálogo'
-                })
+        if len([r for r in recursos if r.get('fonte') == 'Internet']) >= 6:
+            break
 
-    return recursos
+    # ================================================
+    # 3. COMPLETAR COM CATÁLOGO (ATÉ 11)
+    # ================================================
+    if len(recursos) < 11:
+        areas_atencao = selecoes.get('areas_atencao', [])
+        mapa_catalogo = {
+            'comunicacao': ['AAC - Livro de Comunicação Personalizado', 'Cartões de Comunicação',
+                            'Prancha de Comunicação'],
+            'regulacao_sensorial': ['Garrafa da Calma', 'Kit Sensorial com Caixas', 'Fone de Ouvido Caseiro'],
+            'motor': ['Teclado Adaptado com Papelão', 'Prancha de Atividades Motoras'],
+            'cognitivo': ['Jogo da Memória Adaptado', 'Atividades de Raciocínio Lógico'],
+            'interacao_social': ['Cartões de Habilidades Sociais', 'História Social Ilustrada'],
+            'estruturacao': ['Rotina Visual com Caixas', 'Agenda Visual de Tarefas'],
+        }
+
+        tecs_adicionais = []
+        for area in areas_atencao:
+            area = area.lower().strip()
+            if area in mapa_catalogo:
+                for nome_tech in mapa_catalogo[area]:
+                    if not any(r['nome'] == nome_tech for r in recursos):
+                        try:
+                            ta = TecnologiaAssistiva.objects.get(nome=nome_tech, criada_por_ia=False)
+                            tecs_adicionais.append(ta)
+                        except TecnologiaAssistiva.DoesNotExist:
+                            pass
+
+        for ta in tecs_adicionais[:11 - len(recursos)]:
+            recursos.append({
+                'nome': ta.nome,
+                'categoria': ta.categoria,
+                'descricao': ta.descricao,
+                'materiais': ta.materiais,
+                'como_fazer': ta.como_fazer,
+                'como_usar': ta.como_usar,
+                'para_que_serve': ta.para_que_serve,
+                'justificativa': f'Recomendado pela IA para {ta.get_categoria_display()}',
+                'fonte': 'Catálogo',
+                'link': None
+            })
+
+    return recursos[:11]
+
 
 @login_required
 def detalhe_recomendacao(request, id):
@@ -499,8 +796,6 @@ def salvar_recomendacao(request):
 
     return JsonResponse({'error': 'Método não permitido'}, status=405)
 
-
-# telas/views.py - Adicionar a view se não existir
 
 @login_required
 def excluir_recomendacao(request, id):
@@ -602,6 +897,15 @@ def arquivar_recomendacao(request, id):
 
     return JsonResponse({'error': 'Método não permitido'}, status=405)
 
+@login_required
+def lista_recomendacoes(request):
+    """Lista de recomendações"""
+    recomendacoes = Recomendacao.objects.filter(professor=request.user)
+    context = {
+        'recomendacoes': recomendacoes,
+        'total': recomendacoes.count(),
+    }
+    return render(request, 'recomendacoes/listas.html', context)
 
 # ============ PEI ============
 
@@ -680,22 +984,29 @@ def editar_pei(request, id):
 
 @login_required
 def gerar_pdf_pei(request, id):
-    """Gerar PDF do PEI"""
+    """Gerar PDF do PEI com formatação melhorada"""
     pei = get_object_or_404(PEI, id=id, professor=request.user)
 
+    # Criar resposta PDF
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="PEI_{pei.estudante.nome}_v{pei.versao}.pdf"'
+    response[
+        'Content-Disposition'] = f'attachment; filename="PEI_{pei.estudante.nome}_v{pei.versao}_{pei.criado_em.strftime("%Y%m%d")}.pdf'
 
+    # Criar conteúdo do PDF
     content = f"""
     ========================================
     PLANO EDUCACIONAL INDIVIDUALIZADO - PEI
     ========================================
 
-    Aluno: {pei.estudante.nome}
+    DATA DE GERAÇÃO: {timezone.now().strftime('%d/%m/%Y %H:%M')}
+
+    ----------------------------------------
+    INFORMAÇÕES DO ALUNO
+    ----------------------------------------
+    Nome: {pei.estudante.nome}
     Nível de Suporte: {pei.estudante.get_nivel_suporte_display()}
     Turma: {pei.estudante.turma or 'Não informada'}
-    Versão: {pei.versao}
-    Data: {pei.criado_em.strftime('%d/%m/%Y %H:%M')}
+    Data de Nascimento: {pei.estudante.data_nascimento.strftime('%d/%m/%Y') if pei.estudante.data_nascimento else 'Não informada'}
 
     ----------------------------------------
     OBJETIVOS
@@ -713,7 +1024,15 @@ def gerar_pdf_pei(request, id):
     {pei.recursos or 'Não informado'}
 
     ----------------------------------------
+    INFORMAÇÕES DO PEI
+    ----------------------------------------
+    Versão: {pei.versao}
+    Criado em: {pei.criado_em.strftime('%d/%m/%Y %H:%M')}
+    Última atualização: {pei.atualizado_em.strftime('%d/%m/%Y %H:%M')}
     Professor Responsável: {pei.professor.nome}
+
+    ========================================
+    AssistIA - Sistema de Recomendação de Tecnologias Assistivas
     ========================================
     """
 
@@ -723,9 +1042,10 @@ def gerar_pdf_pei(request, id):
 
 # ============ PERFIL ============
 
+
 @login_required
 def perfil_usuario(request):
-    """Perfil do usuário"""
+    """Perfil do usuário com histórico de senhas"""
     if request.method == 'POST':
         nome = request.POST.get('nome')
         email = request.POST.get('email')
@@ -744,14 +1064,34 @@ def perfil_usuario(request):
                 return redirect('perfil_usuario')
             user.email = email
 
-        # Alterar senha
+        # ============ ALTERAR SENHA COM HISTÓRICO ============
         if nova_senha:
+            # Validar senha atual
             if not senha_atual:
                 messages.error(request, 'Digite sua senha atual para alterar a senha.')
                 return redirect('perfil_usuario')
 
             if not user.check_password(senha_atual):
                 messages.error(request, 'Senha atual incorreta.')
+                return redirect('perfil_usuario')
+
+            # Validar nova senha com hardening
+            from user.views import validar_senha_segura, verificar_senha_vazada
+            erros_senha = validar_senha_segura(nova_senha, user.nome, user.email)
+            if erros_senha:
+                for erro in erros_senha:
+                    messages.error(request, erro)
+                return redirect('perfil_usuario')
+
+            # Verificar se a senha foi vazada
+            if verificar_senha_vazada(nova_senha):
+                messages.error(request,
+                               'Esta senha foi encontrada em vazamentos de dados. Por favor, escolha uma senha mais segura.')
+                return redirect('perfil_usuario')
+
+            # Verificar se a senha já foi usada anteriormente
+            if user.verificar_senha_no_historico(nova_senha):
+                messages.error(request, 'Esta senha já foi usada anteriormente. Por favor, escolha uma nova senha.')
                 return redirect('perfil_usuario')
 
             if len(nova_senha) < 8:
@@ -762,7 +1102,12 @@ def perfil_usuario(request):
                 messages.error(request, 'As senhas não coincidem.')
                 return redirect('perfil_usuario')
 
+            # Salvar nova senha
             user.set_password(nova_senha)
+
+            # Salvar no histórico
+            user.salvar_historico_senha(nova_senha)
+
             messages.success(request, 'Senha alterada com sucesso!')
 
         user.save()
@@ -782,5 +1127,6 @@ def perfil_usuario(request):
         'total_recomendacoes': Recomendacao.objects.filter(professor=request.user).count(),
         'total_pei': PEI.objects.filter(professor=request.user).count(),
         'total_tecnologias': TecnologiaAssistiva.objects.filter(ativo=True).count(),
+        'historico_senhas': request.user.password_history.all()[:5]  # Últimas 5 senhas
     }
     return render(request, 'perfil/perfil.html', context)

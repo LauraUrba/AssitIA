@@ -23,7 +23,7 @@
         <h2 class="auth-title" style="text-align: center;">Código de Verificação</h2>
         <p class="auth-subtitle" style="text-align: center;">
             Enviamos um código de 6 dígitos para seu email.<br>
-            <strong style="color: var(--primary-color);">{{ request.session.user_email|default:"seu email" }}</strong>
+            <strong style="color: var(--primary-color);">{{ email|default:"seu email" }}</strong>
         </p>
 
         <!-- Mensagens -->
@@ -36,7 +36,7 @@
             {% endfor %}
         {% endif %}
 
-        <form id="otpForm" method="post" action="{% url 'verificar_otp' %}">
+        <form id="otpForm" method="post">
             {% csrf_token %}
 
             <div class="otp-input-group" id="otpGroup">
@@ -50,7 +50,7 @@
 
             <input type="hidden" name="otp" id="otpHidden">
 
-            <button type="submit" class="btn btn-primary-custom" id="verifyBtn">
+            <button type="submit" class="btn btn-primary-custom" id="verifyBtn" {% if bloqueado %}disabled{% endif %}>
                 <span class="btn-text"><i class="fas fa-check-circle"></i> Verificar</span>
                 <span class="spinner"></span>
             </button>
@@ -84,25 +84,17 @@ const otpInputs = document.querySelectorAll('.otp-input');
 
 otpInputs.forEach((input, index) => {
     input.addEventListener('input', function(e) {
-        // Permitir apenas números
         this.value = this.value.replace(/\D/g, '');
-
-        // Auto-avançar
         if (this.value.length === 1 && index < otpInputs.length - 1) {
             otpInputs[index + 1].focus();
         }
-
-        // Atualizar hidden
         updateOtpHidden();
     });
 
     input.addEventListener('keydown', function(e) {
-        // Voltar com backspace
         if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
             otpInputs[index - 1].focus();
         }
-
-        // Colar código
         if (e.key === 'v' && (e.ctrlKey || e.metaKey)) {
             setTimeout(() => {
                 const pastedText = this.value;
@@ -156,7 +148,6 @@ function updateTimer() {
         timerElement.textContent = '00:00';
         timerElement.style.color = '#EF4444';
         document.getElementById('resendLink').style.display = 'inline';
-
         otpInputs.forEach(input => {
             input.disabled = true;
         });
@@ -216,17 +207,16 @@ document.getElementById('otpForm').addEventListener('submit', function(e) {
     btn.classList.add('loading');
 });
 
-// Auto-focus no primeiro campo
+// Auto-focus
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('otp1').focus();
 });
 
-// Navegação com teclas direcionais
+// Teclas direcionais
 document.addEventListener('keydown', function(e) {
     const activeElement = document.activeElement;
     if (activeElement && activeElement.classList.contains('otp-input')) {
         const currentIndex = Array.from(otpInputs).indexOf(activeElement);
-
         if (e.key === 'ArrowRight' && currentIndex < otpInputs.length - 1) {
             e.preventDefault();
             otpInputs[currentIndex + 1].focus();

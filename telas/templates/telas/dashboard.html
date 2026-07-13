@@ -1,75 +1,334 @@
 <!-- telas/templates/telas/dashboard.html -->
 {% extends 'telas/base.html' %}
+{% load static %}
 
 {% block title %}Dashboard - AssistIA{% endblock %}
 
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    /* ===== CARDS DE ESTUDANTES ===== */
+    .estudante-card {
+        transition: all 0.2s ease;
+        border: 1px solid #E5E7EB;
+    }
+    .estudante-card:hover {
+        border-color: #4F46E5;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+    }
+    .estudante-card .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 18px;
+        color: #fff;
+        flex-shrink: 0;
+        text-transform: uppercase;
+    }
+    /* Cores de avatar com fallback */
+    .avatar-azul { background: #3B82F6; }
+    .avatar-verde { background: #10B981; }
+    .avatar-roxo { background: #8B5CF6; }
+    .avatar-rosa { background: #EC4899; }
+    .avatar-laranja { background: #F59E0B; }
+    .avatar-vermelho { background: #EF4444; }
+    .avatar-ciano { background: #06B6D4; }
+    .avatar-indigo { background: #6366F1; }
+    .avatar-padrao { background: #4F46E5; }
+
+    .estudante-card h6 {
+        font-weight: 600;
+        color: #1F2937;
+        margin: 0;
+    }
+    .estudante-card p {
+        font-size: 13px;
+        margin: 0;
+        color: #6B7280;
+    }
+    .estudante-card small {
+        font-size: 12px;
+        color: #9CA3AF;
+    }
+    .estudante-card .seta {
+        color: #D1D5DB;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    .estudante-card:hover .seta {
+        color: #4F46E5;
+        transform: translateX(3px);
+    }
+
+    /* ===== ACESSIBILIDADE - FOCO ===== */
+    .estudante-card:focus-visible {
+        outline: 3px solid #4F46E5;
+        outline-offset: 2px;
+        border-radius: 8px;
+    }
+
+    /* ===== CONTRASTE ===== */
+    .card.bg-primary .btn-light {
+        color: #0D6EFD;
+    }
+    .card.bg-success .btn-light {
+        color: #198754;
+    }
+    .card.bg-info .btn-light {
+        color: #0DCAF0;
+    }
+    .card.bg-warning .btn-light {
+        color: #FFC107;
+    }
+
+    /* ===== TAMANHO DE FONTE RESPONSIVO ===== */
+    @media (max-width: 576px) {
+        .dashboard-card h2 {
+            font-size: 1.8rem;
+        }
+        .dashboard-card .fa-3x {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <div class="row mb-4">
+    <!-- ===== CABEÇALHO ===== -->
+    <header class="row mb-4" aria-label="Cabeçalho do dashboard">
         <div class="col-12">
-            <h1 class="display-6">
-                <i class="fas fa-chart-line text-primary"></i> Dashboard
-            </h1>
-            <p class="text-muted">Bem-vindo(a), <strong>{{ user.nome }}</strong>!</p>
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h1 class="display-6">
+                        <i class="fas fa-chart-line text-primary" aria-hidden="true"></i>
+                        <span class="visually-hidden">Dashboard - </span>
+                        Dashboard
+                    </h1>
+                    <p class="text-muted" aria-live="polite">
+                        Bem-vindo(a), <strong>{{ user.nome }}</strong>!
+                    </p>
+                </div>
+                <div aria-live="polite">
+                    <span class="badge bg-primary fs-6" aria-label="Data atual">
+                        <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                        {% now "d/m/Y" %}
+                    </span>
+                </div>
+            </div>
         </div>
-    </div>
+    </header>
 
-    <div class="row g-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white h-100 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-white-50">Total de Alunos</h6>
-                            <h2 class="display-5 fw-bold">{{ total_estudantes }}</h2>
+    <!-- ===== CARDS DE ESTATÍSTICAS ===== -->
+    <section aria-label="Estatísticas gerais do sistema">
+        <div class="row g-4">
+            <!-- Total de Alunos -->
+            <div class="col-md-3 col-6">
+                <div class="card bg-primary text-white h-100 shadow-sm dashboard-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-white-50" id="stat-total-alunos">
+                                    <i class="fas fa-users" aria-hidden="true"></i>
+                                    Total de Alunos
+                                </h6>
+                                <p class="display-5 fw-bold mb-0" aria-labelledby="stat-total-alunos">
+                                    {{ total_estudantes }}
+                                </p>
+                            </div>
+                            <i class="fas fa-users fa-3x text-white-50" aria-hidden="true"></i>
                         </div>
-                        <i class="fas fa-users fa-3x text-white-50"></i>
+                        <a href="{% url 'lista_estudantes' %}" class="btn btn-light btn-sm mt-2"
+                           aria-label="Ver todos os alunos ({{ total_estudantes }} alunos)">
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            Ver todos
+                        </a>
                     </div>
-                    <a href="{% url 'lista_estudantes' %}" class="btn btn-light btn-sm mt-2">Ver todos</a>
+                </div>
+            </div>
+
+            <!-- Alunos Ativos -->
+            <div class="col-md-3 col-6">
+                <div class="card bg-success text-white h-100 shadow-sm dashboard-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-white-50" id="stat-alunos-ativos">
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                    Alunos Ativos
+                                </h6>
+                                <p class="display-5 fw-bold mb-0" aria-labelledby="stat-alunos-ativos">
+                                    {{ estudantes_ativos }}
+                                </p>
+                            </div>
+                            <i class="fas fa-check-circle fa-3x text-white-50" aria-hidden="true"></i>
+                        </div>
+                        {% with percentual=estudantes_ativos|divisibleby:total_estudantes %}
+                            <span class="badge bg-light text-success mt-2"
+                                  aria-label="{% if total_estudantes > 0 %}{{ percentual|floatformat:0 }} por cento dos alunos estão ativos{% else %}Nenhum aluno cadastrado{% endif %}">
+                                <i class="fas fa-percent" aria-hidden="true"></i>
+                                {% if total_estudantes > 0 %}
+                                    {{ percentual|floatformat:0 }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </span>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recomendações -->
+            <div class="col-md-3 col-6">
+                <div class="card bg-info text-white h-100 shadow-sm dashboard-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-white-50" id="stat-recomendacoes">
+                                    <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                                    Recomendações
+                                </h6>
+                                <p class="display-5 fw-bold mb-0" aria-labelledby="stat-recomendacoes">
+                                    {{ total_recomendacoes }}
+                                </p>
+                            </div>
+                            <i class="fas fa-lightbulb fa-3x text-white-50" aria-hidden="true"></i>
+                        </div>
+                        <a href="{% url 'lista_recomendacoes' %}" class="btn btn-light btn-sm mt-2"
+                           aria-label="Ver todas as recomendações ({{ total_recomendacoes }} recomendações)">
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            Ver todas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PEIs -->
+            <div class="col-md-3 col-6">
+                <div class="card bg-warning text-white h-100 shadow-sm dashboard-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-white-50" id="stat-peis">
+                                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                                    PEIs
+                                </h6>
+                                <p class="display-5 fw-bold mb-0" aria-labelledby="stat-peis">
+                                    {{ total_pei }}
+                                </p>
+                            </div>
+                            <i class="fas fa-file-alt fa-3x text-white-50" aria-hidden="true"></i>
+                        </div>
+                        <a href="{% url 'lista_pei' %}" class="btn btn-light btn-sm mt-2"
+                           aria-label="Ver todos os PEIs ({{ total_pei }} PEIs)">
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            Ver todos
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white h-100 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-white-50">Alunos Ativos</h6>
-                            <h2 class="display-5 fw-bold">{{ estudantes_ativos }}</h2>
+    </section>
+
+    <!-- ===== ÚLTIMOS ALUNOS ACESSADOS ===== -->
+    <section class="row mt-4" aria-label="Alunos abertos recentemente">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap">
+                    <h5 class="mb-0" id="ultimos-alunos-titulo">
+                        <i class="fas fa-clock text-primary" aria-hidden="true"></i>
+                        Alunos Abertos Recentemente
+                    </h5>
+                    <a href="{% url 'lista_estudantes' %}" class="btn btn-sm btn-outline-primary"
+                       aria-label="Ir para lista completa de alunos">
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        Ver todos
+                    </a>
+                </div>
+                <div class="card-body" role="list" aria-labelledby="ultimos-alunos-titulo">
+                    {% if ultimos_estudantes %}
+                        <div class="row g-3">
+                            {% for estudante in ultimos_estudantes %}
+                                <div class="col-md-4 col-sm-6" role="listitem">
+                                    <a href="{% url 'detalhe_estudante' estudante.id %}"
+                                       class="card shadow-sm h-100 estudante-card text-decoration-none d-block"
+                                       aria-label="{{ estudante.nome }} - Turma: {% if estudante.turma %}{{ estudante.turma }}{% else %}Sem turma{% endif %} - Acessado há {{ estudante.atualizado_em|timesince }}">
+                                        <div class="card-body d-flex align-items-center">
+                                            <div class="avatar {% if estudante.cor %}avatar-{{ estudante.cor }}{% else %}avatar-padrao{% endif %}"
+                                                 aria-hidden="true">
+                                                {{ estudante.nome|slice:":1"|upper }}
+                                            </div>
+                                            <div class="ms-3 flex-grow-1">
+                                                <h6 class="mb-1" id="estudante-nome-{{ estudante.id }}">
+                                                    {{ estudante.nome }}
+                                                </h6>
+                                                <p class="mb-1">
+                                                    <i class="fas fa-users" aria-hidden="true"></i>
+                                                    <span class="visually-hidden">Turma:</span>
+                                                    {{ estudante.turma|default:"Sem turma" }}
+                                                </p>
+                                                <small>
+                                                    <i class="fas fa-clock" aria-hidden="true"></i>
+                                                    <span class="visually-hidden">Acessado há</span>
+                                                    {{ estudante.atualizado_em|timesince }}
+                                                </small>
+                                            </div>
+                                            <i class="fas fa-chevron-right seta" aria-hidden="true"></i>
+                                            <span class="visually-hidden">Acessar perfil</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            {% endfor %}
                         </div>
-                        <i class="fas fa-check-circle fa-3x text-white-50"></i>
-                    </div>
+                    {% else %}
+                        <div class="text-center py-4" role="status" aria-live="polite">
+                            <i class="fas fa-users fa-3x text-muted mb-3" aria-hidden="true"></i>
+                            <p class="text-muted">Nenhum aluno acessado recentemente.</p>
+                            <a href="{% url 'novo_estudante' %}" class="btn btn-primary btn-sm"
+                               aria-label="Cadastrar primeiro aluno">
+                                <i class="fas fa-plus" aria-hidden="true"></i>
+                                Cadastrar primeiro aluno
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white h-100 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-white-50">Recomendações</h6>
-                            <h2 class="display-5 fw-bold">{{ total_recomendacoes }}</h2>
-                        </div>
-                        <i class="fas fa-lightbulb fa-3x text-white-50"></i>
-                    </div>
-                    <a href="{% url 'lista_recomendacoes' %}" class="btn btn-light btn-sm mt-2">Ver todas</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white h-100 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-white-50">PEIs</h6>
-                            <h2 class="display-5 fw-bold">{{ total_pei }}</h2>
-                        </div>
-                        <i class="fas fa-file-alt fa-3x text-white-50"></i>
-                    </div>
-                    <a href="{% url 'lista_pei' %}" class="btn btn-light btn-sm mt-2">Ver todos</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
+
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ===== ANUNCIAR CARREGAMENTO DO DASHBOARD =====
+        if (window.announce) {
+            window.announce('Dashboard carregado com sucesso. Você tem {{ total_estudantes }} alunos no sistema.');
+        }
+
+        // ===== GARANTIR QUE CARDS SEJAM CLICÁVEIS VIA TECLADO =====
+        document.querySelectorAll('.estudante-card').forEach(function(card) {
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

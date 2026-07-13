@@ -1,52 +1,302 @@
-<!-- user/templates/auth/base.html -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- ===== META DADOS DE ACESSIBILIDADE ===== -->
+    <meta name="theme-color" content="#4F46E5">
+    <meta name="color-scheme" content="light">
+    <meta name="application-name" content="AssistIA">
+    <meta name="description" content="Sistema de Tecnologias Assistivas para auxílio no desenvolvimento de alunos com necessidades especiais">
+
     <title>{% block title %}AssistIA - Sistema de Tecnologias Assistivas{% endblock %}</title>
 
+    <!-- ===== PULAR PARA O CONTEÚDO PRINCIPAL (WCAG 2.1) ===== -->
+    <a href="#main-content" class="skip-link" aria-label="Pular para o conteúdo principal">
+        Pular para o conteúdo principal
+    </a>
+
+    <!-- ===== FAVICON ===== -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234F46E5'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3Ccircle cx='8.5' cy='10.5' r='1.5' fill='%234F46E5'/%3E%3Ccircle cx='15.5' cy='10.5' r='1.5' fill='%234F46E5'/%3E%3Crect x='7' y='14' width='10' height='2' rx='1' fill='%234F46E5'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234F46E5'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E">
+
+    <!-- ===== FOLHAS DE ESTILO ===== -->
     <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    </noscript>
 
     {% load static %}
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
     {% block extra_css %}{% endblock %}
+
+    <!-- ===== ESTILOS DE ACESSIBILIDADE ===== -->
+    <style>
+        /* ===== SKIP LINK (WCAG 2.1 - 2.4.1) ===== */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 0;
+            padding: 12px 20px;
+            background: #4F46E5;
+            color: #FFFFFF !important;
+            z-index: 9999;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 0 0 8px 0;
+            transition: top 0.3s ease;
+        }
+        .skip-link:focus {
+            top: 0;
+            color: #FFFFFF !important;
+            text-decoration: underline;
+            outline: 3px solid #FFFFFF;
+            outline-offset: 2px;
+        }
+
+        /* ===== FOCO VISÍVEL (WCAG 2.1 - 2.4.7) ===== */
+        *:focus-visible {
+            outline: 3px solid #4F46E5;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        /* ===== CONTRASTE E TAMANHO ===== */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1F2937;
+            background-color: #F9FAFB;
+        }
+
+        /* ===== REDUÇÃO DE MOVIMENTO (WCAG 2.1 - 2.3.3) ===== */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* ===== ALTO CONTRASTE ===== */
+        @media (prefers-contrast: high) {
+            body {
+                color: #000000;
+                background-color: #FFFFFF;
+            }
+            .btn-primary {
+                background-color: #000000 !important;
+                border-color: #000000 !important;
+                color: #FFFFFF !important;
+            }
+            .card {
+                border: 2px solid #000000 !important;
+            }
+            a {
+                text-decoration: underline !important;
+            }
+        }
+
+        /* ===== FONTE LEGÍVEL ===== */
+        @media (max-width: 768px) {
+            body {
+                font-size: 16px;
+            }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.3rem; }
+        }
+
+        /* ===== ARIA-REQUIRED ===== */
+        [aria-required="true"]:invalid {
+            border-color: #DC2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+        }
+        [aria-required="true"]:valid {
+            border-color: #10B981;
+        }
+
+        /* ===== MENSAGENS DE ERRO ===== */
+        .error-message {
+            color: #DC2626;
+            font-size: 0.875rem;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* ===== CARREGAMENTO ASSÍNCRONO ===== */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navbar para páginas de autenticação -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <!-- ===== CABEÇALHO ===== -->
+    <header role="banner" aria-label="Cabeçalho do sistema">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm" role="navigation" aria-label="Navegação principal">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="{% url 'login' %}" aria-label="AssistIA - Página inicial">
+                    <i class="fas fa-robot" style="color: #4F46E5;" aria-hidden="true"></i>
+                    <span class="visually-hidden">AssistIA</span>
+                    <span aria-hidden="true">AssistIA</span>
+                </a>
+                <div class="ms-auto">
+                    {% if user.is_authenticated %}
+                        <span class="text-muted me-2" aria-live="polite">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <span class="visually-hidden">Usuário:</span>
+                            {{ user.nome }}
+                        </span>
+                        <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger" aria-label="Sair do sistema">
+                            <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                            Sair
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+    <main id="main-content" role="main" aria-label="Conteúdo principal">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ===== RODAPÉ ===== -->
+    <footer role="contentinfo" aria-label="Rodapé" class="mt-5 py-3 text-center text-muted border-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'login' %}">
-                <i class="fas fa-robot" style="color: #4F46E5;"></i>
-                AssistIA
-            </a>
-            <div class="ms-auto">
-                {% if user.is_authenticated %}
-                    <span class="text-muted me-2">
-                        <i class="fas fa-user"></i> {{ user.nome }}
-                    </span>
-                    <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger">
-                        <i class="fas fa-sign-out-alt"></i> Sair
-                    </a>
-                {% endif %}
+            <small>
+                &copy; {% now "Y" %} AssistIA - Sistema de Tecnologias Assistivas
+                <span aria-hidden="true">|</span>
+                <span class="visually-hidden">Desenvolvido com</span>
+                <i class="fas fa-heart text-danger" aria-hidden="true"></i>
+                <span class="visually-hidden">amor</span>
+                <span aria-hidden="true">❤️</span>
+                <span class="visually-hidden">para inclusão</span>
+            </small>
+            <div class="mt-1">
+                <small>
+                    <a href="#" class="text-muted text-decoration-none" aria-label="Acessibilidade">♿</a>
+                    <span class="mx-1" aria-hidden="true">|</span>
+                    <a href="#" class="text-muted text-decoration-none" aria-label="Mapa do site">📋</a>
+                </small>
             </div>
         </div>
-    </nav>
+    </footer>
 
-    {% block content %}{% endblock %}
+    <!-- ===== SCRIPTS ===== -->
+    <!-- Bootstrap 5 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-1cVlPwQ1R9FTOR+2aFpP3zkO3X/4gD/sC3/JQjTt1n2AMTgGpWZf5ORZz7EYzHrM" crossorigin="anonymous"></script>
 
     {% block extra_js %}{% endblock %}
+
+    <!-- ===== VALIDAÇÃO DE ACESSIBILIDADE ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Garantir que todos os inputs com required tenham aria-required="true"
+            document.querySelectorAll('[required]').forEach(function(el) {
+                if (!el.hasAttribute('aria-required')) {
+                    el.setAttribute('aria-required', 'true');
+                }
+            });
+
+            // Garantir que todos os inputs com aria-required="true" tenham required
+            document.querySelectorAll('[aria-required="true"]').forEach(function(el) {
+                if (!el.hasAttribute('required')) {
+                    el.setAttribute('required', 'required');
+                }
+            });
+
+            // Adicionar aria-label em botões sem texto visível
+            document.querySelectorAll('button:not([aria-label])').forEach(function(btn) {
+                if (!btn.textContent.trim() && btn.querySelector('i, svg')) {
+                    const icon = btn.querySelector('i, svg');
+                    if (icon) {
+                        btn.setAttribute('aria-label', icon.className || 'Botão');
+                    }
+                }
+            });
+
+            // Tornar imagens com ícones acessíveis
+            document.querySelectorAll('.fa, .fas, .far, .fab, .fal, .fad').forEach(function(icon) {
+                if (!icon.parentElement.textContent.trim() && !icon.parentElement.querySelector('.visually-hidden')) {
+                    icon.setAttribute('aria-hidden', 'true');
+                }
+            });
+
+            console.log('✅ Acessibilidade ativada');
+        });
+
+        // ===== GERENCIADOR DE FOCO =====
+        // Garantir que o foco nunca fique preso
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                // Fechar modals abertos
+                document.querySelectorAll('.modal.show').forEach(function(modal) {
+                    const instance = bootstrap.Modal.getInstance(modal);
+                    if (instance) {
+                        instance.hide();
+                    }
+                });
+                // Voltar foco para o elemento anterior
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
+            }
+        });
+
+        // ===== ANUNCIAR MUDANÇAS DINÂMICAS =====
+        // Criar um container para mensagens de live region
+        const liveRegion = document.createElement('div');
+        liveRegion.setAttribute('aria-live', 'polite');
+        liveRegion.setAttribute('aria-atomic', 'true');
+        liveRegion.setAttribute('class', 'visually-hidden');
+        liveRegion.id = 'live-region';
+        document.body.appendChild(liveRegion);
+
+        // Função para anunciar mensagens para leitores de tela
+        window.announce = function(message) {
+            const region = document.getElementById('live-region');
+            if (region) {
+                region.textContent = '';
+                setTimeout(() => {
+                    region.textContent = message;
+                }, 100);
+            }
+        };
+    </script>
+
+    <!-- ===== NOSCRIPT ===== -->
+    <noscript>
+        <div class="container mt-3">
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                <strong>Aviso:</strong> O JavaScript está desabilitado no seu navegador.
+                Algumas funcionalidades podem não estar disponíveis.
+                Recomendamos ativar o JavaScript para uma melhor experiência.
+            </div>
+        </div>
+    </noscript>
 </body>
 </html>

@@ -51,3 +51,54 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.nome} ({self.email})"
+
+    def verificar_senha_no_historico(self, nova_senha, limite=5):
+        """
+        Verifica se a nova senha já foi usada anteriormente
+        Args:
+            nova_senha: A nova senha a ser verificada
+            limite: Número máximo de senhas a verificar (padrão: 5)
+        Returns:
+            bool: True se a senha já foi usada, False caso contrário
+        """
+        historico = self.password_history.all()[:limite]
+
+        for registro in historico:
+            # Verificar se a senha corresponde ao hash armazenado
+            from django.contrib.auth.hashers import check_password
+            if check_password(nova_senha, registro.password_hash):
+                return True
+        return False
+
+    def salvar_historico_senha(self, senha):
+        """Salvar a senha no histórico"""
+        from django.contrib.auth.hashers import make_password
+
+        # Limitar histórico a 10 senhas
+        if self.password_history.count() >= 10:
+            # Remover a senha mais antiga
+            mais_antiga = self.password_history.last()
+            if mais_antiga:
+                mais_antiga.delete()
+
+        # Salvar nova senha
+        PasswordHistory.objects.create(
+            user=self,
+            password_hash=make_password(senha)
+        )
+
+
+class PasswordHistory(models.Model):
+    """Histórico de senhas do usuário"""
+    user = models.ForeignKey('Usuario', on_delete=models.CASCADE, related_name='password_history')
+    password_hash = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'password_history'
+        verbose_name = 'Histórico de Senha'
+        verbose_name_plural = 'Históricos de Senhas'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.created_at.strftime('%d/%m/%Y %H:%M')}"

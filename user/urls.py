@@ -11,4 +11,10 @@ urlpatterns = [
     path('redefinir-senha/<str:uidb64>/<str:token>/', views.redefinir_senha_view, name='redefinir_senha'),
     path('verificar-otp/', views.verificar_otp_view, name='verificar_otp'),
 
+    # honeypot
+    path('honeypot-log/', views.honeypot_log, name='honeypot_log'),
+
+    # Termos de Uso
+    path('termos/<str:tipo>/', views.termos_view, name='termos'),
+
 ]

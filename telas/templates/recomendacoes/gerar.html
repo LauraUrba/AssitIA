@@ -1,3 +1,4 @@
+<!-- telas/templates/recomendacoes/gerar.html -->
 {% extends 'telas/base.html' %}
 {% load static %}
 
@@ -5,41 +6,78 @@
 
 {% block extra_css %}
 <style>
-    .loading-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        z-index: 9999;
-        justify-content: center;
+    /* ============ CHECKBOX ESTILIZADO ============ */
+    .custom-checkbox {
+        display: inline-flex;
         align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        margin: 4px 6px 4px 0;
+        border-radius: 25px;
+        border: 1.5px solid #D1D5DB;
+        background: #FAFAFA;
+        color: #4B5563;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        user-select: none;
     }
-    .loading-overlay.active {
-        display: flex;
+    .custom-checkbox:hover {
+        border-color: #9CA3AF;
+        background: #F3F4F6;
     }
-    .loading-content {
+    .custom-checkbox input[type="checkbox"] {
+        display: none;
+    }
+    .custom-checkbox .checkmark {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 2px solid #D1D5DB;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.25s ease;
+        flex-shrink: 0;
         background: white;
-        padding: 40px;
-        border-radius: 16px;
-        text-align: center;
-        max-width: 400px;
     }
-    .loading-spinner {
-        width: 60px;
-        height: 60px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #4F46E5;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin: 0 auto 20px;
+    .custom-checkbox .emoji {
+        font-size: 16px;
     }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+
+    /* Quando selecionado */
+    .custom-checkbox.checked {
+        border-color: #60A5FA;
+        background: #EFF6FF;
+        color: #1E40AF;
     }
+    .custom-checkbox.checked .checkmark {
+        border-color: #3B82F6;
+        background: #3B82F6;
+    }
+    .custom-checkbox.checked:hover {
+        border-color: #3B82F6;
+        background: #DBEAFE;
+    }
+
+    .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px 0;
+    }
+
+    .observacao-field {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed #E5E7EB;
+    }
+    .observacao-field textarea {
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
     .perfil-card {
         background: #f8fafc;
         border-radius: 12px;
@@ -70,6 +108,47 @@
     .checkbox-grid .form-check:hover {
         background: #eef2ff;
     }
+
+    .section-title {
+        font-weight: 600;
+        font-size: 15px;
+        color: #1F2937;
+        margin-bottom: 8px;
+    }
+    .section-title i {
+        color: #4F46E5;
+        margin-right: 8px;
+    }
+
+    /* Botão com spinner */
+    .btn-ia {
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+        padding: 12px 30px;
+        font-weight: 600;
+        font-size: 16px;
+        border-radius: 8px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-ia:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        color: white;
+    }
+    .btn-ia:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    .btn-ia .spinner-border {
+        width: 20px;
+        height: 20px;
+        border-width: 2px;
+    }
 </style>
 {% endblock %}
 
@@ -80,10 +159,12 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1 class="display-6">
-                        <i class="fas fa-robot text-primary"></i> Gerar Recomendação com IA
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-robot text-primary"></i>
+                        Gerar Recomendação
                     </h1>
                     <p class="text-muted">
-                        A IA vai analisar o perfil do aluno e recomendar as melhores tecnologias assistivas
+                        Selecione as características do aluno para a IA gerar recomendações personalizadas
                     </p>
                 </div>
                 <a href="{% url 'detalhe_estudante' estudante.id %}" class="btn btn-secondary">
@@ -163,7 +244,7 @@
 
         <!-- Formulário de Recomendação -->
         <div class="col-md-8">
-            <form id="recomendacaoForm" method="post">
+            <form id="recomendacaoForm" method="post" action="{% url 'gerar_recomendacao' estudante.id %}">
                 {% csrf_token %}
 
                 <div class="card shadow-sm mb-4">
@@ -173,6 +254,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
+                        <!-- Área Principal e Prioridade -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="area_principal" class="form-label">Área Principal de Apoio</label>
@@ -195,37 +277,211 @@
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-12 mb-3">
-                                <label for="interesses" class="form-label">Interesses Específicos do Aluno</label>
-                                <input type="text" class="form-control" id="interesses" name="interesses"
-                                       placeholder="Ex: Música, desenhos, animais..."
-                                       value="{{ perfil_tea.interesses|default:'' }}">
+                        <!-- ============ INTERESSES ESPECÍFICOS ============ -->
+                        <div class="mb-4">
+                            <div class="section-title"><i class="fas fa-heart"></i> Interesses Específicos do Aluno</div>
+                            <div class="tag-container" id="interessesContainer">
+                                <label class="custom-checkbox" id="interesse_musica">
+                                    <input type="checkbox" name="interesses_list" value="musica" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🎵</span> Música
+                                </label>
+                                <label class="custom-checkbox" id="interesse_desenhos">
+                                    <input type="checkbox" name="interesses_list" value="desenhos" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🎨</span> Desenhos
+                                </label>
+                                <label class="custom-checkbox" id="interesse_massinha">
+                                    <input type="checkbox" name="interesses_list" value="massinha" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🧶</span> Massinha
+                                </label>
+                                <label class="custom-checkbox" id="interesse_dinossauros">
+                                    <input type="checkbox" name="interesses_list" value="dinossauros" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🦕</span> Dinossauros
+                                </label>
+                                <label class="custom-checkbox" id="interesse_pintura">
+                                    <input type="checkbox" name="interesses_list" value="pintura" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🖌️</span> Pintura
+                                </label>
+                                <label class="custom-checkbox" id="interesse_leitura">
+                                    <input type="checkbox" name="interesses_list" value="leitura" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">📚</span> Leitura
+                                </label>
+                                <label class="custom-checkbox" id="interesse_jogos">
+                                    <input type="checkbox" name="interesses_list" value="jogos" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🎮</span> Jogos
+                                </label>
+                                <label class="custom-checkbox" id="interesse_animais">
+                                    <input type="checkbox" name="interesses_list" value="animais" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🐾</span> Animais
+                                </label>
+                                <label class="custom-checkbox" id="interesse_natureza">
+                                    <input type="checkbox" name="interesses_list" value="natureza" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🌿</span> Natureza
+                                </label>
+                                <label class="custom-checkbox" id="interesse_tecnologia">
+                                    <input type="checkbox" name="interesses_list" value="tecnologia" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">💻</span> Tecnologia
+                                </label>
+                                <label class="custom-checkbox" id="interesse_esportes">
+                                    <input type="checkbox" name="interesses_list" value="esportes" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">⚽</span> Esportes
+                                </label>
+                                <label class="custom-checkbox" id="interesse_instrumentos">
+                                    <input type="checkbox" name="interesses_list" value="instrumentos" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🎹</span> Instrumentos
+                                </label>
+                            </div>
+                            <input type="hidden" name="interesses" id="interessesInput" value="">
+                            <div class="observacao-field">
+                                <label for="interesses_observacao" class="form-label small text-muted">Outros interesses (opcional)</label>
+                                <input type="text" class="form-control form-control-sm" id="interesses_observacao" name="interesses_observacao"
+                                       placeholder="Digite outros interesses do aluno..." style="font-size: 13px;">
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-12 mb-3">
-                                <label for="sensibilidades" class="form-label">Sensibilidades Sensoriais</label>
-                                <input type="text" class="form-control" id="sensibilidades" name="sensibilidades"
-                                       placeholder="Ex: Sons altos, luzes fortes, texturas..."
-                                       value="{{ perfil_tea.sensibilidades|default:'' }}">
+                        <!-- ============ SENSIBILIDADES SENSORIAIS ============ -->
+                        <div class="mb-4">
+                            <div class="section-title"><i class="fas fa-eye"></i> Sensibilidades Sensoriais</div>
+                            <div class="tag-container" id="sensibilidadesContainer">
+                                <label class="custom-checkbox" id="sensibilidade_sons_altos">
+                                    <input type="checkbox" name="sensibilidades_list" value="sons_altos" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🔊</span> Sons altos
+                                </label>
+                                <label class="custom-checkbox" id="sensibilidade_luzes_fortes">
+                                    <input type="checkbox" name="sensibilidades_list" value="luzes_fortes" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">💡</span> Luzes fortes
+                                </label>
+                                <label class="custom-checkbox" id="sensibilidade_texturas">
+                                    <input type="checkbox" name="sensibilidades_list" value="texturas" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🧵</span> Texturas
+                                </label>
+                                <label class="custom-checkbox" id="sensibilidade_multidoes">
+                                    <input type="checkbox" name="sensibilidades_list" value="multidoes" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">👥</span> Multidões
+                                </label>
+                                <label class="custom-checkbox" id="sensibilidade_cheiros">
+                                    <input type="checkbox" name="sensibilidades_list" value="cheiros" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">👃</span> Cheiros fortes
+                                </label>
+                                <label class="custom-checkbox" id="sensibilidade_toque">
+                                    <input type="checkbox" name="sensibilidades_list" value="toque" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🤝</span> Toque físico
+                                </label>
+                                <label class="custom-checkbox" id="sensibilidade_movimento">
+                                    <input type="checkbox" name="sensibilidades_list" value="movimento" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🌀</span> Movimento
+                                </label>
+                                <label class="custom-checkbox" id="sensibilidade_comidas">
+                                    <input type="checkbox" name="sensibilidades_list" value="comidas" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🍽️</span> Comidas
+                                </label>
+                                <label class="custom-checkbox" id="sensibilidade_rotina">
+                                    <input type="checkbox" name="sensibilidades_list" value="rotina" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🔄</span> Mudanças na rotina
+                                </label>
+                                <label class="custom-checkbox" id="sensibilidade_temperatura">
+                                    <input type="checkbox" name="sensibilidades_list" value="temperatura" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🌡️</span> Temperatura
+                                </label>
+                            </div>
+                            <input type="hidden" name="sensibilidades" id="sensibilidadesInput" value="">
+                            <div class="observacao-field">
+                                <label for="sensibilidades_observacao" class="form-label small text-muted">Outras sensibilidades (opcional)</label>
+                                <input type="text" class="form-control form-control-sm" id="sensibilidades_observacao" name="sensibilidades_observacao"
+                                       placeholder="Digite outras sensibilidades do aluno..." style="font-size: 13px;">
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-12 mb-3">
-                                <label for="recursos" class="form-label">Recursos Disponíveis na Escola</label>
-                                <input type="text" class="form-control" id="recursos" name="recursos"
-                                       placeholder="Ex: Tablet, impressora, computador, materiais recicláveis...">
+                        <!-- ============ RECURSOS DISPONÍVEIS ============ -->
+                        <div class="mb-4">
+                            <div class="section-title"><i class="fas fa-tools"></i> Recursos Disponíveis na Escola</div>
+                            <div class="tag-container" id="recursosContainer">
+                                <label class="custom-checkbox" id="recurso_tablet">
+                                    <input type="checkbox" name="recursos_list" value="tablet" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">📱</span> Tablet
+                                </label>
+                                <label class="custom-checkbox" id="recurso_computador">
+                                    <input type="checkbox" name="recursos_list" value="computador" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">💻</span> Computador
+                                </label>
+                                <label class="custom-checkbox" id="recurso_impressora">
+                                    <input type="checkbox" name="recursos_list" value="impressora" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🖨️</span> Impressora
+                                </label>
+                                <label class="custom-checkbox" id="recurso_lousa">
+                                    <input type="checkbox" name="recursos_list" value="lousa_digital" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">📝</span> Lousa Digital
+                                </label>
+                                <label class="custom-checkbox" id="recurso_reciclaveis">
+                                    <input type="checkbox" name="recursos_list" value="reciclaveis" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">♻️</span> Materiais Recicláveis
+                                </label>
+                                <label class="custom-checkbox" id="recurso_livros">
+                                    <input type="checkbox" name="recursos_list" value="livros" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">📚</span> Livros
+                                </label>
+                                <label class="custom-checkbox" id="recurso_jogos">
+                                    <input type="checkbox" name="recursos_list" value="jogos_educativos" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🎲</span> Jogos Educativos
+                                </label>
+                                <label class="custom-checkbox" id="recurso_instrumentos">
+                                    <input type="checkbox" name="recursos_list" value="instrumentos_musicais" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🎵</span> Instrumentos Musicais
+                                </label>
+                                <label class="custom-checkbox" id="recurso_arte">
+                                    <input type="checkbox" name="recursos_list" value="arte" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">🎨</span> Materiais de Arte
+                                </label>
+                                <label class="custom-checkbox" id="recurso_esporte">
+                                    <input type="checkbox" name="recursos_list" value="esporte" onchange="toggleCheckbox(this)">
+                                    <span class="checkmark"></span>
+                                    <span class="emoji">⚽</span> Materiais Esportivos
+                                </label>
+                            </div>
+                            <input type="hidden" name="recursos" id="recursosInput" value="">
+                            <div class="observacao-field">
+                                <label for="recursos_observacao" class="form-label small text-muted">Outros recursos (opcional)</label>
+                                <input type="text" class="form-control form-control-sm" id="recursos_observacao" name="recursos_observacao"
+                                       placeholder="Digite outros recursos disponíveis..." style="font-size: 13px;">
                             </div>
                         </div>
 
                         <hr>
 
+                        <!-- Áreas de Atenção -->
                         <div class="row">
                             <div class="col-12">
-                                <label class="form-label">Áreas de Atenção (selecione as relevantes)</label>
+                                <div class="section-title"><i class="fas fa-check-circle"></i> Áreas de Atenção</div>
                                 <div class="checkbox-grid">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="areas" value="comunicacao" checked>
@@ -257,38 +513,105 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-lg w-100" id="gerarBtn">
-                    <i class="fas fa-star ia-sparkle"></i> Gerar Recomendações com IA
+                <button type="submit"
+                        class="btn btn-primary btn-lg w-100"
+                        id="gerarBtn"
+                        style="background: linear-gradient(135deg, #4F46E5, #7C3AED);
+                               border: none;
+                               padding: 14px 30px;
+                               font-weight: 600;
+                               font-size: 16px;
+                               border-radius: 8px;
+                               color: white;
+                               display: inline-flex;
+                               align-items: center;
+                               justify-content: center;
+                               gap: 10px;">
+                    <span class="btn-text" id="btnText">
+                        <i class="fas fa-star" style="color: #FCD34D;"></i>
+
+                        Gerar Recomendação com IA
+                    </span>
+                    <span class="spinner-border spinner-border-sm" id="btnSpinner" style="display: none;" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </span>
                 </button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Loading Overlay
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-content">
-        <div class="loading-spinner"></div>
-        <h4>🤖 Gerando Recomendações...</h4>
-        <p class="text-muted">A IA está analisando o perfil do aluno e selecionando as melhores tecnologias assistivas.</p>
-        <div class="progress mt-3">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
-        </div>
-        <p class="text-muted small mt-2">Isso pode levar alguns segundos...</p>
-    </div>
-</div>
-
--->
-
 <script>
+// ============ FUNÇÃO TOGGLE CHECKBOX ============
+function toggleCheckbox(input) {
+    const label = input.closest('.custom-checkbox');
+    if (input.checked) {
+        label.classList.add('checked');
+    } else {
+        label.classList.remove('checked');
+    }
+    atualizarInput(input.name.replace('_list', ''));
+}
+
+// ============ ATUALIZAR INPUT OCULTO ============
+function atualizarInput(categoria) {
+    const categoriaMap = {
+        'interesses': 'interesses_list',
+        'sensibilidades': 'sensibilidades_list',
+        'recursos': 'recursos_list'
+    };
+
+    const inputName = categoriaMap[categoria] || categoria + '_list';
+    const checkboxes = document.querySelectorAll(`input[name="${inputName}"]:checked`);
+    const valores = Array.from(checkboxes).map(cb => cb.value);
+
+    const input = document.getElementById(categoria + 'Input');
+    if (input) {
+        input.value = valores.join(', ');
+    }
+
+    // Também pegar observações
+    const observacao = document.getElementById(categoria + '_observacao');
+    if (observacao && observacao.value.trim()) {
+        if (input && input.value) {
+            input.value += ', ' + observacao.value.trim();
+        } else if (input) {
+            input.value = observacao.value.trim();
+        }
+    }
+}
+
+// ============ INICIALIZAR CHECKBOXES ============
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.custom-checkbox input[type="checkbox"]').forEach(input => {
+        if (input.checked) {
+            input.closest('.custom-checkbox').classList.add('checked');
+        }
+    });
+});
+
+// ============ ESCUTAR MUDANÇAS NAS OBSERVAÇÕES ============
+document.querySelectorAll('.observacao-field input').forEach(input => {
+    const categoria = input.id.replace('_observacao', '');
+    input.addEventListener('input', function() {
+        atualizarInput(categoria);
+    });
+});
+
+// ============ ENVIO DO FORMULÁRIO ============
 document.getElementById('recomendacaoForm').addEventListener('submit', function(e) {
-    // Mostrar loading
-    document.getElementById('loadingOverlay').classList.add('active');
+    const btn = document.getElementById('gerarBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
 
     // Desabilitar botão
-    const btn = document.getElementById('gerarBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Gerando...';
+
+    // Esconder texto
+    btnText.style.display = 'none';
+
+    // Mostrar spinner
+    btnSpinner.style.display = 'inline-block';
 });
 </script>
 {% endblock %}

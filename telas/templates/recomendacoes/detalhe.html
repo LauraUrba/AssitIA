@@ -6,36 +6,96 @@
 
 {% block extra_css %}
 <style>
+    /* ===== ESTILOS DOS CARDS DE RECOMENDAÇÃO ===== */
+    .recomendacoes-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .recomendacoes-count {
+        background: #EEF2FF;
+        color: #4338CA;
+        font-weight: 700;
+        font-size: 13px;
+        padding: 6px 16px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .recomendacoes-lista {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        margin-top: 18px;
+    }
+
     .recomendacao-card {
-        border-radius: 12px;
-        border-left: 5px solid #4F46E5;
-        transition: transform 0.2s;
-        margin-bottom: 16px;
-        background: white;
+        border-radius: 16px;
+        border: 1px solid #E5E7EB;
+        border-left: 6px solid #4F46E5;
+        background: #FFFFFF;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        overflow: hidden;
     }
     .recomendacao-card:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 28px rgba(0,0,0,0.10);
     }
     .recomendacao-card.rank-1 { border-left-color: #F59E0B; }
     .recomendacao-card.rank-2 { border-left-color: #9CA3AF; }
     .recomendacao-card.rank-3 { border-left-color: #EF4444; }
-    .recomendacao-card .rank-badge {
-        font-size: 14px;
-        font-weight: 700;
-        padding: 4px 12px;
-        border-radius: 20px;
-        display: inline-block;
+    .recomendacao-card.rank-other { border-left-color: #4F46E5; }
+
+    .recomendacao-card .card-body {
+        padding: 24px 26px 22px;
     }
-    .recomendacao-card .rank-badge.rank-1 { background: #F59E0B; color: white; }
-    .recomendacao-card .rank-badge.rank-2 { background: #9CA3AF; color: white; }
-    .recomendacao-card .rank-badge.rank-3 { background: #EF4444; color: white; }
-    .recomendacao-card .rank-badge.rank-other { background: #E5E7EB; color: #4B5563; }
+
+    /* ---- Cabeçalho do card ---- */
+    .rec-card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+    }
+    .rank-badge {
+        font-size: 13px;
+        font-weight: 700;
+        padding: 5px 14px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        color: white;
+        white-space: nowrap;
+    }
+    .rank-badge.rank-1 { background: #F59E0B; }
+    .rank-badge.rank-2 { background: #9CA3AF; }
+    .rank-badge.rank-3 { background: #EF4444; }
+    .rank-badge.rank-other { background: #4F46E5; }
+
+    .rec-card-title-group h5 {
+        margin: 0;
+        font-weight: 700;
+        color: #111827;
+    }
+    .rec-card-badges {
+        margin-top: 8px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
 
     .tech-category {
         display: inline-block;
-        padding: 4px 12px;
-        border-radius: 20px;
+        padding: 4px 14px;
+        border-radius: 999px;
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
@@ -47,79 +107,116 @@
     .tech-category.cognitivo { background: #EDE9FE; color: #5B21B6; }
     .tech-category.interacao_social { background: #FCE4EC; color: #9C27B0; }
     .tech-category.estruturacao { background: #E0F2FE; color: #0369A1; }
-    .tech-category.online { background: #E0F2FE; color: #0369A1; }
+    .tech-category.online { background: #F3F4F6; color: #4B5563; }
 
+    .fonte-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: #DBEAFE;
+        color: #1E40AF;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* ---- Blocos de detalhe ---- */
     .detail-item {
         background: #F9FAFB;
-        border-radius: 8px;
-        padding: 10px 14px;
-        margin-top: 6px;
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-top: 10px;
     }
     .detail-item strong {
         color: #4F46E5;
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 6px;
         font-size: 12px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     .detail-item p {
-        margin: 4px 0 0 0;
+        margin: 6px 0 0 0;
         font-size: 14px;
         color: #1F2937;
+        line-height: 1.5;
     }
-    .fonte-badge {
-        font-size: 11px;
-        padding: 2px 10px;
-        border-radius: 12px;
-        background: #E5E7EB;
-        color: #4B5563;
+    .detail-item .link-internet {
+        color: #4F46E5;
+        word-break: break-all;
+        font-weight: 500;
+        text-decoration: none;
     }
-    .fonte-badge.ia { background: #DBEAFE; color: #1E40AF; }
-    .fonte-badge.internet { background: #D1FAE5; color: #065F46; }
-    .fonte-badge.catalogo { background: #FEF3C7; color: #92400E; }
+    .detail-item .link-internet:hover {
+        color: #4338CA;
+        text-decoration: underline;
+    }
 
     .justificativa-box {
         background: #F3F4F6;
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 12px 16px;
-        margin-top: 8px;
+        margin-top: 14px;
         font-size: 14px;
         color: #4B5563;
         border-left: 3px solid #4F46E5;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
     }
-    .justificativa-box i {
-        color: #4F46E5;
-        margin-right: 8px;
-    }
-    .feedback-btn {
-        padding: 4px 12px;
-        font-size: 12px;
-        border-radius: 20px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .feedback-btn.aceita { background: #10B981; color: white; }
-    .feedback-btn.aceita:hover { background: #059669; }
-    .feedback-btn.a_testar { background: #F59E0B; color: white; }
-    .feedback-btn.a_testar:hover { background: #D97706; }
-    .feedback-btn.rejeitada { background: #EF4444; color: white; }
-    .feedback-btn.rejeitada:hover { background: #DC2626; }
-    .feedback-btn.detalhes { background: #4F46E5; color: white; }
-    .feedback-btn.detalhes:hover { background: #4338CA; }
+    .justificativa-box i { color: #4F46E5; margin-top: 2px; }
 
-    .link-internet {
-        color: #4F46E5;
-        word-break: break-all;
+    /* ===== BOTÕES DE FEEDBACK — reforçados com !important ===== */
+    .btn-group-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #E5E7EB;
     }
-    .link-internet:hover {
-        color: #4338CA;
+    .btn-group-actions .feedback-btn {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        padding: 9px 20px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        border-radius: 999px !important;
+        border: none !important;
+        outline: none !important;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #FFFFFF !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
     }
+    .btn-group-actions .feedback-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+        color: #FFFFFF !important;
+    }
+    .btn-group-actions .feedback-btn:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(79,70,229,0.25);
+    }
+    .btn-group-actions .feedback-btn.aceita   { background: #10B981 !important; }
+    .btn-group-actions .feedback-btn.aceita:hover   { background: #059669 !important; }
+    .btn-group-actions .feedback-btn.a_testar { background: #F59E0B !important; }
+    .btn-group-actions .feedback-btn.a_testar:hover { background: #D97706 !important; }
+    .btn-group-actions .feedback-btn.rejeitada { background: #EF4444 !important; }
+    .btn-group-actions .feedback-btn.rejeitada:hover { background: #DC2626 !important; }
+    .btn-group-actions .feedback-btn.detalhes  { background: #4F46E5 !important; }
+    .btn-group-actions .feedback-btn.detalhes:hover  { background: #4338CA !important; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
+    <!-- Cabeçalho da página -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="display-6">
@@ -146,38 +243,48 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow-sm">
-                <div class="card-header bg-white">
+                <div class="card-header bg-white recomendacoes-header">
                     <h5 class="mb-0">
                         <i class="fas fa-microchip text-primary"></i>
                         Tecnologias Recomendadas pela IA
                     </h5>
+                    {% if tecnologias_recomendadas %}
+                    <span class="recomendacoes-count">
+                        <i class="fas fa-list-ol"></i>
+                        {{ tecnologias_recomendadas|length }} recomendaç{{ tecnologias_recomendadas|length|pluralize:"ão,ões" }}
+                    </span>
+                    {% endif %}
                 </div>
                 <div class="card-body">
                     {% if tecnologias_recomendadas %}
+                        <div class="recomendacoes-lista">
                         {% for rec_ta in tecnologias_recomendadas %}
-                            <div class="card recomendacao-card rank-{{ rec_ta.posicao_ranking }}">
+                            <!-- ===== CARD DE RECOMENDAÇÃO ===== -->
+                            <div class="recomendacao-card rank-{% if rec_ta.posicao_ranking <= 3 %}rank-{{ rec_ta.posicao_ranking }}{% else %}other{% endif %}">
                                 <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                <span class="rank-badge rank-{% if rec_ta.posicao_ranking <= 3 %}rank-{{ rec_ta.posicao_ranking }}{% else %}other{% endif %}">
-                                                    {% if rec_ta.posicao_ranking == 1 %}🥇 #1
-                                                    {% elif rec_ta.posicao_ranking == 2 %}🥈 #2
-                                                    {% elif rec_ta.posicao_ranking == 3 %}🥉 #3
-                                                    {% else %}#{{ rec_ta.posicao_ranking }}{% endif %}
-                                                </span>
-                                                <h5 class="mb-0">{{ rec_ta.ta.nome }}</h5>
-                                            </div>
-                                            <div class="mt-1">
+
+                                    <div class="rec-card-top">
+                                        <span class="rank-badge rank-{% if rec_ta.posicao_ranking <= 3 %}rank-{{ rec_ta.posicao_ranking }}{% else %}other{% endif %}">
+                                            {% if rec_ta.posicao_ranking == 1 %}🥇 #1
+                                            {% elif rec_ta.posicao_ranking == 2 %}🥈 #2
+                                            {% elif rec_ta.posicao_ranking == 3 %}🥉 #3
+                                            {% else %}#{{ rec_ta.posicao_ranking }}{% endif %}
+                                        </span>
+
+                                        <div class="rec-card-title-group">
+                                            <h5>
+                                                {% if rec_ta.ta.categoria == 'online' %}🌐 {% endif %}{{ rec_ta.ta.nome|cut:"🌐 "|cut:"🌐"|cut:"🔗 "|cut:"🔗" }}
+                                            </h5>
+                                            <div class="rec-card-badges">
                                                 <span class="tech-category {{ rec_ta.ta.categoria }}">
                                                     {{ rec_ta.ta.get_categoria_display }}
                                                 </span>
-                                                <span class="fonte-badge ia">🤖 IA</span>
+                                                <span class="fonte-badge">🤖 IA</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Descrição completa -->
+                                    <!-- Descrição -->
                                     <div class="detail-item">
                                         <strong><i class="fas fa-info-circle"></i> Descrição</strong>
                                         <p>{{ rec_ta.ta.descricao|default:"Tecnologia assistiva recomendada." }}</p>
@@ -185,54 +292,62 @@
 
                                     <!-- Materiais -->
                                     {% if rec_ta.ta.materiais %}
-                                        <div class="detail-item">
-                                            <strong><i class="fas fa-box"></i> Materiais</strong>
-                                            <p>{{ rec_ta.ta.materiais }}</p>
-                                        </div>
+                                    <div class="detail-item">
+                                        <strong><i class="fas fa-box"></i> Materiais</strong>
+                                        <p>{{ rec_ta.ta.materiais }}</p>
+                                    </div>
                                     {% endif %}
 
                                     <!-- Como Fazer -->
                                     {% if rec_ta.ta.como_fazer %}
-                                        <div class="detail-item">
-                                            <strong><i class="fas fa-hammer"></i> Como Fazer</strong>
-                                            <p>{{ rec_ta.ta.como_fazer }}</p>
-                                        </div>
+                                    <div class="detail-item">
+                                        <strong><i class="fas fa-hammer"></i> Como Fazer</strong>
+                                        <p>{{ rec_ta.ta.como_fazer|linebreaks }}</p>
+                                    </div>
                                     {% endif %}
 
                                     <!-- Como Usar -->
                                     {% if rec_ta.ta.como_usar %}
-                                        <div class="detail-item">
-                                            <strong><i class="fas fa-play"></i> Como Usar</strong>
-                                            <p>{{ rec_ta.ta.como_usar }}</p>
-                                        </div>
+                                    <div class="detail-item">
+                                        <strong><i class="fas fa-play"></i> Como Usar</strong>
+                                        <p>{{ rec_ta.ta.como_usar|linebreaks }}</p>
+                                    </div>
                                     {% endif %}
 
                                     <!-- Para Que Serve -->
                                     {% if rec_ta.ta.para_que_serve %}
-                                        <div class="detail-item" style="border-left: 3px solid #10B981;">
-                                            <strong><i class="fas fa-bullseye"></i> Para Que Serve</strong>
-                                            <p>{{ rec_ta.ta.para_que_serve }}</p>
-                                        </div>
+                                    <div class="detail-item">
+                                        <strong><i class="fas fa-bullseye"></i> Para Que Serve</strong>
+                                        <p>{{ rec_ta.ta.para_que_serve|linebreaks }}</p>
+                                    </div>
                                     {% endif %}
 
-                                    <!-- Link (se for recurso online) -->
+                                    <!-- Link (ícone único, sem duplicar globo) -->
                                     {% if rec_ta.ta.categoria == 'online' and rec_ta.ta.exemplos_uso %}
-                                        <div class="detail-item" style="border-left: 3px solid #4F46E5;">
-                                            <strong><i class="fas fa-globe"></i> Link</strong>
-                                            <p><a href="{{ rec_ta.ta.exemplos_uso }}" target="_blank" class="link-internet">{{ rec_ta.ta.exemplos_uso }}</a></p>
-                                        </div>
+                                    <div class="detail-item">
+                                        <strong><i class="fas fa-link"></i> Link</strong>
+                                        <p>
+                                            <a href="{{ rec_ta.ta.exemplos_uso }}"
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                               class="link-internet">
+                                                {{ rec_ta.ta.exemplos_uso }}
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </p>
+                                    </div>
                                     {% endif %}
 
                                     <!-- Justificativa -->
                                     {% if rec_ta.justificativa %}
-                                        <div class="justificativa-box">
-                                            <i class="fas fa-quote-left"></i>
-                                            {{ rec_ta.justificativa }}
-                                        </div>
+                                    <div class="justificativa-box">
+                                        <i class="fas fa-quote-left"></i>
+                                        <span>{{ rec_ta.justificativa }}</span>
+                                    </div>
                                     {% endif %}
 
                                     <!-- Botões de ação -->
-                                    <div class="mt-3 d-flex gap-2 flex-wrap">
+                                    <div class="btn-group-actions">
                                         <button class="feedback-btn aceita" onclick="darFeedback('{{ rec_ta.id }}', 'aceita')">
                                             <i class="fas fa-check"></i> Aceitar
                                         </button>
@@ -248,7 +363,9 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- ===== FIM DO CARD ===== -->
                         {% endfor %}
+                        </div>
                     {% else %}
                         <div class="text-center py-4">
                             <i class="fas fa-microchip fa-3x text-muted mb-3"></i>
@@ -259,7 +376,7 @@
             </div>
         </div>
 
-        <!-- Sidebar com informações do aluno -->
+        <!-- Sidebar Aluno (inalterado) -->
         <div class="col-lg-4">
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-white">
@@ -290,7 +407,7 @@
     </div>
 </div>
 
-<!-- Modal de Detalhes da Tecnologia -->
+<!-- Modal (inalterado) -->
 <div class="modal fade" id="techModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -315,12 +432,11 @@
 </div>
 
 <script>
-// Dados das tecnologias para o modal
 const tecnologiasData = [
     {% for rec_ta in tecnologias_recomendadas %}
     {
         id: '{{ rec_ta.ta.id }}',
-        nome: '{{ rec_ta.ta.nome|escapejs }}',
+        nome: '{{ rec_ta.ta.nome|cut:"🌐 "|cut:"🌐"|cut:"🔗 "|cut:"🔗"|escapejs }}',
         categoria: '{{ rec_ta.ta.categoria }}',
         categoria_display: '{{ rec_ta.ta.get_categoria_display }}',
         descricao: '{{ rec_ta.ta.descricao|escapejs|default:"Sem descrição" }}',
@@ -351,7 +467,7 @@ function darFeedback(recomendacaoTaId, avaliacao) {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('/app/recomendacoes/feedback/', {
+            fetch('/telas/recomendacoes/feedback/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -387,7 +503,7 @@ function abrirModal(id) {
 
     modalBody.innerHTML = `
         <div class="mb-3">
-            <h4>${tech.nome}</h4>
+            <h4>${tech.categoria === 'online' ? '🌐 ' : ''}${tech.nome}</h4>
             <span class="tech-category ${tech.categoria}">${tech.categoria_display}</span>
         </div>
 

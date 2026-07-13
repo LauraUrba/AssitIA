@@ -15,6 +15,7 @@ urlpatterns = [
 
     # Tecnologias
     path('tecnologias/catalogo/', views.catalogo_tecnologias, name='catalogo_tecnologias'),
+path('tecnologias/avaliar/', views.avaliar_tecnologia, name='avaliar_tecnologia'),
 
     # Recomendações
     path('recomendacoes/', views.lista_recomendacoes, name='lista_recomendacoes'),
@@ -22,7 +23,6 @@ urlpatterns = [
     path('recomendacoes/<uuid:id>/', views.detalhe_recomendacao, name='detalhe_recomendacao'),
     path('recomendacoes/<uuid:id>/arquivar/', views.arquivar_recomendacao, name='arquivar_recomendacao'),
     path('recomendacoes/<uuid:id>/excluir/', views.excluir_recomendacao, name='excluir_recomendacao'),
-    # <-- VERIFICAR SE ESTA LINHA EXISTE
     path('recomendacoes/salvar/', views.salvar_recomendacao, name='salvar_recomendacao'),
     path('recomendacoes/feedback/', views.salvar_feedback, name='salvar_feedback'),
 
@@ -35,4 +35,8 @@ urlpatterns = [
 
     # Perfil
     path('perfil/', views.perfil_usuario, name='perfil_usuario'),
+
+    # Segurança
+    path('seguranca/', views.dashboard_seguranca, name='dashboard_seguranca'),
+    path('seguranca/desbloquear-ip/<str:ip>/', views.desbloquear_ip_view, name='desbloquear_ip'),
 ]

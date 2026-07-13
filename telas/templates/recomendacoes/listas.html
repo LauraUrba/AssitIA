@@ -46,6 +46,73 @@
         background: #FEF2F2;
         color: #DC2626;
     }
+
+    .btn-ia {
+        background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
+        color: white !important;
+        border: none !important;
+        transition: all 0.3s ease;
+        padding: 10px 24px;
+        font-weight: 600;
+        font-size: 14px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-ia:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4) !important;
+        color: white !important;
+        background: linear-gradient(135deg, #4338CA, #6D28D9) !important;
+    }
+
+    .btn-ia .fa-star {
+        color: #FCD34D;
+    }
+
+    .btn-ia .fa-robot {
+        color: white;
+    }
+
+    .ia-sparkle {
+        display: inline-block;
+        animation: sparkle 1.8s ease-in-out infinite;
+    }
+
+    @keyframes sparkle {
+        0%, 100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+        25% {
+            transform: scale(1.2) rotate(10deg);
+            opacity: 0.9;
+        }
+        50% {
+            transform: scale(1) rotate(-5deg);
+            opacity: 1;
+        }
+        75% {
+            transform: scale(0.9) rotate(5deg);
+            opacity: 0.8;
+        }
+    }
+
+    .ia-pulse {
+        animation: pulse-ia 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ia {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 15px rgba(79, 70, 229, 0);
+        }
+    }
 </style>
 {% endblock %}
 
@@ -62,8 +129,17 @@
                 recomendações geradas pela IA
             </p>
         </div>
-        <a href="{% url 'lista_estudantes' %}" class="btn btn-ia ia-pulse">
-            <i class="fas fa-star ia-sparkle"></i>
+        <a href="{% url 'lista_estudantes' %}" class="btn btn-primary ia-pulse"
+           style="background: linear-gradient(135deg, #4F46E5, #7C3AED);
+                  border: none;
+                  padding: 10px 24px;
+                  font-weight: 600;
+                  border-radius: 8px;
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 8px;
+                  color: white;">
+            <i class="fas fa-star ia-sparkle" style="color: #FCD34D;"></i>
             Nova Recomendação com IA
         </a>
     </div>

@@ -1,87 +1,262 @@
-<!-- telas/templates/perfil/perfil.html -->
 {% extends 'telas/base.html' %}
+{% load static %}
 
-{% block title %}Perfil - AssistIA{% endblock %}
+{% block title %}Meu Perfil - AssistIA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        font-size: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto;
+    }
+    .historico-table {
+        font-size: 14px;
+    }
+    .historico-table .badge {
+        font-size: 11px;
+    }
+    .card-perfil {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .card-perfil .card-header {
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .btn-salvar {
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        border: none;
+        transition: all 0.3s;
+    }
+    .btn-salvar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    }
+    .stat-number {
+        font-size: 28px;
+        font-weight: 700;
+    }
+    .stat-label {
+        color: #6B7280;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+    .divider {
+        border-top: 1px solid #E5E7EB;
+        margin: 20px 0;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm">
+            <!-- Card Principal do Perfil -->
+            <div class="card shadow-sm card-perfil">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-user-circle text-primary"></i> Meu Perfil</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle text-primary"></i> Meu Perfil
+                    </h5>
                 </div>
                 <div class="card-body">
+                    <!-- Avatar e Informações -->
                     <div class="text-center mb-4">
-                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
-                             style="width: 100px; height: 100px; font-size: 40px;">
+                        <div class="avatar-circle bg-primary text-white">
                             {{ user.nome|slice:":1"|upper }}
                         </div>
                         <h4 class="mt-2">{{ user.nome }}</h4>
                         <span class="badge bg-primary">{{ user.get_perfil_display }}</span>
-                        <p class="text-muted"><i class="fas fa-envelope"></i> {{ user.email }}</p>
+                        <p class="text-muted mt-1">
+                            <i class="fas fa-envelope"></i> {{ user.email }}
+                        </p>
+                        <p class="text-muted small">
+                            <i class="fas fa-calendar-alt"></i> Membro desde {{ user.criado_em|date:"d/m/Y" }}
+                        </p>
                     </div>
 
+                    <!-- Mensagens -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Formulário -->
                     <form method="post">
                         {% csrf_token %}
+
                         <div class="mb-3">
                             <label for="nome" class="form-label">Nome Completo</label>
-                            <input type="text" class="form-control" id="nome" name="nome" value="{{ user.nome }}" required>
+                            <input type="text" class="form-control" id="nome" name="nome"
+                                   value="{{ user.nome }}" required>
                         </div>
+
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   value="{{ user.email }}" required>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Perfil</label>
                             <input type="text" class="form-control" value="{{ user.get_perfil_display }}" disabled>
-                            <small class="text-muted">O perfil não pode ser alterado.</small>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> O perfil não pode ser alterado.
+                            </small>
                         </div>
 
-                        <hr>
-                        <h6 class="mb-3">Alterar Senha</h6>
+                        <hr class="divider">
+
+                        <h6 class="mb-3">
+                            <i class="fas fa-key text-primary"></i> Alterar Senha
+                        </h6>
 
                         <div class="mb-3">
                             <label for="senha_atual" class="form-label">Senha Atual</label>
-                            <input type="password" class="form-control" id="senha_atual" name="senha_atual">
-                        </div>
-                        <div class="mb-3">
-                            <label for="nova_senha" class="form-label">Nova Senha</label>
-                            <input type="password" class="form-control" id="nova_senha" name="nova_senha" placeholder="Mínimo 8 caracteres">
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirmar_senha" class="form-label">Confirmar Nova Senha</label>
-                            <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha">
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="senha_atual" name="senha_atual"
+                                       placeholder="Digite sua senha atual">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('senha_atual')">
+                                    <i class="fas fa-eye" id="eye_senha_atual"></i>
+                                </button>
+                            </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">
+                        <div class="mb-3">
+                            <label for="nova_senha" class="form-label">Nova Senha</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="nova_senha" name="nova_senha"
+                                       placeholder="Mínimo 8 caracteres">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('nova_senha')">
+                                    <i class="fas fa-eye" id="eye_nova_senha"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                A senha deve ter no mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais.
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmar_senha" class="form-label">Confirmar Nova Senha</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha"
+                                       placeholder="Confirme sua nova senha">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmar_senha')">
+                                    <i class="fas fa-eye" id="eye_confirmar_senha"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-salvar">
                             <i class="fas fa-save"></i> Atualizar Perfil
                         </button>
                     </form>
                 </div>
             </div>
 
-            <div class="card shadow-sm mt-4">
+            <!-- Histórico de Senhas -->
+            <div class="card shadow-sm mt-4 card-perfil">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar text-primary"></i> Estatísticas</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-history text-primary"></i> Histórico de Senhas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">
+                        <i class="fas fa-shield-alt text-primary"></i>
+                        Últimas 5 senhas alteradas. Não é permitido reutilizar senhas anteriores.
+                    </p>
+
+                    {% if historico_senhas %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover historico-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Data da Alteração</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for registro in historico_senhas %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <i class="fas fa-clock text-muted"></i>
+                                                {{ registro.created_at|date:"d/m/Y H:i" }}
+                                            </td>
+                                            <td>
+                                                {% if forloop.first %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check-circle"></i> Atual
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-clock"></i> Anterior
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Histórico mantém as últimas <strong>10 senhas</strong>. Senhas antigas são removidas automaticamente.
+                        </small>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Nenhum histórico de senhas encontrado.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="card shadow-sm mt-4 card-perfil">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar text-primary"></i> Estatísticas
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-3">
-                            <h3 class="text-primary">{{ total_estudantes|default:0 }}</h3>
-                            <p class="text-muted">Alunos</p>
+                            <div class="stat-number text-primary">{{ total_estudantes|default:0 }}</div>
+                            <div class="stat-label">
+                                <i class="fas fa-users"></i> Alunos
+                            </div>
                         </div>
                         <div class="col-3">
-                            <h3 class="text-success">{{ total_recomendacoes|default:0 }}</h3>
-                            <p class="text-muted">Recomendações</p>
+                            <div class="stat-number text-success">{{ total_recomendacoes|default:0 }}</div>
+                            <div class="stat-label">
+                                <i class="fas fa-star"></i> Recomendações
+                            </div>
                         </div>
                         <div class="col-3">
-                            <h3 class="text-info">{{ total_pei|default:0 }}</h3>
-                            <p class="text-muted">PEIs</p>
+                            <div class="stat-number text-info">{{ total_pei|default:0 }}</div>
+                            <div class="stat-label">
+                                <i class="fas fa-file-alt"></i> PEIs
+                            </div>
                         </div>
                         <div class="col-3">
-                            <h3 class="text-warning">{{ total_tecnologias|default:0 }}</h3>
-                            <p class="text-muted">Tecnologias</p>
+                            <div class="stat-number text-warning">{{ total_tecnologias|default:0 }}</div>
+                            <div class="stat-label">
+                                <i class="fas fa-microchip"></i> Tecnologias
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -90,19 +265,94 @@
     </div>
 </div>
 
+<!-- Scripts -->
 <script>
-document.querySelector('form').addEventListener('submit', function(e) {
-    const nova = document.getElementById('nova_senha').value;
-    const confirmar = document.getElementById('confirmar_senha').value;
+// Toggle password visibility
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const eyeIcon = document.getElementById('eye_' + inputId);
 
-    if (nova && nova !== confirmar) {
-        e.preventDefault();
-        Swal.fire({ icon: 'error', title: 'Erro', text: 'As senhas não coincidem!' });
+    if (input.type === 'password') {
+        input.type = 'text';
+        eyeIcon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        eyeIcon.className = 'fas fa-eye';
     }
-    if (nova && nova.length < 8) {
-        e.preventDefault();
-        Swal.fire({ icon: 'error', title: 'Erro', text: 'A nova senha deve ter no mínimo 8 caracteres!' });
+}
+
+// Validar senha antes de enviar
+document.querySelector('form').addEventListener('submit', function(e) {
+    const senhaAtual = document.getElementById('senha_atual').value;
+    const novaSenha = document.getElementById('nova_senha').value;
+    const confirmarSenha = document.getElementById('confirmar_senha').value;
+
+    // Se não está alterando senha, permitir
+    if (!novaSenha && !confirmarSenha && !senhaAtual) {
+        return;
     }
+
+    // Verificar se todos os campos de senha estão preenchidos
+    if (!senhaAtual || !novaSenha || !confirmarSenha) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'warning',
+            title: 'Campos incompletos',
+            text: 'Para alterar a senha, preencha todos os campos de senha.',
+            confirmButtonColor: '#4F46E5'
+        });
+        return;
+    }
+
+    // Verificar se as senhas coincidem
+    if (novaSenha !== confirmarSenha) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Senhas não coincidem',
+            text: 'A nova senha e a confirmação não são iguais.',
+            confirmButtonColor: '#4F46E5'
+        });
+        return;
+    }
+
+    // Verificar tamanho mínimo
+    if (novaSenha.length < 8) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Senha muito curta',
+            text: 'A nova senha deve ter no mínimo 8 caracteres.',
+            confirmButtonColor: '#4F46E5'
+        });
+        return;
+    }
+
+    // Verificar se a nova senha tem requisitos mínimos
+    const temMaiuscula = /[A-Z]/.test(novaSenha);
+    const temMinuscula = /[a-z]/.test(novaSenha);
+    const temNumero = /[0-9]/.test(novaSenha);
+    const temEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(novaSenha);
+
+    if (!temMaiuscula || !temMinuscula || !temNumero || !temEspecial) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Senha fraca',
+            html: 'A senha deve conter:<br>' +
+                  '• <strong>Letra maiúscula</strong> (A-Z)<br>' +
+                  '• <strong>Letra minúscula</strong> (a-z)<br>' +
+                  '• <strong>Número</strong> (0-9)<br>' +
+                  '• <strong>Caractere especial</strong> (!@#$%^&*)',
+            confirmButtonColor: '#4F46E5'
+        });
+        return;
+    }
+
+    // Se passou por todas as validações, mostrar loading
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Salvando...';
 });
 </script>
 {% endblock %}

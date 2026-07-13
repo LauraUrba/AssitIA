@@ -1,0 +1,32 @@
+<!-- telas/templates/admin/change_list.html -->
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content_title %}
+    <h1>Logs de Segurança - AssistIA</h1>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border-left: 4px solid #0d6efd;">
+            <h3 style="margin: 0; color: #0d6efd;">{{ total_logs }}</h3>
+            <p style="margin: 5px 0 0; color: #6c757d; font-size: 12px;">Total de Logs</p>
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border-left: 4px solid #198754;">
+            <h3 style="margin: 0; color: #198754;">{{ logs_hoje }}</h3>
+            <p style="margin: 5px 0 0; color: #6c757d; font-size: 12px;">Logs Hoje</p>
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border-left: 4px solid #dc3545;">
+            <h3 style="margin: 0; color: #dc3545;">{{ ataques }}</h3>
+            <p style="margin: 5px 0 0; color: #6c757d; font-size: 12px;">Ataques</p>
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border-left: 4px solid #ffc107;">
+            <h3 style="margin: 0; color: #856404;">{{ honeypots }}</h3>
+            <p style="margin: 5px 0 0; color: #6c757d; font-size: 12px;">Honeypots</p>
+        </div>
+    </div>
+
+    {{ block.super }}
+</div>
+{% endblock %}

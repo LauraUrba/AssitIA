@@ -151,6 +151,60 @@ body {
     color: white;
 }
 
+
+.btn-ia {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+    padding: 14px 30px;
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 8px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-ia:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    color: white;
+    background: linear-gradient(135deg, #4338CA, #6D28D9);
+}
+
+.btn-ia:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-ia .spinner-border {
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+    border-color: white;
+    border-top-color: transparent;
+}
+
+.btn-ia .btn-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-ia .btn-text i {
+    color: #FCD34D;
+}
+
+.btn-ia .btn-text .fa-robot {
+    color: white;
+}
+
 .auth-links {
     text-align: center;
     margin-top: 24px;
@@ -244,6 +298,29 @@ body {
     font-weight: 600;
     color: var(--primary-color);
     font-size: 16px;
+}
+
+/* Honeypot - Esconder campo de forma segura */
+.honeypot-field {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Botão desabilitado após honeypot */
+.btn-danger {
+    background: #EF4444 !important;
+    border-color: #EF4444 !important;
+}
+
+.btn-danger:hover {
+    background: #DC2626 !important;
+    border-color: #DC2626 !important;
 }
 
 @media (max-width: 576px) {

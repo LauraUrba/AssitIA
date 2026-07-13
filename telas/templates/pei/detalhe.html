@@ -1,11 +1,59 @@
 <!-- telas/templates/pei/detalhe.html -->
 {% extends 'telas/base.html' %}
+{% load static %}
 
 {% block title %}Detalhe do PEI - AssistIA{% endblock %}
 
+{% block extra_css %}
+<style>
+    .btn-pdf {
+        background: #DC2626;
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-pdf:hover {
+        background: #B91C1C;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    .btn-pdf i {
+        margin-right: 8px;
+    }
+    .btn-print {
+        background: #6B7280;
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-print:hover {
+        background: #4B5563;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    }
+    .btn-print i {
+        margin-right: 8px;
+    }
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .btn-group {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <div>
             <h1 class="display-6"><i class="fas fa-file-alt text-primary"></i> PEI - {{ pei.estudante.nome }}</h1>
             <p class="text-muted">Versão {{ pei.versao }} - {{ pei.criado_em|date:"d/m/Y H:i" }}</p>
@@ -14,10 +62,24 @@
             <a href="{% url 'editar_pei' pei.id %}" class="btn btn-warning">
                 <i class="fas fa-edit"></i> Editar
             </a>
+            <a href="{% url 'gerar_pdf_pei' pei.id %}" target="_blank" class="btn btn-pdf btn-danger">
+                <i class="fas fa-file-pdf"></i> Baixar PDF
+            </a>
+            <button onclick="window.print()" class="btn btn-print btn-light ">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
             <a href="{% url 'lista_pei' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
         </div>
+    </div>
+
+    <!-- Versão para impressão (escondida normalmente, visível na impressão) -->
+    <div class="d-none d-print-block" style="text-align: center; margin-bottom: 20px;">
+        <h1>AssistIA</h1>
+        <h2>Plano Educacional Individualizado - PEI</h2>
+        <p>Gerado em: {% now "d/m/Y H:i" %}</p>
+        <hr>
     </div>
 
     <div class="card shadow-sm">
@@ -53,6 +115,14 @@
                 <p>Professor: {{ pei.professor.nome }}</p>
             </div>
         </div>
+    </div>
+
+    <!-- Rodapé para impressão -->
+    <div class="d-none d-print-block" style="text-align: center; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 10px;">
+        <p style="font-size: 12px; color: #666;">
+            AssistIA - Sistema de Recomendação de Tecnologias Assistivas<br>
+            Documento gerado automaticamente - {{ pei.criado_em|date:"d/m/Y" }}
+        </p>
     </div>
 </div>
 {% endblock %}
