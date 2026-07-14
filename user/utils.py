@@ -13,7 +13,7 @@ def send_otp(request, user):
     try:
         # Gerar chave secreta
         secret_key = pyotp.random_base32()
-        totp = pyotp.TOTP(secret_key, interval=300)  # 5 minutos
+        totp = pyotp.TOTP(secret_key, interval=300)
         otp_code = totp.now()
 
         # Salvar na sessão
@@ -21,11 +21,19 @@ def send_otp(request, user):
         request.session['otp_valid_date'] = (datetime.now() + timedelta(minutes=5)).isoformat()
         request.session['user_email'] = user.email
 
+        # LOG: Verificar configurações de email
+        logger.info(f"📧 Tentando enviar OTP para {user.email}")
+        logger.info(f"📧 EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
+        logger.info(f"📧 EMAIL_HOST_PASSWORD: {'*' * 4 if settings.EMAIL_HOST_PASSWORD else 'VAZIO'}")
+        logger.info(f"📧 EMAIL_PORT: {settings.EMAIL_PORT}")
+        logger.info(f"📧 EMAIL_USE_TLS: {settings.EMAIL_USE_TLS}")
+        logger.info(f"📧 EMAIL_USE_SSL: {settings.EMAIL_USE_SSL}")
+
         # Tentar enviar email
         try:
-            subject = '🔐 Código de Verificação - AssistIA'
-            message = f"""
-Olá, {user.nome}!
+            send_mail(
+                '🔐 Código de Verificação - AssistIA',
+                f"""Olá, {user.nome}!
 
 Seu código de verificação é: {otp_code}
 
@@ -34,30 +42,34 @@ Este código é válido por 5 minutos.
 Se você não solicitou este código, ignore este email.
 
 Atenciosamente,
-Equipe AssistIA
-"""
-            send_mail(
-                subject,
-                message,
+Equipe AssistIA""",
                 settings.DEFAULT_FROM_EMAIL,
                 [user.email],
                 fail_silently=False
             )
-            logger.info(f"OTP enviado para {user.email}")
+            logger.info(f"✅ OTP enviado com sucesso para {user.email}")
+
         except Exception as e:
-            # Se falhar o email, mostrar o código no terminal (desenvolvimento)
-            logger.warning(f"Erro ao enviar email: {e}")
-            print(f"\n{'=' * 50}")
-            print(f"CÓDIGO PARA {user.email}")
-            print(f"Código: {otp_code}")
-            print(f"⏱Válido por: 5 minutos")
-            print(f"{'=' * 50}\n")
+            # 🔥 FALLBACK: Mostrar no console para debug
+            logger.error(f"❌ ERRO ao enviar email: {str(e)}")
+            logger.error(f"❌ TIPO DO ERRO: {type(e).__name__}")
+
+            # Mostrar código no console
+            print(f"\n{'=' * 60}")
+            print(f"🔑 CÓDIGO DE VERIFICAÇÃO PARA {user.email}")
+            print(f"📝 Código: {otp_code}")
+            print(f"⏱ Válido por: 5 minutos")
+            print(f"📧 Configuração: {settings.EMAIL_HOST_USER} - Porta {settings.EMAIL_PORT}")
+            print(f"{'=' * 60}\n")
 
             # Salvar código na sessão para teste
             request.session['otp_code_debug'] = otp_code
 
+            # Não retorna False para não travar o login
+            # return True mesmo com erro para continuar o fluxo
+
         return True
 
     except Exception as e:
-        logger.error(f"Erro ao gerar OTP: {str(e)}")
+        logger.error(f"❌ Erro ao gerar OTP: {str(e)}")
         return False
