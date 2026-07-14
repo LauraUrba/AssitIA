@@ -531,6 +531,8 @@ Desafios: {perfil.desafios or 'N/I'}
     return render(request, 'recomendacoes/gerar.html', context)
 
 
+# telas/views.py - gerar_recomendacao_rapida
+
 def gerar_recomendacao_rapida(request, estudante, selecoes=None):
     """Gerar recomendação rápida usando catálogo priorizando áreas selecionadas"""
     try:
@@ -560,6 +562,7 @@ def gerar_recomendacao_rapida(request, estudante, selecoes=None):
                     categorias_para_buscar.append(mapa_categorias[area])
 
             if categorias_para_buscar:
+                # 🔥 BUSCAR 5 DE CADA CATEGORIA PRIORITÁRIA
                 tecs = TecnologiaAssistiva.objects.filter(
                     ativo=True,
                     criada_por_ia=False,
@@ -584,6 +587,8 @@ def gerar_recomendacao_rapida(request, estudante, selecoes=None):
     except Exception as e:
         messages.error(request, f'❌ Erro ao gerar recomendação: {str(e)}')
         return redirect('detalhe_estudante', id=estudante.id)
+
+
 
 def calcular_idade(data_nascimento):
     """Calcular idade em anos"""

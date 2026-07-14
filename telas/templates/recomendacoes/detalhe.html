@@ -168,7 +168,54 @@
     }
     .justificativa-box i { color: #4F46E5; margin-top: 2px; }
 
-    /* ===== BOTÕES DE FEEDBACK — reforçados com !important ===== */
+    /* ===== ALERTA DE FALLBACK ===== */
+    .fallback-alert {
+        background: #FEF3C7;
+        border: 1px solid #F59E0B;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .fallback-alert .icon {
+        font-size: 24px;
+        color: #F59E0B;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    .fallback-alert .content h5 {
+        margin: 0 0 4px 0;
+        color: #92400E;
+        font-weight: 700;
+    }
+    .fallback-alert .content p {
+        margin: 0;
+        color: #78350F;
+        font-size: 14px;
+    }
+    .fallback-alert .content .btn-regenerar {
+        margin-top: 10px;
+        background: #4F46E5;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .fallback-alert .content .btn-regenerar:hover {
+        background: #4338CA;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    /* ===== BOTÕES DE FEEDBACK ===== */
     .btn-group-actions {
         display: flex;
         gap: 10px;
@@ -240,6 +287,23 @@
         </div>
     </div>
 
+    <!-- ===== ALERTA DE FALLBACK ===== -->
+    {% if recomendacao.parametros_entrada == '{"fallback": "rapido"}' %}
+    <div class="fallback-alert">
+        <div class="icon">⏱️</div>
+        <div class="content">
+            <h5>Recomendação gerada com fallback</h5>
+            <p>
+                A IA não respondeu a tempo, mas geramos recomendações do catálogo para você.
+                As recomendações abaixo foram selecionadas com base nas áreas que você escolheu.
+            </p>
+            <a href="{% url 'gerar_recomendacao' recomendacao.estudante.id %}" class="btn-regenerar">
+                <i class="fas fa-sync"></i> Tentar gerar com IA novamente
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow-sm">
@@ -279,7 +343,11 @@
                                                 <span class="tech-category {{ rec_ta.ta.categoria }}">
                                                     {{ rec_ta.ta.get_categoria_display }}
                                                 </span>
+                                                {% if recomendacao.parametros_entrada == '{"fallback": "rapido"}' %}
+                                                <span class="fonte-badge" style="background: #FEF3C7; color: #92400E;">📋 Catálogo</span>
+                                                {% else %}
                                                 <span class="fonte-badge">🤖 IA</span>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
@@ -376,7 +444,7 @@
             </div>
         </div>
 
-        <!-- Sidebar Aluno (inalterado) -->
+        <!-- Sidebar Aluno -->
         <div class="col-lg-4">
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-white">
@@ -407,7 +475,7 @@
     </div>
 </div>
 
-<!-- Modal (inalterado) -->
+<!-- Modal -->
 <div class="modal fade" id="techModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
