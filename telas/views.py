@@ -337,6 +337,8 @@ def avaliar_tecnologia(request):
 
 # ============ RECOMENDAÇÕES ============
 
+# telas/views.py - Função gerar_recomendacao COMPLETA CORRIGIDA
+
 @login_required
 def gerar_recomendacao(request, estudante_id):
     """Gerar recomendação de TA para um estudante usando a API com dados dos checkboxes"""
@@ -367,57 +369,70 @@ def gerar_recomendacao(request, estudante_id):
             areas_atencao = request.POST.getlist('areas')
             areas_texto = ', '.join(areas_atencao) if areas_atencao else 'Nao informadas'
 
-            # ============ CONSTRUIR DESCRIÇÃO ============
+            # ============ CONSTRUIR DESCRIÇÃO (MAIS CURTA PARA A API) ============
             descricao = f"""Aluno: {estudante.nome}
 Nível: {estudante.get_nivel_suporte_display()}
 Turma: {estudante.turma or 'N/I'}
 """
 
             if perfil:
+                # 🔥 PEGAR APENAS A PRIMEIRA FRASE DE CADA CAMPO
+                comunicacao = (perfil.comunicacao or 'N/I').split('.')[0][:150]
+                sensorial = (perfil.perfil_sensorial or 'N/I').split('.')[0][:150]
+                motor = (perfil.habilidade_motora or 'N/I').split('.')[0][:150]
+                cognitivo = (perfil.perfil_cognitivo or 'N/I').split('.')[0][:150]
+                desafios = (perfil.desafios or 'N/I').split('.')[0][:150]
+
                 descricao += f"""
-Comunicação: {perfil.comunicacao or 'N/I'}
-Sensorial: {perfil.perfil_sensorial or 'N/I'}
-Motor: {perfil.habilidade_motora or 'N/I'}
-Cognitivo: {perfil.perfil_cognitivo or 'N/I'}
-Desafios: {perfil.desafios or 'N/I'}
+Comunicação: {comunicacao}
+Sensorial: {sensorial}
+Motor: {motor}
+Cognitivo: {cognitivo}
+Desafios: {desafios}
 """
+
+            # 🔥 LIMITAR TAMANHO DOS CAMPOS PARA EVITAR ERRO DA API
+            interesses_limitado = (interesses or '')[:150]
+            sensibilidades_limitado = (sensibilidades or '')[:150]
+            recursos_limitado = (recursos or '')[:150]
+            areas_texto_limitado = areas_texto[:200]
 
             # ============ PAYLOAD PARA A API ============
             payload = {
-                "descricao_professor": descricao,
+                "descricao_professor": descricao[:600],  # ⬅️ LIMITADO A 600 CARACTERES
                 "idade_aluno": calcular_idade(estudante.data_nascimento) if estudante.data_nascimento else None,
                 "nivel_suporte": str(estudante.nivel_suporte),
-                "interesses_especificos": interesses,
-                "sensibilidades_sensoriais": sensibilidades,
+                "interesses_especificos": interesses_limitado,
+                "sensibilidades_sensoriais": sensibilidades_limitado,
                 "incluir_estruturas": True,
-                "recursos_disponiveis": recursos,
+                "recursos_disponiveis": recursos_limitado,
                 "buscar_online": True,
-                "comunicacao": perfil.comunicacao if perfil else None,
-                "motor": perfil.habilidade_motora if perfil else None,
-                "atencao": request.POST.get('atencao', ''),
-                "comportamentos": request.POST.get('comportamentos', ''),
+                "comunicacao": comunicacao[:150] if perfil else None,
+                "motor": motor[:150] if perfil else None,
+                "atencao": (request.POST.get('atencao', '') or '')[:150],
+                "comportamentos": (request.POST.get('comportamentos', '') or '')[:150],
                 "area_principal": area_principal,
                 "prioridade": prioridade,
-                "areas_atencao": areas_texto,
-                "interesses": interesses,
-                "sensibilidades": sensibilidades,
-                "recursos": recursos,
-                "interesses_observacao": interesses_observacao,
-                "sensibilidades_observacao": sensibilidades_observacao,
-                "recursos_observacao": recursos_observacao
+                "areas_atencao": areas_texto_limitado,
+                "interesses": interesses_limitado,
+                "sensibilidades": sensibilidades_limitado,
+                "recursos": recursos_limitado,
+                "interesses_observacao": (interesses_observacao or '')[:150],
+                "sensibilidades_observacao": (sensibilidades_observacao or '')[:150],
+                "recursos_observacao": (recursos_observacao or '')[:150]
             }
 
             # 🔥 SALVAR AS SELEÇÕES PARA USAR NO FALLBACK
             selecoes = {
                 'areas_atencao': areas_atencao,
-                'interesses': interesses,
-                'sensibilidades': sensibilidades,
-                'recursos': recursos,
+                'interesses': interesses_limitado,
+                'sensibilidades': sensibilidades_limitado,
+                'recursos': recursos_limitado,
                 'area_principal': area_principal,
                 'prioridade': prioridade
             }
 
-            # ============ CHAMAR API  ============
+            # ============ CHAMAR API ============
             api_url = 'https://api-assitia.onrender.com/analisar-aluno-tea/'
 
             import time
@@ -430,7 +445,7 @@ Desafios: {perfil.desafios or 'N/I'}
                         api_url,
                         json=payload,
                         headers={'Content-Type': 'application/json'},
-                        timeout=180  # 🔥 90 segundos por tentativa
+                        timeout=180
                     )
                     if response.status_code == 200:
                         break
@@ -460,15 +475,10 @@ Desafios: {perfil.desafios or 'N/I'}
                 analise = resultado_api.get('analise', '')
                 recursos_recomendados = extrair_recursos_da_analise(analise, selecoes)
 
-
                 # Salvar tecnologias recomendadas (ATÉ 11)
-                # telas/views.py - Substituir o bloco de salvar recomendações
-
                 for idx, recurso in enumerate(recursos_recomendados[:11], 1):
                     # 🔥 SE FOR LINK DA INTERNET
                     if recurso.get('link'):
-                        # 🔥 NÃO CRIAR NO CATÁLOGO! Apenas associar à recomendação
-                        # Buscar ou criar uma tecnologia "virtual" apenas para esta recomendação
                         ta, created = TecnologiaAssistiva.objects.get_or_create(
                             nome=f"🌐 {recurso.get('nome', f'Recurso Online {idx}')[:50]}",
                             defaults={
@@ -480,8 +490,8 @@ Desafios: {perfil.desafios or 'N/I'}
                                                          'Explore o recurso conforme as instruções do site'),
                                 'para_que_serve': recurso.get('para_que_serve',
                                                               'Tecnologia assistiva encontrada na internet'),
-                                'exemplos_uso': recurso.get('link', ''),  # Guardar o link aqui
-                                'criada_por_ia': True,  # 🔥 MARCAR COMO IA
+                                'exemplos_uso': recurso.get('link', ''),
+                                'criada_por_ia': True,
                                 'ativo': True
                             }
                         )
@@ -496,7 +506,7 @@ Desafios: {perfil.desafios or 'N/I'}
                                 'como_fazer': recurso.get('como_fazer', ''),
                                 'como_usar': recurso.get('como_usar', ''),
                                 'para_que_serve': recurso.get('para_que_serve', ''),
-                                'criada_por_ia': True,  # 🔥 MARCAR COMO IA
+                                'criada_por_ia': True,
                                 'ativo': True
                             }
                         )
@@ -529,6 +539,7 @@ Desafios: {perfil.desafios or 'N/I'}
         'tecnologias': TecnologiaAssistiva.objects.filter(ativo=True, criada_por_ia=False),
     }
     return render(request, 'recomendacoes/gerar.html', context)
+
 
 
 # telas/views.py - gerar_recomendacao_rapida
