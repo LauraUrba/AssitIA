@@ -15,7 +15,8 @@ urlpatterns = [
 
     # Tecnologias
     path('tecnologias/catalogo/', views.catalogo_tecnologias, name='catalogo_tecnologias'),
-path('tecnologias/avaliar/', views.avaliar_tecnologia, name='avaliar_tecnologia'),
+    path('tecnologias/avaliar/', views.avaliar_tecnologia, name='avaliar_tecnologia'),
+    path('executar-populate/', views.executar_populate, name='executar_populate'),
 
     # Recomendações
     path('recomendacoes/', views.lista_recomendacoes, name='lista_recomendacoes'),

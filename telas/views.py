@@ -905,6 +905,163 @@ def lista_recomendacoes(request):
     }
     return render(request, 'recomendacoes/listas.html', context)
 
+
+# ============ POPULAR CATÁLOGO ============
+
+@staff_member_required
+def executar_populate(request):
+    """View para executar o populate_catalogos.py no Render (sem shell)"""
+    from django.core.management import call_command
+    import io
+    import sys
+
+    try:
+        # Capturar a saída do comando
+        out = io.StringIO()
+        sys.stdout = out
+
+        # Executar o comando populate_catalogos
+        call_command('populate_catalogos')
+
+        # Restaurar stdout
+        sys.stdout = sys.__stdout__
+
+        resultado = out.getvalue()
+
+        return HttpResponse(f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Popular Catálogo</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 900px; margin: 50px auto; padding: 20px; background: #f3f4f6; }}
+                .container {{ background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+                h1 {{ color: #4F46E5; margin-top: 0; }}
+                h2 {{ color: #1F2937; font-size: 18px; margin: 20px 0 10px; }}
+                pre {{ 
+                    background: #1a1a1a; 
+                    color: #10B981; 
+                    padding: 20px; 
+                    border-radius: 8px; 
+                    overflow-x: auto; 
+                    font-size: 13px;
+                    max-height: 500px;
+                    overflow-y: auto;
+                    font-family: 'Courier New', monospace;
+                    line-height: 1.6;
+                }}
+                .btn-group {{ margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }}
+                .btn {{ 
+                    display: inline-block; 
+                    background: #4F46E5; 
+                    color: white; 
+                    padding: 12px 24px; 
+                    text-decoration: none; 
+                    border-radius: 8px; 
+                    font-weight: 600;
+                    transition: background 0.2s;
+                }}
+                .btn:hover {{ background: #4338CA; }}
+                .btn-secondary {{ background: #6B7280; }}
+                .btn-secondary:hover {{ background: #4B5563; }}
+                .btn-success {{ background: #10B981; }}
+                .btn-success:hover {{ background: #059669; }}
+                .stats {{ 
+                    background: #F3F4F6; 
+                    padding: 15px 20px; 
+                    border-radius: 8px; 
+                    margin: 15px 0;
+                    display: flex;
+                    gap: 30px;
+                    flex-wrap: wrap;
+                }}
+                .stats-item {{ display: flex; align-items: center; gap: 8px; }}
+                .stats-number {{ font-size: 24px; font-weight: 700; color: #4F46E5; }}
+                .stats-label {{ color: #6B7280; font-size: 14px; }}
+                .success {{ color: #10B981; }}
+                .error {{ color: #EF4444; }}
+                hr {{ border: none; border-top: 2px solid #E5E7EB; margin: 20px 0; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>📚 Popular Catálogo de Tecnologias</h1>
+                <hr>
+
+                <div class="stats">
+                    <div class="stats-item">
+                        <span class="stats-number" id="totalCount">0</span>
+                        <span class="stats-label">Tecnologias criadas</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-number" id="totalTecnologias">0</span>
+                        <span class="stats-label">Total no catálogo</span>
+                    </div>
+                </div>
+
+                <h2>📝 Resultado da execução:</h2>
+                <pre id="output">{resultado}</pre>
+
+                <div class="btn-group">
+                    <a href="/telas/tecnologias/catalogo/" class="btn btn-success">🔗 Ver Catálogo</a>
+                    <a href="/admin/" class="btn btn-secondary">⚙️ Admin</a>
+                    <a href="/telas/executar-populate/" class="btn">🔄 Executar Novamente</a>
+                </div>
+            </div>
+
+            <script>
+                // Contar quantas tecnologias foram criadas
+                const output = document.getElementById('output');
+                const text = output.textContent;
+                const criadas = (text.match(/✅ Criada:/g) || []).length;
+                const total = (text.match(/📊 Total no catálogo: (\\d+)/) || [])[1] || '0';
+
+                document.getElementById('totalCount').textContent = criadas;
+                document.getElementById('totalTecnologias').textContent = total;
+
+                // Adicionar cores ao output
+                let html = output.innerHTML;
+                html = html.replace(/✅ Criada:.*/g, match => `<span style="color: #10B981;">${match}</span>`);
+                html = html.replace(/⚠️.*/g, match => `<span style="color: #F59E0B;">${match}</span>`);
+                html = html.replace(/❌.*/g, match => `<span style="color: #EF4444;">${match}</span>`);
+                output.innerHTML = html;
+            </script>
+        </body>
+        </html>
+        """)
+
+    except Exception as e:
+        import traceback
+        return HttpResponse(f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Erro</title>
+            <style>
+                body {{ font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px; background: #FEF2F2; }}
+                .container {{ background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+                h1 {{ color: #DC2626; }}
+                .error {{ color: #DC2626; background: #FEE2E2; padding: 15px; border-radius: 8px; overflow-x: auto; }}
+                .traceback {{ background: #1a1a1a; color: #FCD34D; padding: 20px; border-radius: 8px; overflow-x: auto; font-size: 13px; }}
+                .btn {{ display: inline-block; background: #6B7280; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; margin-top: 20px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>❌ Erro ao executar</h1>
+                <div class="error">
+                    <strong>Mensagem:</strong> {str(e)}
+                </div>
+                <div class="traceback">
+                    {traceback.format_exc()}
+                </div>
+                <a href="/admin/" class="btn">⚙️ Voltar ao Admin</a>
+            </div>
+        </body>
+        </html>
+        """, status=500)
+
+
 # ============ PEI ============
 
 @login_required
