@@ -393,6 +393,11 @@ function togglePassword(inputId, iconId) {
 }
 
 // ============ VALIDAÇÃO DE SENHA ============
+<!-- user/templates/auth/cadastro.html -->
+
+// user/templates/auth/cadastro.html - JavaScript
+
+// ============ VALIDAÇÃO DE SENHA ============
 document.getElementById('password').addEventListener('input', function() {
     const password = this.value;
     const nome = document.getElementById('nome').value;
@@ -400,7 +405,7 @@ document.getElementById('password').addEventListener('input', function() {
     const emailPrefix = email.split('@')[0] || '';
 
     const requirements = [
-        { id: 'req-length', test: password.length >= 8 },
+        { id: 'req-length', test: password.length >= 8 },  // ⬅️ MUDOU PARA 8
         { id: 'req-uppercase', test: /[A-Z]/.test(password) },
         { id: 'req-lowercase', test: /[a-z]/.test(password) },
         { id: 'req-number', test: /[0-9]/.test(password) },

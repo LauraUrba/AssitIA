@@ -740,13 +740,15 @@ def redefinir_senha_view(request, uidb64, token):
 
 # ============ HARDENING DE SENHAS ============
 
+# user/views.py
+
 def validar_senha_segura(password, nome, email):
-    """Validar senha com requisitos de segurança avançados"""
+    """Validar senha com requisitos de segurança"""
     erros = []
 
-    # 1. Mínimo 12 caracteres (aumentado de 8 para 12)
-    if len(password) < 12:
-        erros.append('A senha deve ter no mínimo 12 caracteres')
+    # 1. Mínimo 8 caracteres (ALTERADO DE 12 PARA 8)
+    if len(password) < 8:
+        erros.append('A senha deve ter no mínimo 8 caracteres')
 
     # 2. Pelo menos uma letra maiúscula
     if not re.search(r'[A-Z]', password):
