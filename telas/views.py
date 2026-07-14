@@ -1285,3 +1285,108 @@ def perfil_usuario(request):
         'historico_senhas': request.user.password_history.all()[:5]  # Últimas 5 senhas
     }
     return render(request, 'perfil/perfil.html', context)
+
+# ++++++++++++++++++ SUPER USUARIO +++++++++++++++++
+# telas/views.py - NO FINAL DO ARQUIVO
+
+def criar_superusuario(request):
+    """View temporária para criar superusuário no Render"""
+    from user.models import Usuario
+
+    email = 'admin@assistia.com'
+    password = 'Admin123!'
+
+    try:
+        user, created = Usuario.objects.get_or_create(
+            email=email,
+            defaults={
+                'nome': 'Administrador',
+                'perfil': 'coordenador',
+                'is_superuser': True,
+                'is_staff': True,
+                'is_active': True,
+            }
+        )
+
+        if created:
+            user.set_password(password)
+            user.save()
+            return HttpResponse(f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Superusuário Criado</title>
+                <style>
+                    body {{ font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; background: #f0fdf4; }}
+                    .container {{ background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+                    h1 {{ color: #10B981; }}
+                    .info {{ background: #F3F4F6; padding: 15px; border-radius: 8px; margin: 15px 0; }}
+                    .btn {{ display: inline-block; background: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; }}
+                    .btn:hover {{ background: #4338CA; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>✅ Superusuário Criado!</h1>
+                    <div class="info">
+                        <p><strong>📧 Email:</strong> {email}</p>
+                        <p><strong>🔑 Senha:</strong> {password}</p>
+                    </div>
+                    <p style="color: #6B7280;">Guarde essas informações para fazer login.</p>
+                    <a href="/admin/" class="btn">🔗 Acessar Admin</a>
+                    <a href="/auth/login/" class="btn" style="background: #6B7280;">🔗 Fazer Login</a>
+                </div>
+            </body>
+            </html>
+            """)
+        else:
+            # Se já existe, resetar a senha
+            user.set_password(password)
+            user.save()
+            return HttpResponse(f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Superusuário Atualizado</title>
+                <style>
+                    body {{ font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; background: #fefce8; }}
+                    .container {{ background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+                    h1 {{ color: #F59E0B; }}
+                    .info {{ background: #F3F4F6; padding: 15px; border-radius: 8px; margin: 15px 0; }}
+                    .btn {{ display: inline-block; background: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🔄 Superusuário Atualizado!</h1>
+                    <div class="info">
+                        <p><strong>📧 Email:</strong> {email}</p>
+                        <p><strong>🔑 Nova Senha:</strong> {password}</p>
+                    </div>
+                    <a href="/admin/" class="btn">🔗 Acessar Admin</a>
+                </div>
+            </body>
+            </html>
+            """)
+
+    except Exception as e:
+        return HttpResponse(f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Erro</title>
+            <style>
+                body {{ font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; background: #fef2f2; }}
+                .container {{ background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+                h1 {{ color: #DC2626; }}
+                .error {{ color: #DC2626; background: #FEE2E2; padding: 15px; border-radius: 8px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>❌ Erro</h1>
+                <div class="error">{str(e)}</div>
+            </div>
+        </body>
+        </html>
+        """, status=500)

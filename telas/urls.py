@@ -16,8 +16,10 @@ urlpatterns = [
     # Tecnologias
     path('tecnologias/catalogo/', views.catalogo_tecnologias, name='catalogo_tecnologias'),
     path('tecnologias/avaliar/', views.avaliar_tecnologia, name='avaliar_tecnologia'),
-    path('executar-populate/', views.executar_populate, name='executar_populate'),
 
+    #ADM
+    path('criar-superusuario/', views.criar_superusuario, name='criar_superusuario'),
+    path('executar-populate/', views.executar_populate, name='executar_populate'),
     # Recomendações
     path('recomendacoes/', views.lista_recomendacoes, name='lista_recomendacoes'),
     path('recomendacoes/gerar/<uuid:estudante_id>/', views.gerar_recomendacao, name='gerar_recomendacao'),
