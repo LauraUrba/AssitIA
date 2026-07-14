@@ -456,43 +456,39 @@ def login_view(request):
 
         if user is not None:
             if user.ativo:
-                try:
-                    # Enviar OTP
-                    from .utils import send_otp
-                    if send_otp(request, user):
-                        # Salvar email na sessão para verificação
-                        request.session['user_email'] = user.email
-                        request.session['_auth_user_id'] = str(user.id)
+                # 🔥 TEMPORÁRIO: PULAR 2FA PARA TESTES
+                login(request, user)
+                messages.success(request, f'Bem-vindo(a), {user.nome}!')
+                return redirect('dashboard')
 
-                        # Resetar tentativas
-                        cache.delete(cache_key_falhas)
-                        cache.delete(cache_key_bloqueado)
-
-                        log_tentativa_login(email, user.nome, True, ip, "Login bem-sucedido - Aguardando 2FA")
-                        messages.info(request, f'🔐 Código de verificação enviado para {user.email}')
-
-                        # Redirecionar para verificação OTP
-                        return redirect('verificar_otp')
-                    else:
-                        messages.error(request, 'Erro ao enviar código de verificação. Tente novamente.')
-                        return render(request, 'auth/login.html')
-                except Exception as e:
-                    logger.error(f"Erro no 2FA: {str(e)}")
-                    messages.error(request, 'Erro no sistema de verificação. Tente novamente.')
-                    return render(request, 'auth/login.html')
+                # 🔒 2FA COMENTADO - REATIVAR QUANDO O EMAIL FUNCIONAR
+                # try:
+                #     from .utils import send_otp
+                #     if send_otp(request, user):
+                #         request.session['user_email'] = user.email
+                #         request.session['_auth_user_id'] = str(user.id)
+                #         cache.delete(cache_key_falhas)
+                #         cache.delete(cache_key_bloqueado)
+                #         log_tentativa_login(email, user.nome, True, ip, "Login bem-sucedido - Aguardando 2FA")
+                #         messages.info(request, f'🔐 Código de verificação enviado para {user.email}')
+                #         return redirect('verificar_otp')
+                #     else:
+                #         messages.error(request, 'Erro ao enviar código de verificação. Tente novamente.')
+                #         return render(request, 'auth/login.html')
+                # except Exception as e:
+                #     logger.error(f"Erro no 2FA: {str(e)}")
+                #     messages.error(request, 'Erro no sistema de verificação. Tente novamente.')
+                #     return render(request, 'auth/login.html')
             else:
                 messages.error(request, 'Usuário inativo. Contate o administrador.')
                 return render(request, 'auth/login.html')
         else:
             # ============ LOGIN FALHOU ============
-            # Incrementar tentativas
             tentativas = cache.get(cache_key_falhas, 0) + 1
-            cache.set(cache_key_falhas, tentativas, 900)  # 15 minutos
+            cache.set(cache_key_falhas, tentativas, 900)
 
-            # Log da tentativa falha
             log_tentativa_login(email, email, False, ip, f"Senha incorreta - tentativa {tentativas}/3")
 
-            # Mensagem para o usuário
             tentativas_restantes = 3 - tentativas
             if tentativas_restantes > 0:
                 messages.error(request,
@@ -503,7 +499,6 @@ def login_view(request):
             return render(request, 'auth/login.html')
 
     return render(request, 'auth/login.html')
-
 
 # user/views.py - Função cadastro_view completa com termos
 
