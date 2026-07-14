@@ -337,7 +337,7 @@ def avaliar_tecnologia(request):
 
 # ============ RECOMENDAÇÕES ============
 
-# telas/views.py - Função gerar_recomendacao COMPLETA CORRIGIDA
+# telas/views.py - Função gerar_recomendacao SIMPLIFICADA
 
 @login_required
 def gerar_recomendacao(request, estudante_id):
@@ -369,19 +369,18 @@ def gerar_recomendacao(request, estudante_id):
             areas_atencao = request.POST.getlist('areas')
             areas_texto = ', '.join(areas_atencao) if areas_atencao else 'Nao informadas'
 
-            # ============ CONSTRUIR DESCRIÇÃO (MAIS CURTA PARA A API) ============
+            # ============ CONSTRUIR DESCRIÇÃO (MAIS CURTA) ============
             descricao = f"""Aluno: {estudante.nome}
 Nível: {estudante.get_nivel_suporte_display()}
 Turma: {estudante.turma or 'N/I'}
 """
 
             if perfil:
-                # 🔥 PEGAR APENAS A PRIMEIRA FRASE DE CADA CAMPO
-                comunicacao = (perfil.comunicacao or 'N/I').split('.')[0][:150]
-                sensorial = (perfil.perfil_sensorial or 'N/I').split('.')[0][:150]
-                motor = (perfil.habilidade_motora or 'N/I').split('.')[0][:150]
-                cognitivo = (perfil.perfil_cognitivo or 'N/I').split('.')[0][:150]
-                desafios = (perfil.desafios or 'N/I').split('.')[0][:150]
+                comunicacao = (perfil.comunicacao or 'N/I')[:150]
+                sensorial = (perfil.perfil_sensorial or 'N/I')[:150]
+                motor = (perfil.habilidade_motora or 'N/I')[:150]
+                cognitivo = (perfil.perfil_cognitivo or 'N/I')[:150]
+                desafios = (perfil.desafios or 'N/I')[:150]
 
                 descricao += f"""
 Comunicação: {comunicacao}
@@ -391,15 +390,15 @@ Cognitivo: {cognitivo}
 Desafios: {desafios}
 """
 
-            # 🔥 LIMITAR TAMANHO DOS CAMPOS PARA EVITAR ERRO DA API
+            # 🔥 LIMITAR CAMPOS
             interesses_limitado = (interesses or '')[:150]
             sensibilidades_limitado = (sensibilidades or '')[:150]
             recursos_limitado = (recursos or '')[:150]
             areas_texto_limitado = areas_texto[:200]
 
-            # ============ PAYLOAD PARA A API ============
+            # ============ PAYLOAD ============
             payload = {
-                "descricao_professor": descricao[:600],  # ⬅️ LIMITADO A 600 CARACTERES
+                "descricao_professor": descricao[:600],
                 "idade_aluno": calcular_idade(estudante.data_nascimento) if estudante.data_nascimento else None,
                 "nivel_suporte": str(estudante.nivel_suporte),
                 "interesses_especificos": interesses_limitado,
@@ -422,7 +421,7 @@ Desafios: {desafios}
                 "recursos_observacao": (recursos_observacao or '')[:150]
             }
 
-            # 🔥 SALVAR AS SELEÇÕES PARA USAR NO FALLBACK
+            # 🔥 SALVAR SELEÇÕES PARA FALLBACK
             selecoes = {
                 'areas_atencao': areas_atencao,
                 'interesses': interesses_limitado,
@@ -432,36 +431,26 @@ Desafios: {desafios}
                 'prioridade': prioridade
             }
 
-            # ============ CHAMAR API ============
+            # ============ CHAMAR API (UMA TENTATIVA, TIMEOUT 60s) ============
             api_url = 'https://api-assitia.onrender.com/analisar-aluno-tea/'
 
-            import time
-            response = None
-            max_tentativas = 3
-
-            for tentativa in range(max_tentativas):
-                try:
-                    response = requests.post(
-                        api_url,
-                        json=payload,
-                        headers={'Content-Type': 'application/json'},
-                        timeout=180
-                    )
-                    if response.status_code == 200:
-                        break
-                    elif response.status_code != 200:
-                        break
-                except requests.exceptions.Timeout:
-                    if tentativa < max_tentativas - 1:
-                        print(f"⏱️ Tentativa {tentativa + 1} falhou. Aguardando 5 segundos...")
-                        time.sleep(5)
-                        continue
-                    else:
-                        messages.warning(request, '⏱️ A IA está demorando. Usando recomendações rápidas do catálogo.')
-                        return gerar_recomendacao_rapida(request, estudante, selecoes)
-                except Exception as e:
-                    messages.error(request, f'❌ Erro ao gerar recomendação: {str(e)}')
-                    return gerar_recomendacao_rapida(request, estudante, selecoes)
+            try:
+                print(f"⏱️ Chamando API com timeout de 60 segundos...")
+                response = requests.post(
+                    api_url,
+                    json=payload,
+                    headers={'Content-Type': 'application/json'},
+                    timeout=60  # 🔥 60 SEGUNDOS
+                )
+                print(f"✅ API respondeu em {response.elapsed.total_seconds():.2f} segundos")
+            except requests.exceptions.Timeout:
+                print(f"⏱️ API não respondeu em 60 segundos. Usando fallback.")
+                messages.warning(request, '⏱️ A IA está demorando. Usando recomendações rápidas do catálogo.')
+                return gerar_recomendacao_rapida(request, estudante, selecoes)
+            except Exception as e:
+                print(f"❌ Erro ao chamar API: {str(e)}")
+                messages.error(request, f'❌ Erro ao gerar recomendação: {str(e)}')
+                return gerar_recomendacao_rapida(request, estudante, selecoes)
 
             if response and response.status_code == 200:
                 resultado_api = response.json()
@@ -475,9 +464,7 @@ Desafios: {desafios}
                 analise = resultado_api.get('analise', '')
                 recursos_recomendados = extrair_recursos_da_analise(analise, selecoes)
 
-                # Salvar tecnologias recomendadas (ATÉ 11)
                 for idx, recurso in enumerate(recursos_recomendados[:11], 1):
-                    # 🔥 SE FOR LINK DA INTERNET
                     if recurso.get('link'):
                         ta, created = TecnologiaAssistiva.objects.get_or_create(
                             nome=f"🌐 {recurso.get('nome', f'Recurso Online {idx}')[:50]}",
@@ -486,17 +473,14 @@ Desafios: {desafios}
                                 'descricao': recurso.get('descricao', 'Recurso encontrado na internet'),
                                 'materiais': recurso.get('materiais', 'Acessar o link para ver os materiais'),
                                 'como_fazer': recurso.get('como_fazer', 'Acesse o link para mais informações'),
-                                'como_usar': recurso.get('como_usar',
-                                                         'Explore o recurso conforme as instruções do site'),
-                                'para_que_serve': recurso.get('para_que_serve',
-                                                              'Tecnologia assistiva encontrada na internet'),
+                                'como_usar': recurso.get('como_usar', 'Explore o recurso conforme as instruções do site'),
+                                'para_que_serve': recurso.get('para_que_serve', 'Tecnologia assistiva encontrada na internet'),
                                 'exemplos_uso': recurso.get('link', ''),
                                 'criada_por_ia': True,
                                 'ativo': True
                             }
                         )
                     else:
-                        # 🔥 SE FOR DO CATÁLOGO, BUSCAR OU CRIAR
                         ta, created = TecnologiaAssistiva.objects.get_or_create(
                             nome=recurso.get('nome', f'Recurso {idx}'),
                             defaults={
@@ -511,7 +495,6 @@ Desafios: {desafios}
                             }
                         )
 
-                    # Criar a associação na recomendação
                     RecomendacaoTA.objects.create(
                         recomendacao=recomendacao,
                         ta=ta,
@@ -525,9 +508,6 @@ Desafios: {desafios}
                 messages.error(request, f'❌ Erro na API: {response.status_code if response else "Sem resposta"}')
                 return gerar_recomendacao_rapida(request, estudante, selecoes)
 
-        except requests.exceptions.Timeout:
-            messages.warning(request, '⏱️ A IA está demorando. Usando recomendações rápidas do catálogo.')
-            return gerar_recomendacao_rapida(request, estudante, selecoes)
         except Exception as e:
             messages.error(request, f'❌ Erro ao gerar recomendação: {str(e)}')
             logger.error(f"Erro ao gerar recomendação: {str(e)}")
@@ -539,7 +519,6 @@ Desafios: {desafios}
         'tecnologias': TecnologiaAssistiva.objects.filter(ativo=True, criada_por_ia=False),
     }
     return render(request, 'recomendacoes/gerar.html', context)
-
 
 
 # telas/views.py - gerar_recomendacao_rapida
@@ -608,10 +587,12 @@ def calcular_idade(data_nascimento):
     return hoje.year - data_nascimento.year - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
 
 
+# telas/views.py - Função extrair_recursos_da_analise CORRIGIDA (sem erro de match)
+
 def extrair_recursos_da_analise(analise, selecoes=None):
     """
     Extrair recursos da análise da IA.
-    Retorna: 3 do catálogo + 6 links únicos + 2 do catálogo (complemento) = 11
+    Retorna dicionários, NÃO cria no banco.
     """
     recursos = []
     from telas.models import TecnologiaAssistiva
@@ -626,9 +607,13 @@ def extrair_recursos_da_analise(analise, selecoes=None):
     padrao_recurso = r'#### \d+\. \*\*(.+?)\*\*\s*\n\n\*\*📦 Materiais:\*\* (.+?)\n\n\*\*🔧 Como fazer:\*\* (.+?)\n\n\*\*👩‍🏫 Como usar:\*\* (.+?)\n\n\*\*🎯 Para que serve:\*\* (.+?)(?=\n\n---|\n\n###|\Z)'
     matches = re.findall(padrao_recurso, analise, re.DOTALL)
 
+    # 🔥 CORREÇÃO: Verificar se matches existe antes de iterar
     for match in matches:
         nome = match[0].strip()
-        materiais, como_fazer, como_usar, para_que_serve = [m.strip() for m in match[1:]]
+        materiais = match[1].strip()
+        como_fazer = match[2].strip()
+        como_usar = match[3].strip()
+        para_que_serve = match[4].strip()
 
         try:
             ta = TecnologiaAssistiva.objects.get(nome=nome, criada_por_ia=False)
@@ -653,7 +638,7 @@ def extrair_recursos_da_analise(analise, selecoes=None):
             break
 
     # ================================================
-    # 2. RECURSOS DA INTERNET (CORRIGIDO)
+    # 2. LINKS DA INTERNET
     # ================================================
     padrao_online = re.compile(
         r'\*\*\d+\.\s*(.+?)\*\*\s*\n\n(.*?)\n\n🔗\s*Fonte:\s*(\S+)',
@@ -662,19 +647,19 @@ def extrair_recursos_da_analise(analise, selecoes=None):
     matches_online = padrao_online.findall(analise)
 
     links_vistos = set()
-    for titulo_bruto, snippet, link in matches_online:
-        link = link.strip()
+    for match_online in matches_online:
+        titulo_bruto = match_online[0].strip()
+        snippet = match_online[1].strip()
+        link = match_online[2].strip()
 
-        # Pular links inválidos ou duplicados
         if not link or link in links_vistos:
             continue
         if 'assitia' in link or 'localhost' in link or '127.0.0.1' in link:
             continue
 
         links_vistos.add(link)
-        titulo = titulo_bruto.strip()[:80]
+        titulo = titulo_bruto[:80]
 
-        # Identificar fonte
         if "youtube" in link or "youtu.be" in link:
             fonte = "YouTube"
         elif "tiktok" in link:
@@ -693,7 +678,7 @@ def extrair_recursos_da_analise(analise, selecoes=None):
         recursos.append({
             'nome': f"🌐 {titulo}",
             'categoria': 'online',
-            'descricao': snippet.strip()[:300] or 'Recurso encontrado na internet pela IA',
+            'descricao': snippet[:300] or 'Recurso encontrado na internet pela IA',
             'materiais': 'Acessar o link para ver os materiais',
             'como_fazer': 'Acesse o link para mais informações',
             'como_usar': 'Explore o recurso conforme as instruções do site',
@@ -703,17 +688,16 @@ def extrair_recursos_da_analise(analise, selecoes=None):
             'link': link
         })
 
-        if len([r for r in recursos if r.get('fonte') == 'Internet']) >= 6:
+        if len([r for r in recursos if r.get('fonte') == 'Internet']) >= 3:
             break
 
     # ================================================
-    # 3. COMPLETAR COM CATÁLOGO (ATÉ 11)
+    # 3. SE NÃO TIVER RECURSOS SUFICIENTES, USAR CATÁLOGO
     # ================================================
-    if len(recursos) < 11:
+    if len(recursos) < 5:
         areas_atencao = selecoes.get('areas_atencao', [])
         mapa_catalogo = {
-            'comunicacao': ['AAC - Livro de Comunicação Personalizado', 'Cartões de Comunicação',
-                            'Prancha de Comunicação'],
+            'comunicacao': ['AAC - Livro de Comunicação Personalizado', 'Cartões de Comunicação', 'Prancha de Comunicação'],
             'regulacao_sensorial': ['Garrafa da Calma', 'Kit Sensorial com Caixas', 'Fone de Ouvido Caseiro'],
             'motor': ['Teclado Adaptado com Papelão', 'Prancha de Atividades Motoras'],
             'cognitivo': ['Jogo da Memória Adaptado', 'Atividades de Raciocínio Lógico'],
@@ -721,7 +705,6 @@ def extrair_recursos_da_analise(analise, selecoes=None):
             'estruturacao': ['Rotina Visual com Caixas', 'Agenda Visual de Tarefas'],
         }
 
-        tecs_adicionais = []
         for area in areas_atencao:
             area = area.lower().strip()
             if area in mapa_catalogo:
@@ -729,25 +712,22 @@ def extrair_recursos_da_analise(analise, selecoes=None):
                     if not any(r['nome'] == nome_tech for r in recursos):
                         try:
                             ta = TecnologiaAssistiva.objects.get(nome=nome_tech, criada_por_ia=False)
-                            tecs_adicionais.append(ta)
+                            recursos.append({
+                                'nome': ta.nome,
+                                'categoria': ta.categoria,
+                                'descricao': ta.descricao,
+                                'materiais': ta.materiais,
+                                'como_fazer': ta.como_fazer,
+                                'como_usar': ta.como_usar,
+                                'para_que_serve': ta.para_que_serve,
+                                'justificativa': f'Recomendado pela IA para {ta.get_categoria_display()}',
+                                'fonte': 'Catálogo',
+                                'link': None
+                            })
                         except TecnologiaAssistiva.DoesNotExist:
                             pass
 
-        for ta in tecs_adicionais[:11 - len(recursos)]:
-            recursos.append({
-                'nome': ta.nome,
-                'categoria': ta.categoria,
-                'descricao': ta.descricao,
-                'materiais': ta.materiais,
-                'como_fazer': ta.como_fazer,
-                'como_usar': ta.como_usar,
-                'para_que_serve': ta.para_que_serve,
-                'justificativa': f'Recomendado pela IA para {ta.get_categoria_display()}',
-                'fonte': 'Catálogo',
-                'link': None
-            })
-
-    return recursos[:11]
+    return recursos[:11]  # Retorna até 11 recomendações
 
 
 @login_required
