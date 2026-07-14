@@ -42,4 +42,7 @@ urlpatterns = [
     # Segurança
     path('seguranca/', views.dashboard_seguranca, name='dashboard_seguranca'),
     path('seguranca/desbloquear-ip/<str:ip>/', views.desbloquear_ip_view, name='desbloquear_ip'),
+
+    #Email - teste
+    path('testar-email/', views.testar_email, name='testar_email'),
 ]

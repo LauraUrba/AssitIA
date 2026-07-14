@@ -1390,3 +1390,65 @@ def criar_superusuario(request):
         </body>
         </html>
         """, status=500)
+
+
+def testar_email(request):
+    """Testar envio de email com Gmail"""
+    from django.core.mail import send_mail
+    from django.conf import settings
+    import socket
+    import smtplib
+
+    resultados = []
+
+    # 1. Verificar configurações
+    resultados.append(f"📧 EMAIL_HOST: {settings.EMAIL_HOST}")
+    resultados.append(f"📧 EMAIL_PORT: {settings.EMAIL_PORT}")
+    resultados.append(f"📧 EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
+    resultados.append(f"📧 EMAIL_USE_TLS: {settings.EMAIL_USE_TLS}")
+    resultados.append(f"📧 EMAIL_USE_SSL: {settings.EMAIL_USE_SSL}")
+
+    try:
+        # 2. Testar conexão SMTP
+        socket.setdefaulttimeout(10)
+        server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=10)
+        server.starttls()
+        server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+        server.quit()
+        resultados.append("✅ Conexão SMTP bem-sucedida!")
+
+        # 3. Enviar email
+        send_mail(
+            'Teste AssistIA',
+            'Este é um teste de email com Gmail!',
+            settings.DEFAULT_FROM_EMAIL,
+            ['urbaantuneslaura@gmail.com'],
+            fail_silently=False,
+        )
+        resultados.append("✅ Email enviado com sucesso!")
+
+        return HttpResponse(
+            f"<h1 style='color: green;'>✅ Email enviado!</h1>"
+            f"<pre>{'<br>'.join(resultados)}</pre>"
+            f"<p>Verifique sua caixa de entrada (e spam).</p>"
+        )
+
+    except socket.timeout:
+        return HttpResponse(
+            f"<h1 style='color: red;'>❌ Erro: Timeout</h1>"
+            f"<pre>{'<br>'.join(resultados)}</pre>"
+            f"<p>O servidor SMTP não respondeu.</p>"
+        )
+    except smtplib.SMTPAuthenticationError as e:
+        return HttpResponse(
+            f"<h1 style='color: red;'>❌ Erro de Autenticação</h1>"
+            f"<pre>{'<br>'.join(resultados)}</pre>"
+            f"<p><strong>Erro:</strong> {str(e)}</p>"
+            f"<p>Verifique a Senha de App.</p>"
+        )
+    except Exception as e:
+        return HttpResponse(
+            f"<h1 style='color: red;'>❌ Erro</h1>"
+            f"<pre>{'<br>'.join(resultados)}</pre>"
+            f"<p><strong>Erro:</strong> {str(e)}</p>"
+        )
