@@ -440,7 +440,7 @@ Desafios: {desafios}
                     api_url,
                     json=payload,
                     headers={'Content-Type': 'application/json'},
-                    timeout=70  # 🔥SEGUNDOS
+                    timeout=120 # 🔥SEGUNDOS
                 )
                 print(f"✅ API respondeu em {response.elapsed.total_seconds():.2f} segundos")
             except requests.exceptions.Timeout:
