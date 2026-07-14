@@ -456,30 +456,10 @@ def login_view(request):
 
         if user is not None:
             if user.ativo:
-                # 🔥 REATIVAR 2FA - DESCOMENTADO E FUNCIONANDO
-                try:
-                    from .utils import send_otp
-                    if send_otp(request, user):
-                        # Salvar email na sessão para verificação
-                        request.session['user_email'] = user.email
-                        request.session['_auth_user_id'] = str(user.id)
-
-                        # Resetar tentativas
-                        cache.delete(cache_key_falhas)
-                        cache.delete(cache_key_bloqueado)
-
-                        log_tentativa_login(email, user.nome, True, ip, "Login bem-sucedido - Aguardando 2FA")
-                        messages.info(request, f'🔐 Código de verificação enviado para {user.email}')
-
-                        # Redirecionar para verificação OTP
-                        return redirect('verificar_otp')
-                    else:
-                        messages.error(request, 'Erro ao enviar código de verificação. Tente novamente.')
-                        return render(request, 'auth/login.html')
-                except Exception as e:
-                    logger.error(f"Erro no 2FA: {str(e)}")
-                    messages.error(request, 'Erro no sistema de verificação. Tente novamente.')
-                    return render(request, 'auth/login.html')
+                # 🔥 PULAR 2FA COMPLETAMENTE - LOGIN DIRETO
+                login(request, user)
+                messages.success(request, f'Bem-vindo(a), {user.nome}!')
+                return redirect('dashboard')
             else:
                 messages.error(request, 'Usuário inativo. Contate o administrador.')
                 return render(request, 'auth/login.html')
