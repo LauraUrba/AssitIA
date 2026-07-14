@@ -31,7 +31,6 @@ if not CSRF_TRUSTED_ORIGINS or CSRF_TRUSTED_ORIGINS == ['']:
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 if DATABASE_URL:
-    # Produção - Render, ElephantSQL, etc.
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
@@ -40,7 +39,6 @@ if DATABASE_URL:
         )
     }
 else:
-    # Desenvolvimento local - PostgreSQL
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -187,7 +185,12 @@ LOGGING = {
 # ========================================
 AUTH_USER_MODEL = 'user.Usuario'
 LOGIN_URL = '/auth/login/'
+LOGIN_REDIRECT_URL = '/telas/'
 LOGOUT_REDIRECT_URL = '/auth/login/'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # ========================================
 # INTERNACIONALIZAÇÃO
@@ -206,7 +209,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-# Whitenoise para produção
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ========================================
@@ -240,9 +242,9 @@ REST_FRAMEWORK = {
 # ========================================
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', '465'))
-EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'True') == 'True'
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', f'AssistIA <{EMAIL_HOST_USER}>')
@@ -253,6 +255,16 @@ EMAIL_TIMEOUT = 30
 # ========================================
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8000').split(',')
 CORS_ALLOW_CREDENTIALS = True
+
+# ========================================
+# SESSÃO
+# ========================================
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME = 'assistia_sessionid'
+SESSION_COOKIE_AGE = 86400  # 24 horas
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_SAVE_EVERY_REQUEST = True  # ⬅️ IMPORTANTE
 
 # ========================================
 # SEGURANÇA (PRODUÇÃO)

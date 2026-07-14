@@ -913,7 +913,7 @@ def login_user(request):
         return JsonResponse({'erro': 'Credenciais inválidas.'}, status=401)
 
 
-# user/views.py - Atualizar a função verificar_otp_view
+# user/views.py - Adicione esta função
 
 def verificar_otp_view(request):
     """Página de verificação OTP com segurança e integração com login"""
@@ -924,7 +924,6 @@ def verificar_otp_view(request):
 
     if not email or not user_id:
         messages.error(request, 'Sessão expirada. Faça login novamente.')
-        log_tentativa_2fa('desconhecido', False, request.META.get('REMOTE_ADDR'), "Sessão expirada")
         return redirect('login')
 
     ip = request.META.get('REMOTE_ADDR')
@@ -934,21 +933,17 @@ def verificar_otp_view(request):
         user = Usuario.objects.get(id=user_id, email=email)
     except Usuario.DoesNotExist:
         messages.error(request, 'Usuário não encontrado.')
-        log_tentativa_2fa(email, False, ip, "Usuário não encontrado")
         return redirect('login')
 
     # ============ HONEYPOT PARA 2FA ============
     cache_key_2fa = f'2fa_tentativas_{ip}_{email}'
     tentativas_2fa = cache.get(cache_key_2fa, 0)
 
-    # Se já tem 5 tentativas, bloquear temporariamente
     if tentativas_2fa >= 5:
-        logger.warning(f"🚨 2FA HONEYPOT ATIVADO! IP: {ip}, Email: {email}")
-        log_ataque_suspeito(ip, "2FA - Múltiplas tentativas", f"{tentativas_2fa} tentativas para {email}")
         messages.error(request, 'Muitas tentativas. Aguarde 5 minutos para tentar novamente.')
         return render(request, 'auth/verificar_otp.html', {'bloqueado': True, 'email': email})
 
-    # Mostrar código debug no terminal (desenvolvimento)
+    # Mostrar código debug no terminal
     if 'otp_code_debug' in request.session:
         print(f"\n{'=' * 50}")
         print(f"🔐 CÓDIGO OTP PARA {email}")
@@ -959,57 +954,35 @@ def verificar_otp_view(request):
     if request.method == 'POST':
         otp = request.POST.get('otp', '').strip()
 
-        # ============ VALIDAR OTP ============
         if not otp or len(otp) != 6:
             messages.error(request, 'Código inválido. Digite os 6 dígitos.')
             return render(request, 'auth/verificar_otp.html', {'email': email})
 
-        # ============ VERIFICAR CÓDIGO DEBUG (DESENVOLVIMENTO) ============
+        # ============ VERIFICAR CÓDIGO ============
         debug_code = request.session.get('otp_code_debug')
-        if debug_code and otp == debug_code:
-            # Login bem-sucedido com debug
-            login(request, user)
-
-            # Limpar sessão 2FA
-            request.session.pop('user_email', None)
-            request.session.pop('_auth_user_id', None)
-            request.session.pop('otp_secret_key', None)
-            request.session.pop('otp_valid_date', None)
-            request.session.pop('otp_code_debug', None)
-            cache.delete(cache_key_2fa)
-
-            # Atualizar último login
-            user.ultimo_login = timezone.now()
-            user.save()
-
-            log_tentativa_2fa(email, True, ip, "Login com código debug")
-            messages.success(request, f'Bem-vindo(a), {user.nome}!')
-            return redirect('dashboard')
-
-        # ============ VERIFICAR OTP NORMAL ============
         otp_secret_key = request.session.get('otp_secret_key')
-        otp_valid_until = request.session.get('otp_valid_date')
+        codigo_valido = False
 
-        if not otp_secret_key or not otp_valid_until:
-            messages.error(request, 'Sessão inválida. Faça login novamente.')
-            log_tentativa_2fa(email, False, ip, "Sessão inválida")
-            return redirect('login')
+        # Verificar debug_code
+        if debug_code and otp == debug_code:
+            codigo_valido = True
+            logger.info(f"✅ OTP validado com código DEBUG para {email}")
 
-        # Verificar validade
-        from datetime import datetime
-        valid_until = datetime.fromisoformat(otp_valid_until)
-        if datetime.now() > valid_until:
-            messages.error(request, 'Código expirado. Solicite um novo login.')
-            log_tentativa_2fa(email, False, ip, "OTP expirado")
-            return redirect('login')
+        # Verificar OTP normal
+        elif otp_secret_key:
+            otp_valid_until = request.session.get('otp_valid_date')
+            if otp_valid_until:
+                from datetime import datetime
+                valid_until = datetime.fromisoformat(otp_valid_until)
+                if datetime.now() <= valid_until:
+                    import pyotp
+                    totp = pyotp.TOTP(otp_secret_key, interval=300)
+                    if totp.verify(otp):
+                        codigo_valido = True
+                        logger.info(f"✅ OTP validado com sucesso para {email}")
 
-        # Verificar OTP
-        import pyotp
-        totp = pyotp.TOTP(otp_secret_key, interval=300)
-        if totp.verify(otp):
-            # ============ LOGIN COMPLETO ============
-
-            # 🔑 1. PRIMEIRO: Limpar sessão 2FA
+        if codigo_valido:
+            # ============ LIMPAR SESSÃO 2FA ============
             request.session.pop('user_email', None)
             request.session.pop('_auth_user_id', None)
             request.session.pop('otp_secret_key', None)
@@ -1017,35 +990,50 @@ def verificar_otp_view(request):
             request.session.pop('otp_code_debug', None)
             cache.delete(cache_key_2fa)
 
-            # 🔑 2. SEGUNDO: Fazer login
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
-            login(request, user)
+            # ============ FAZER LOGIN ============
+            from django.contrib.auth import login as auth_login
 
-            # 🔑 3. TERCEIRO: Salvar a sessão
+            # 🔑 Definir backend explicitamente
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+
+            # 🔑 Fazer login
+            auth_login(request, user)
+
+            # 🔑 FORÇAR SALVAMENTO DA SESSÃO
+            request.session.modified = True
             request.session.save()
 
-            # 🔑 4. QUARTO: Atualizar último login
+            # 🔑 Atualizar último login
             user.ultimo_login = timezone.now()
-            user.save()
+            user.save(update_fields=['ultimo_login'])
 
-            # 🔑 5. VERIFICAR se está autenticado
-            print(f"🔑 Após login e limpeza: is_authenticated = {request.user.is_authenticated}")
-            print(f"🔑 USER ID: {request.session.get('_auth_user_id')}")
+            # 🔑 LOGS PARA DEBUG
+            print(f"✅ Usuário autenticado: {request.user.is_authenticated}")
+            print(f"✅ Usuário ID: {request.user.id}")
+            print(f"✅ Session ID: {request.session.session_key}")
 
+            messages.success(request, f'Bem-vindo(a), {user.nome}!')
+
+            # ============ REDIRECIONAR ============
+            from django.http import HttpResponseRedirect
+            from django.urls import reverse
+
+            # 🔑 Forçar redirecionamento para o dashboard
             if request.user.is_authenticated:
-                log_tentativa_2fa(email, True, ip, "2FA bem-sucedido")
-                messages.success(request, f'Bem-vindo(a), {user.nome}!')
-                return redirect('dashboard')
+                print(f"✅ Redirecionando para dashboard")
+                return HttpResponseRedirect(reverse('dashboard'))
             else:
-                messages.error(request, 'Erro ao autenticar. Tente novamente.')
-                return redirect('login')
+                # 🔑 Fallback: tentar autenticar novamente
+                print(f"⚠️ Usuário NÃO autenticado após login! Tentando novamente...")
+                return HttpResponseRedirect(reverse('login'))
+
         else:
             # ============ OTP INVÁLIDO ============
             tentativas_2fa = cache.get(cache_key_2fa, 0) + 1
-            cache.set(cache_key_2fa, tentativas_2fa, 300)  # 5 minutos
+            cache.set(cache_key_2fa, tentativas_2fa, 300)
 
             tentativas_restantes = 5 - tentativas_2fa
-            log_tentativa_2fa(email, False, ip, f"OTP inválido - tentativa {tentativas_2fa}/5")
+            logger.warning(f"❌ OTP inválido para {email} - tentativa {tentativas_2fa}/5")
 
             if tentativas_restantes > 0:
                 messages.error(request, f'Código inválido. Você tem mais {tentativas_restantes} tentativa(s).')
@@ -1055,6 +1043,8 @@ def verificar_otp_view(request):
             return render(request, 'auth/verificar_otp.html', {'email': email})
 
     return render(request, 'auth/verificar_otp.html', {'email': email})
+
+
 
 def logout_user(request):
     """Logout via API"""
