@@ -25,7 +25,7 @@ class SecurityLogger:
         """
         log_data = {
             'timestamp': timezone.now().isoformat(),
-            'usuario': usuario.username if usuario and usuario.is_authenticated else 'Anonymous',
+            'usuario': usuario.nome if usuario and usuario.is_authenticated else 'Anonymous',
             'usuario_id': usuario.id if usuario and usuario.is_authenticated else None,
             'acao': acao,
             'ip': ip,

@@ -176,17 +176,15 @@
                             </div>
                             <i class="fas fa-check-circle fa-3x text-white-50" aria-hidden="true"></i>
                         </div>
-                        {% with percentual=estudantes_ativos|divisibleby:total_estudantes %}
-                            <span class="badge bg-light text-success mt-2"
-                                  aria-label="{% if total_estudantes > 0 %}{{ percentual|floatformat:0 }} por cento dos alunos estão ativos{% else %}Nenhum aluno cadastrado{% endif %}">
-                                <i class="fas fa-percent" aria-hidden="true"></i>
-                                {% if total_estudantes > 0 %}
-                                    {{ percentual|floatformat:0 }}%
-                                {% else %}
-                                    0%
-                                {% endif %}
-                            </span>
-                        {% endwith %}
+                        <span class="badge bg-light text-success mt-2"
+                              aria-label="{% if total_estudantes > 0 %}{{ percentual_ativos }} por cento dos alunos estão ativos{% else %}Nenhum aluno cadastrado{% endif %}">
+                            <i class="fas fa-percent" aria-hidden="true"></i>
+                            {% if total_estudantes > 0 %}
+                                {{ percentual_ativos }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </span>
                     </div>
                 </div>
             </div>

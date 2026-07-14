@@ -35,28 +35,25 @@ logger = logging.getLogger(__name__)
 def dashboard(request):
     """Dashboard principal do professor"""
 
-    # Buscar últimos alunos acessados (ordenados por data de atualização)
+    total_estudantes = Estudante.objects.filter(professor=request.user).count()
+    estudantes_ativos = Estudante.objects.filter(professor=request.user, ativo=True).count()
+    total_recomendacoes = Recomendacao.objects.filter(professor=request.user).count()
+    total_pei = PEI.objects.filter(professor=request.user).count()
+
+    # Calcular percentual de alunos ativos
+    percentual_ativos = 0
+    if total_estudantes > 0:
+        percentual_ativos = round((estudantes_ativos / total_estudantes) * 100)
+
+    # Buscar últimos alunos acessados
     ultimos_estudantes = Estudante.objects.filter(
         professor=request.user
     ).order_by('-atualizado_em')[:5]
 
-    # 🔥 CORES DO BOOTSTRAP (NUNCA LIGHT)
     cores = [
-        'primary',  # #4F46E5
-        'success',  # #10B981
-        'warning',  # #F59E0B
-        'danger',  # #EF4444
-        'purple',  # #8B5CF6
-        'pink',  # #EC4899
-        'teal',  # #14B8A6
-        'orange',  # #F97316
-        'indigo',  # #6366F1
-        'cyan',  # #06B6D4
-        'rose',  # #F43F5E
-        'amber',  # #D97706
-        'emerald',  # #059669
-        'violet',  # #7C3AED
-        'fuchsia',  # #D946EF
+        'primary', 'success', 'warning', 'danger', 'purple',
+        'pink', 'teal', 'orange', 'indigo', 'cyan',
+        'rose', 'amber', 'emerald', 'violet', 'fuchsia',
     ]
 
     for i, estudante in enumerate(ultimos_estudantes):
@@ -64,10 +61,11 @@ def dashboard(request):
 
     context = {
         'usuario': request.user,
-        'total_estudantes': Estudante.objects.filter(professor=request.user).count(),
-        'total_recomendacoes': Recomendacao.objects.filter(professor=request.user).count(),
-        'total_pei': PEI.objects.filter(professor=request.user).count(),
-        'estudantes_ativos': Estudante.objects.filter(professor=request.user, ativo=True).count(),
+        'total_estudantes': total_estudantes,
+        'estudantes_ativos': estudantes_ativos,
+        'percentual_ativos': percentual_ativos,  # ⬅️ ADICIONE ESTA LINHA
+        'total_recomendacoes': total_recomendacoes,
+        'total_pei': total_pei,
         'ultimos_estudantes': ultimos_estudantes,
     }
     return render(request, 'telas/dashboard.html', context)
