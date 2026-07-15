@@ -462,11 +462,17 @@ Desafios: {desafios}
                 analise = resultado_api.get('analise', '')
                 recursos_recomendados = extrair_recursos_da_analise(analise, selecoes)
 
+                # Na parte do código onde salva os recursos, substitua por:
+
                 for idx, recurso in enumerate(recursos_recomendados[:11], 1):
                     if recurso.get('link'):
                         # 🔥 RECURSO COM LINK DA INTERNET
+                        nome_recurso = recurso.get('nome', f'Recurso Online {idx}')
+                        # Remove emojis do nome para evitar problemas
+                        nome_recurso = nome_recurso.replace('🌐', '').replace('🔗', '').strip()
+
                         ta, created = TecnologiaAssistiva.objects.get_or_create(
-                            nome=f"🌐 {recurso.get('nome', f'Recurso Online {idx}')[:50]}",
+                            nome=nome_recurso[:100],
                             defaults={
                                 'categoria': 'online',
                                 'descricao': recurso.get('descricao', 'Recurso encontrado na internet'),
@@ -476,16 +482,16 @@ Desafios: {desafios}
                                                          'Explore o recurso conforme as instruções do site'),
                                 'para_que_serve': recurso.get('para_que_serve',
                                                               'Tecnologia assistiva encontrada na internet'),
-                                'exemplos_uso': recurso.get('link', ''),  # 🔥 SALVAR LINK EM exemplos_uso
+                                'exemplos_uso': recurso.get('link', ''),  # 🔥 SALVAR LINK
                                 'criada_por_ia': True,
                                 'ativo': True
                             }
                         )
-                        print(f"✅ Recurso salvo com link: {recurso.get('link')}")
+                        print(f"✅ Recurso salvo COM link: {recurso.get('link')}")
                     else:
                         # RECURSO DO CATÁLOGO
                         ta, created = TecnologiaAssistiva.objects.get_or_create(
-                            nome=recurso.get('nome', f'Recurso {idx}'),
+                            nome=recurso.get('nome', f'Recurso {idx}')[:100],
                             defaults={
                                 'categoria': recurso.get('categoria', 'comunicacao'),
                                 'descricao': recurso.get('descricao', ''),
@@ -590,12 +596,11 @@ def calcular_idade(data_nascimento):
     return hoje.year - data_nascimento.year - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
 
 
-# telas/views.py - Função extrair_recursos_da_analise CORRIGIDA (sem erro de match)
-
 def extrair_recursos_da_analise(analise, selecoes=None):
     """
     Extrair recursos da análise da IA.
     Retorna dicionários, NÃO cria no banco.
+    Versão CORRIGIDA com suporte a múltiplos formatos de link
     """
     recursos = []
     from telas.models import TecnologiaAssistiva
@@ -610,7 +615,6 @@ def extrair_recursos_da_analise(analise, selecoes=None):
     padrao_recurso = r'#### \d+\. \*\*(.+?)\*\*\s*\n\n\*\*📦 Materiais:\*\* (.+?)\n\n\*\*🔧 Como fazer:\*\* (.+?)\n\n\*\*👩‍🏫 Como usar:\*\* (.+?)\n\n\*\*🎯 Para que serve:\*\* (.+?)(?=\n\n---|\n\n###|\Z)'
     matches = re.findall(padrao_recurso, analise, re.DOTALL)
 
-    # 🔥 CORREÇÃO: Verificar se matches existe antes de iterar
     for match in matches:
         nome = match[0].strip()
         materiais = match[1].strip()
@@ -641,66 +645,195 @@ def extrair_recursos_da_analise(analise, selecoes=None):
             break
 
     # ================================================
-    # 2. LINKS DA INTERNET
+    # 2. LINKS DA INTERNET - MÚLTIPLOS PADRÕES
     # ================================================
-    padrao_online = re.compile(
+    links_vistos = set()
+
+    # 🔥 PADRÃO 1: [Fonte](link) - FORMATO DA API CORRIGIDA
+    padrao_online_1 = re.compile(
+        r'\*\*\d+\.\s*(.+?)\*\*\s*\n\n(.*?)\n\n🔗\s*\*\*Fonte:\*\*\s*\[(.+?)\]\((.+?)\)',
+        re.DOTALL
+    )
+
+    # 🔥 PADRÃO 2: Link puro após "Link:"
+    padrao_online_2 = re.compile(
+        r'\*\*\d+\.\s*(.+?)\*\*\s*\n\n(.*?)\n\n📎\s*\*\*Link:\*\*\s*(.+?)(?=\n\n---|\Z)',
+        re.DOTALL
+    )
+
+    # 🔥 PADRÃO 3: Formato antigo (fallback)
+    padrao_online_3 = re.compile(
         r'\*\*\d+\.\s*(.+?)\*\*\s*\n\n(.*?)\n\n🔗\s*Fonte:\s*(\S+)',
         re.DOTALL
     )
-    matches_online = padrao_online.findall(analise)
 
-    links_vistos = set()
-    for match_online in matches_online:
-        titulo_bruto = match_online[0].strip()
-        snippet = match_online[1].strip()
-        link = match_online[2].strip()
+    # TENTAR PADRÃO 1 PRIMEIRO
+    matches_online = padrao_online_1.findall(analise)
 
-        if not link or link in links_vistos:
-            continue
-        if 'assitia' in link or 'localhost' in link or '127.0.0.1' in link:
-            continue
+    if matches_online:
+        print(f"✅ Encontrados {len(matches_online)} links no formato [Fonte](link)")
 
-        links_vistos.add(link)
-        titulo = titulo_bruto[:80]
+        for match_online in matches_online:
+            titulo_bruto = match_online[0].strip()
+            snippet = match_online[1].strip()
+            fonte_nome = match_online[2].strip()
+            link = match_online[3].strip()
 
-        if "youtube" in link or "youtu.be" in link:
-            fonte = "YouTube"
-        elif "tiktok" in link:
-            fonte = "TikTok"
-        elif "pinterest" in link:
-            fonte = "Pinterest"
-        elif ".pdf" in link:
-            fonte = "PDF"
-        elif "slideshare" in link:
-            fonte = "Slideshare"
-        elif "edu" in link or "educ" in link:
-            fonte = "Educacional"
-        else:
-            fonte = "Site"
+            if not link or link in links_vistos:
+                continue
+            if 'assitia' in link or 'localhost' in link or '127.0.0.1' in link:
+                continue
 
-        recursos.append({
-            'nome': f"🌐 {titulo}",
-            'categoria': 'online',
-            'descricao': snippet[:300] or 'Recurso encontrado na internet pela IA',
-            'materiais': 'Acessar o link para ver os materiais',
-            'como_fazer': 'Acesse o link para mais informações',
-            'como_usar': 'Explore o recurso conforme as instruções do site',
-            'para_que_serve': 'Tecnologia assistiva encontrada na internet',
-            'justificativa': f'Recurso recomendado pela IA - Fonte: {fonte}',
-            'fonte': 'Internet',
-            'link': link
-        })
+            links_vistos.add(link)
+            titulo = titulo_bruto[:80]
 
-        if len([r for r in recursos if r.get('fonte') == 'Internet']) >= 3:
-            break
+            recursos.append({
+                'nome': f"🌐 {titulo}",
+                'categoria': 'online',
+                'descricao': snippet[:300] or 'Recurso encontrado na internet pela IA',
+                'materiais': 'Acessar o link para ver os materiais',
+                'como_fazer': 'Acesse o link para mais informações',
+                'como_usar': 'Explore o recurso conforme as instruções do site',
+                'para_que_serve': 'Tecnologia assistiva encontrada na internet',
+                'justificativa': f'Recurso recomendado pela IA - Fonte: {fonte_nome}',
+                'fonte': 'Internet',
+                'link': link
+            })
+
+            if len([r for r in recursos if r.get('fonte') == 'Internet']) >= 3:
+                break
+
+    # SE NÃO ENCONTROU, TENTAR PADRÃO 2
+    if len([r for r in recursos if r.get('fonte') == 'Internet']) < 1:
+        matches_online_2 = padrao_online_2.findall(analise)
+
+        if matches_online_2:
+            print(f"✅ Encontrados {len(matches_online_2)} links no formato Link: url")
+
+            for match_online in matches_online_2:
+                titulo_bruto = match_online[0].strip()
+                snippet = match_online[1].strip()
+                link = match_online[2].strip()
+
+                if not link or link in links_vistos:
+                    continue
+                if 'assitia' in link or 'localhost' in link or '127.0.0.1' in link:
+                    continue
+
+                links_vistos.add(link)
+                titulo = titulo_bruto[:80]
+
+                # Determinar fonte pelo link
+                if "youtube" in link or "youtu.be" in link:
+                    fonte_nome = "YouTube"
+                elif "tiktok" in link:
+                    fonte_nome = "TikTok"
+                elif "pinterest" in link:
+                    fonte_nome = "Pinterest"
+                elif ".pdf" in link:
+                    fonte_nome = "PDF"
+                elif "slideshare" in link:
+                    fonte_nome = "Slideshare"
+                elif "edu" in link or "educ" in link:
+                    fonte_nome = "Educacional"
+                else:
+                    fonte_nome = "Site"
+
+                recursos.append({
+                    'nome': f"🌐 {titulo}",
+                    'categoria': 'online',
+                    'descricao': snippet[:300] or 'Recurso encontrado na internet pela IA',
+                    'materiais': 'Acessar o link para ver os materiais',
+                    'como_fazer': 'Acesse o link para mais informações',
+                    'como_usar': 'Explore o recurso conforme as instruções do site',
+                    'para_que_serve': 'Tecnologia assistiva encontrada na internet',
+                    'justificativa': f'Recurso recomendado pela IA - Fonte: {fonte_nome}',
+                    'fonte': 'Internet',
+                    'link': link
+                })
+
+                if len([r for r in recursos if r.get('fonte') == 'Internet']) >= 3:
+                    break
+
+    # FALLBACK: TENTAR PADRÃO 3 (FORMATO ANTIGO)
+    if len([r for r in recursos if r.get('fonte') == 'Internet']) < 1:
+        matches_online_3 = padrao_online_3.findall(analise)
+
+        if matches_online_3:
+            print(f"⚠️ Encontrados {len(matches_online_3)} links no formato antigo")
+
+            for match_online in matches_online_3:
+                titulo_bruto = match_online[0].strip()
+                snippet = match_online[1].strip()
+                link_ou_fonte = match_online[2].strip()
+
+                if not link_ou_fonte or link_ou_fonte in links_vistos:
+                    continue
+
+                # Verificar se parece um link
+                if not (link_ou_fonte.startswith('http') or 'www.' in link_ou_fonte or '.' in link_ou_fonte):
+                    continue
+
+                if 'assitia' in link_ou_fonte or 'localhost' in link_ou_fonte or '127.0.0.1' in link_ou_fonte:
+                    continue
+
+                links_vistos.add(link_ou_fonte)
+                titulo = titulo_bruto[:80]
+
+                # Determinar fonte
+                if "youtube" in link_ou_fonte or "youtu.be" in link_ou_fonte:
+                    fonte_nome = "YouTube"
+                elif "tiktok" in link_ou_fonte:
+                    fonte_nome = "TikTok"
+                elif "pinterest" in link_ou_fonte:
+                    fonte_nome = "Pinterest"
+                elif ".pdf" in link_ou_fonte:
+                    fonte_nome = "PDF"
+                elif "slideshare" in link_ou_fonte:
+                    fonte_nome = "Slideshare"
+                elif "edu" in link_ou_fonte or "educ" in link_ou_fonte:
+                    fonte_nome = "Educacional"
+                else:
+                    fonte_nome = "Site"
+
+                recursos.append({
+                    'nome': f"🌐 {titulo}",
+                    'categoria': 'online',
+                    'descricao': snippet[:300] or 'Recurso encontrado na internet pela IA',
+                    'materiais': 'Acessar o link para ver os materiais',
+                    'como_fazer': 'Acesse o link para mais informações',
+                    'como_usar': 'Explore o recurso conforme as instruções do site',
+                    'para_que_serve': 'Tecnologia assistiva encontrada na internet',
+                    'justificativa': f'Recurso recomendado pela IA - Fonte: {fonte_nome}',
+                    'fonte': 'Internet',
+                    'link': link_ou_fonte
+                })
+
+                if len([r for r in recursos if r.get('fonte') == 'Internet']) >= 3:
+                    break
 
     # ================================================
-    # 3. SE NÃO TIVER RECURSOS SUFICIENTES, USAR CATÁLOGO
+    # 3. DEBUG - VERIFICAR SE LINKS FORAM ENCONTRADOS
+    # ================================================
+    links_encontrados = [r for r in recursos if r.get('link')]
+    if links_encontrados:
+        print(f"✅ Total de {len(links_encontrados)} links encontrados e incluídos nos recursos")
+        for r in links_encontrados:
+            print(f"   🔗 {r['nome'][:50]}... -> {r['link']}")
+    else:
+        print("⚠️ NENHUM link foi encontrado na análise")
+        print("📄 Análise recebida (primeiros 500 caracteres):")
+        print(analise[:500])
+        print("...")
+
+    # ================================================
+    # 4. SE NÃO TIVER RECURSOS SUFICIENTES, USAR CATÁLOGO
     # ================================================
     if len(recursos) < 5:
         areas_atencao = selecoes.get('areas_atencao', [])
         mapa_catalogo = {
-            'comunicacao': ['AAC - Livro de Comunicação Personalizado', 'Cartões de Comunicação', 'Prancha de Comunicação'],
+            'comunicacao': ['AAC - Livro de Comunicação Personalizado', 'Cartões de Comunicação',
+                            'Prancha de Comunicação'],
             'regulacao_sensorial': ['Garrafa da Calma', 'Kit Sensorial com Caixas', 'Fone de Ouvido Caseiro'],
             'motor': ['Teclado Adaptado com Papelão', 'Prancha de Atividades Motoras'],
             'cognitivo': ['Jogo da Memória Adaptado', 'Atividades de Raciocínio Lógico'],
@@ -730,7 +863,7 @@ def extrair_recursos_da_analise(analise, selecoes=None):
                         except TecnologiaAssistiva.DoesNotExist:
                             pass
 
-    return recursos[:11]  # Retorna até 11 recomendações
+    return recursos[:11]
 
 
 def verificar_links_recomendacao(request, recomendacao_id):
@@ -751,6 +884,35 @@ def verificar_links_recomendacao(request, recomendacao_id):
         'recursos_com_link': recursos_com_link,
         'links_encontrados': len(recursos_com_link)
     })
+
+
+@login_required
+def debug_links_recomendacao(request, recomendacao_id):
+    """Debug para verificar se os links estão sendo salvos corretamente"""
+    recomendacao = get_object_or_404(Recomendacao, id=recomendacao_id, professor=request.user)
+
+    dados = {
+        'recomendacao_id': str(recomendacao.id),
+        'estudante': recomendacao.estudante.nome,
+        'total_recomendacoes': recomendacao.recomendacoes_ta.count(),
+        'recursos': []
+    }
+
+    for rta in recomendacao.recomendacoes_ta.all():
+        recurso = {
+            'nome': rta.ta.nome,
+            'categoria': rta.ta.categoria,
+            'tem_link': bool(rta.ta.exemplos_uso),
+            'link': rta.ta.exemplos_uso if rta.ta.exemplos_uso else None,
+            'posicao': rta.posicao_ranking
+        }
+        dados['recursos'].append(recurso)
+
+    # Contar quantos têm link
+    com_link = [r for r in dados['recursos'] if r['tem_link']]
+    dados['total_com_link'] = len(com_link)
+
+    return JsonResponse(dados)
 
 
 @login_required
