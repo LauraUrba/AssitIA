@@ -337,8 +337,6 @@ def avaliar_tecnologia(request):
 
 # ============ RECOMENDAÇÕES ============
 
-# telas/views.py - Função gerar_recomendacao SIMPLIFICADA
-
 @login_required
 def gerar_recomendacao(request, estudante_id):
     """Gerar recomendação de TA para um estudante usando a API com dados dos checkboxes"""
@@ -466,6 +464,7 @@ Desafios: {desafios}
 
                 for idx, recurso in enumerate(recursos_recomendados[:11], 1):
                     if recurso.get('link'):
+                        # 🔥 RECURSO COM LINK DA INTERNET
                         ta, created = TecnologiaAssistiva.objects.get_or_create(
                             nome=f"🌐 {recurso.get('nome', f'Recurso Online {idx}')[:50]}",
                             defaults={
@@ -473,14 +472,18 @@ Desafios: {desafios}
                                 'descricao': recurso.get('descricao', 'Recurso encontrado na internet'),
                                 'materiais': recurso.get('materiais', 'Acessar o link para ver os materiais'),
                                 'como_fazer': recurso.get('como_fazer', 'Acesse o link para mais informações'),
-                                'como_usar': recurso.get('como_usar', 'Explore o recurso conforme as instruções do site'),
-                                'para_que_serve': recurso.get('para_que_serve', 'Tecnologia assistiva encontrada na internet'),
-                                'exemplos_uso': recurso.get('link', ''),
+                                'como_usar': recurso.get('como_usar',
+                                                         'Explore o recurso conforme as instruções do site'),
+                                'para_que_serve': recurso.get('para_que_serve',
+                                                              'Tecnologia assistiva encontrada na internet'),
+                                'exemplos_uso': recurso.get('link', ''),  # 🔥 SALVAR LINK EM exemplos_uso
                                 'criada_por_ia': True,
                                 'ativo': True
                             }
                         )
+                        print(f"✅ Recurso salvo com link: {recurso.get('link')}")
                     else:
+                        # RECURSO DO CATÁLOGO
                         ta, created = TecnologiaAssistiva.objects.get_or_create(
                             nome=recurso.get('nome', f'Recurso {idx}'),
                             defaults={
@@ -728,6 +731,26 @@ def extrair_recursos_da_analise(analise, selecoes=None):
                             pass
 
     return recursos[:11]  # Retorna até 11 recomendações
+
+
+def verificar_links_recomendacao(request, recomendacao_id):
+    """Função de debug para verificar links salvos"""
+    recomendacao = get_object_or_404(Recomendacao, id=recomendacao_id, professor=request.user)
+
+    recursos_com_link = []
+    for rta in recomendacao.recomendacaota_set.all():
+        if rta.ta.exemplos_uso and ('http' in rta.ta.exemplos_uso or 'www.' in rta.ta.exemplos_uso):
+            recursos_com_link.append({
+                'nome': rta.ta.nome,
+                'link': rta.ta.exemplos_uso,
+                'categoria': rta.ta.categoria
+            })
+
+    return JsonResponse({
+        'total_recursos': recomendacao.recomendacaota_set.count(),
+        'recursos_com_link': recursos_com_link,
+        'links_encontrados': len(recursos_com_link)
+    })
 
 
 @login_required
