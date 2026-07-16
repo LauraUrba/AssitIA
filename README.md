@@ -40,23 +40,23 @@ A pesquisa foi estruturada em seis etapas metodológicas, conforme ilustrado na 
 
 ![Etapas da Pesquisa](docs/image/etapasProjeto.png)
 
-### Etapa 1 – Delineamento do Referencial Teórico
-Estruturação da base teórica sobre TEA, tecnologias assistivas e educação inclusiva, com fundamentação em DSM-5, CID-11 e legislação brasileira.
-
-### Etapa 2 – Análise de Requisitos e Projeto
+### Etapa 1 – Levantamento de Requisitos
 Identificação de stakeholders, especificação de requisitos funcionais e não funcionais, regras de negócio, diagramas UML e MER.
 
-### Etapa 3 – Definição de Arquitetura e Prototipação
+### Etapa 2 – Definição da Aquitetura da informação e prototipação
 Elaboração de taxonomias, arquitetura da informação e wireframes de baixa fidelidade.
 
-### Etapa 4 – Desenvolvimento de Back-End
-Implementação da lógica de negócio, API, banco de dados e segurança.
+### Etapa 3 – Desenvolvimento de Back-End
+Implementação da lógica de negócio, definição da stack, API, banco de dados e segurança.
 
-### Etapa 5 – Desenvolvimento de Front-End
+### Etapa 4 – Desenvolvimento de Front-End
 Criação da interface visual responsiva e acessível.
 
-### Etapa 6 – Aplicação e Avaliação do Protótipo
+### Etapa 5 – Validação com especialistas
 Testes com usuários, aplicação do questionário SUS e análise de feedbacks.
+
+### Etapa 6 – Refinamento e Documentação
+Incluindo usabilidade, deploy, arquivo README.md e redação do relatório final.
 
 ---
 
