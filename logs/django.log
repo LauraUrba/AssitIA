@@ -1923,3 +1923,48 @@ INFO 2026-07-13 20:02:17,960 log "GET /static/css/style.css HTTP/1.1" 304 0
 INFO 2026-07-13 20:06:14,784 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 143075
 INFO 2026-07-13 20:06:24,440 log "GET /telas/ HTTP/1.1" 200 27065
 INFO 2026-07-13 20:07:28,211 log "GET /telas/ HTTP/1.1" 200 34911
+INFO 2026-07-15 17:31:15,952 autoreload Watching for file changes with StatReloader
+INFO 2026-07-15 17:35:39,511 autoreload /home/laura/AssistIA_site/AssistIA/assistIA/settings.py changed, reloading.
+INFO 2026-07-15 17:36:21,341 autoreload Watching for file changes with StatReloader
+INFO 2026-07-15 17:39:05,138 autoreload Watching for file changes with StatReloader
+INFO 2026-07-15 17:39:32,853 autoreload Watching for file changes with StatReloader
+INFO 2026-07-15 17:39:41,322 log "GET / HTTP/1.1" 302 0
+INFO 2026-07-15 17:39:41,326 log "GET /telas/ HTTP/1.1" 302 0
+INFO 2026-07-15 17:39:41,405 log "GET /auth/login/?next=/telas/ HTTP/1.1" 200 21152
+INFO 2026-07-15 17:39:41,511 log "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2026-07-15 17:39:41,667 security_logger [2026-07-15T20:39:41.667904+00:00] INFO: Status 404 - /favicon.ico - Usuário: Anonymous - IP: 127.0.0.1 - Detalhe: Status 404 - /favicon.ico
+WARNING 2026-07-15 17:39:41,668 log Not Found: /favicon.ico
+WARNING 2026-07-15 17:39:41,668 log "GET /favicon.ico HTTP/1.1" 404 2650
+INFO 2026-07-15 17:39:50,350 log "POST /auth/login/ HTTP/1.1" 302 0
+INFO 2026-07-15 17:39:50,410 log "GET /telas/ HTTP/1.1" 200 35311
+INFO 2026-07-16 15:00:00,227 autoreload Watching for file changes with StatReloader
+INFO 2026-07-16 15:00:55,317 log "GET /auth/login/ HTTP/1.1" 302 0
+INFO 2026-07-16 15:00:55,490 log "GET /telas/ HTTP/1.1" 200 34829
+INFO 2026-07-16 15:00:55,929 log "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2026-07-16 15:00:56,481 security_logger [2026-07-16T18:00:56.480877+00:00] INFO: Status 404 - /favicon.ico - Usuário: Jéssica Mara  Urba Rosa - IP: 127.0.0.1 - Detalhe: Status 404 - /favicon.ico
+WARNING 2026-07-16 15:00:56,487 log Not Found: /favicon.ico
+WARNING 2026-07-16 15:00:56,488 log "GET /favicon.ico HTTP/1.1" 404 2650
+INFO 2026-07-16 15:18:34,638 log "GET /telas/estudantes/ HTTP/1.1" 200 23957
+INFO 2026-07-16 15:18:38,077 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 48852
+INFO 2026-07-16 15:18:40,944 log "GET /telas/recomendacoes/ HTTP/1.1" 200 42428
+INFO 2026-07-16 15:19:46,650 log "GET /telas/recomendacoes/8c13aada-3ee6-42e2-9ab8-fe8a406b5ea6/ HTTP/1.1" 200 108564
+INFO 2026-07-16 15:25:48,437 log "GET /telas/estudantes/ HTTP/1.1" 200 23957
+INFO 2026-07-16 15:25:58,207 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/editar/ HTTP/1.1" 200 20910
+INFO 2026-07-16 15:26:10,961 log "GET /telas/estudantes/ HTTP/1.1" 200 23957
+INFO 2026-07-16 15:26:12,599 log "GET /telas/recomendacoes/gerar/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 48852
+INFO 2026-07-16 15:26:57,772 log "GET /telas/recomendacoes/ HTTP/1.1" 200 42428
+INFO 2026-07-16 15:27:00,314 log "GET /telas/recomendacoes/8c13aada-3ee6-42e2-9ab8-fe8a406b5ea6/ HTTP/1.1" 200 108564
+INFO 2026-07-16 15:30:26,844 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 143075
+INFO 2026-07-16 15:31:36,066 log "POST /telas/tecnologias/avaliar/ HTTP/1.1" 200 161
+INFO 2026-07-16 15:32:34,629 log "GET /telas/pei/ HTTP/1.1" 200 20077
+INFO 2026-07-16 15:32:44,772 log "GET /telas/pei/33795ed7-9753-4452-bbe7-04f095e9d11a/ HTTP/1.1" 200 21507
+INFO 2026-07-16 15:33:12,682 log "GET /telas/perfil/ HTTP/1.1" 200 29463
+INFO 2026-07-16 15:33:21,725 log "GET /telas/ HTTP/1.1" 200 34829
+INFO 2026-07-16 15:33:24,376 log "GET /telas/estudantes/eff42597-703b-4ff1-a981-1d2d43b24c40/ HTTP/1.1" 200 31542
+INFO 2026-07-16 15:33:28,283 log "GET /telas/ HTTP/1.1" 200 34829
+INFO 2026-07-16 15:34:43,270 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 143266
+INFO 2026-07-16 15:34:50,835 log "GET /telas/ HTTP/1.1" 200 34829
+INFO 2026-07-16 15:35:04,162 log "GET /telas/tecnologias/catalogo/ HTTP/1.1" 200 143266
+INFO 2026-07-16 15:38:12,936 log "GET /telas/ HTTP/1.1" 200 34829
+INFO 2026-07-16 15:38:16,891 log "GET /telas/pei/ HTTP/1.1" 200 20077
+INFO 2026-07-16 15:38:22,008 log "GET /telas/ HTTP/1.1" 200 34829

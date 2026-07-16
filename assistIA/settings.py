@@ -1,12 +1,17 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import dj_database_url  
-
-# Carregar variáveis de ambiente
-load_dotenv()
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Carregar .env local se existir, senão carregar .env
+env_file = BASE_DIR / '.env.local' if os.getenv('LOCAL_DEV') else BASE_DIR / '.env'
+load_dotenv(env_file)
+
+# Se LOCAL_DEV não estiver definido, carregar .env
+if not os.getenv('LOCAL_DEV'):
+    load_dotenv(BASE_DIR / '.env')
 
 # ========================================
 # SEGURANÇA
