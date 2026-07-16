@@ -24,15 +24,6 @@
 
 O **AssistIA** é um sistema web desenvolvido para auxiliar profissionais da educação (professores, coordenadores e especialistas) a recomendar tecnologias assistivas para alunos com Transtorno do Espectro Autista (TEA). O sistema utiliza inteligência artificial para analisar o perfil do aluno e sugerir recursos personalizados.
 
-### Público-Alvo
-
-| Stakeholder | Descrição |
-|-------------|-----------|
-| **Professores** | Gerenciam alunos, geram recomendações e PEIs |
-| **Coordenadores** | Supervisionam professores e acompanham resultados |
-| **Especialistas** | Validam recomendações e ajustam o sistema |
-| **Alunos TEA** | Beneficiários indiretos do sistema |
-
 ### Status Atual
 
 - ✅ Telas para professores completamente funcionais
@@ -474,7 +465,6 @@ Este projeto está sob a licença MIT.
 
 **Links:**
 - **API de IA**: https://api-assitia.onrender.com
-- **Documentação do TCC**: https://docs.google.com/document/d/1M4p_rf9ZomxLC8pR7ZDh3RJaT84Q3WEdXk2KfDmH6RI/edit?tab=t.8yh8xakvjh4w
 
 ---
 
